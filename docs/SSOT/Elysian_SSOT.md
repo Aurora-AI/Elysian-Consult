@@ -22,6 +22,22 @@
   - **TMI:** O Ticket Médio Ideal é derivado matematicamente da necessidade do negócio e do mix, não da média histórica (que premia a mediocridade). Normalizar índices sempre contra metas ajustadas aos dados da loja.
 - **Modelos de Venda por Frente:** A arquitetura adapta os mecanismos para B2C (dados proprietários, social commerce), B2B (RevOps, SLG/PLG), Indústria (Servitização, EaaS) e Governo (Dispensas eletrônicas, inteligência de lances).
 
+## 4. Configuração do Motor por Frente (Paridade B2B/GTM)
+*Como a máquina traduz os modelos comerciais em sinais e travas determinísticas.*
+- **B2C (O Motor de Balcão):** 
+  - *Sinais:* Recuperação de carrinho via WhatsApp, score de crédito. 
+  - *Trava Determinística:* Proibição de parcelamento sem score; cálculo automático de DIFAL para evitar erosão invisível de margem.
+  - *Ferida de Dado:* Marketplace sequestra o cliente. A solução é forçar o tráfego de margem para DTC (WhatsApp), mantendo marketplace apenas para giro de commodity.
+- **B2B (Dupla Trilha & Sinal Tributário):** 
+  - *Sinais:* Perfil tributário do cliente (Lucro Real vs Simples - altera a competitividade). 
+  - *Trava Determinística:* SLA duro entre Marketing e Vendas (lead não passa de fase sem critério cumprido).
+- **Indústria (Key-Account & Passivo Oculto):** 
+  - *Sinais:* Sell-out dos distribuidores (fim do ponto cego), GMROI. 
+  - *Trava Determinística:* Auditoria contratual obrigatória de representantes (reter 1/12 para indenização separada, mitigando risco de jurisprudência do STJ).
+- **Governo (A Regra Externa):** 
+  - *Sinais:* Histórico de pagamento do órgão (risco de calote). 
+  - *Trava Determinística:* Piso de margem duro (nunca dar lance abaixo do custo ou < 75% do orçamento). Monitor de teto ME/EPP.
+
 ## 3. Playbook de Consultoria (O Como)
 *O roteiro prático do diagnóstico à entrega. Métodos de auditoria de óticas, petshops.*
 - **O Choque do Dia 5:** Demonstrar a "receita deixada na mesa" calculando a Receita Latente na base de clientes existente, provando o valor da ferramenta logo no início.
@@ -46,11 +62,10 @@
 - **O Princípio do Porsche (SPICED + MEDDIC Dinâmico):** Na PME, o *Economic Buyer* ou o *Decision Process* frequentemente envolvem decisores ocultos (ex: cônjuges, sócios silenciosos). A objeção deve ser mapeada via *rapport* situacional (Situação/Dor) e antecipada *antes* da decisão final. Redirecionar a oferta preventivamente protege o ego (status) do cliente e evita que um *downsell* seja percebido como derrota imposta.
 - **A Matemática da Carga Emocional (A Volta Ideal da F1):** A pontuação de intenção de compra (ex: 100 vs 80) e a "Cauda de Cometa" (cadência de resposta) nunca são impostas de forma genérica. Elas são calibradas dinamicamente: o sistema mapeia a operação, extrai os melhores indicadores dos vendedores de elite (criando a "Volta Ideal da F1") e estabelece esse *benchmark* cruzado como o índice "100" para aquela cultura organizacional específica. Isso aniquila a subjetividade e a *Síndrome do Hopium*.
 
-## 6. Tensões a Resolver
+## 7. Tensões a Resolver
 *Buracos, desvios e problemas não solucionados aguardando decisão.*
 1. **Validação do "Motor de 7 Dias":** O "Laudo de Choque em 7 dias" exige uma prova real. O tempo exato e o grau de intervenção manual ainda não foram medidos em um cliente externo (Piloto V1), bloqueando o escalonamento da oferta de entrada.
-2. **Harmonia Documental B2B/GTM:** Não está confirmada a paridade 1:1 entre a tabela teórica de estratégia em frentes (`Modelos_Comerciais_2026.docx`) e os parâmetros de configuração do próprio motor no sistema (`PBM_Config_Motor_por_Frente.docx`).
-3. **Ressonância do Termo "GTM Engineer":** A definição da Elysian como "Go-To-Market Engineers" (em vez de consultoria de vendas) pode gerar fricção cognitiva na PME local, necessitando de validação empírica de mercado.
+2. **Ressonância do Termo "GTM Engineer":** A definição da Elysian como "Go-To-Market Engineers" (em vez de consultoria de vendas) pode gerar fricção cognitiva na PME local, necessitando de validação empírica de mercado.
 
 ---
 **Histórico de Ingestão:**
