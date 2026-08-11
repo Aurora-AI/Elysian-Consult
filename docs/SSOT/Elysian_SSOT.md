@@ -38,7 +38,13 @@
   - *Sinais:* Histórico de pagamento do órgão (risco de calote). 
   - *Trava Determinística:* Piso de margem duro (nunca dar lance abaixo do custo ou < 75% do orçamento). Monitor de teto ME/EPP.
 
-## 3. Playbook de Consultoria (O Como)
+## 3. Posicionamento e Narrativa (Nova Categoria)
+*Como a Elysian se apresenta e dissolve a fricção no mercado PME.*
+- **O Oceano Vermelho:** O mercado está saturado de "Consultoria Empresarial" (foco em administração, cortes, fluxos de caixa inertes). A Elysian se posiciona estritamente como **Consultoria Comercial Avançada (Motor de Vendas Pós-IA)**.
+- **A Tese Binária da Empresa:** Só existem dois setores em qualquer negócio: o que vende, e o que ajuda a vender. A Elysian ataca estoque, impostos e finanças *apenas* como alavancas para precificação e vendas. O foco é vender, não administrar.
+- **A Criação da Categoria:** Em vez de usar jargões distantes como "GTM Engineer" no front-stage local, a ancoragem é feita pela promessa tecnológica palpável: o uso de Inteligência Artificial verdadeira (agentes e automação determinística), superando a falsa IA (machine learning básico ou wrappers de chat) oferecida pelo mercado.
+
+## 4. Playbook de Consultoria (O Como)
 *O roteiro prático do diagnóstico à entrega. Métodos de auditoria de óticas, petshops.*
 - **O Choque do Dia 5:** Demonstrar a "receita deixada na mesa" calculando a Receita Latente na base de clientes existente, provando o valor da ferramenta logo no início.
 - **Caixa de Ferramentas Analíticas de Auditoria:**
@@ -62,10 +68,9 @@
 - **O Princípio do Porsche (SPICED + MEDDIC Dinâmico):** Na PME, o *Economic Buyer* ou o *Decision Process* frequentemente envolvem decisores ocultos (ex: cônjuges, sócios silenciosos). A objeção deve ser mapeada via *rapport* situacional (Situação/Dor) e antecipada *antes* da decisão final. Redirecionar a oferta preventivamente protege o ego (status) do cliente e evita que um *downsell* seja percebido como derrota imposta.
 - **A Matemática da Carga Emocional (A Volta Ideal da F1):** A pontuação de intenção de compra (ex: 100 vs 80) e a "Cauda de Cometa" (cadência de resposta) nunca são impostas de forma genérica. Elas são calibradas dinamicamente: o sistema mapeia a operação, extrai os melhores indicadores dos vendedores de elite (criando a "Volta Ideal da F1") e estabelece esse *benchmark* cruzado como o índice "100" para aquela cultura organizacional específica. Isso aniquila a subjetividade e a *Síndrome do Hopium*.
 
-## 7. Tensões a Resolver
+## 8. Tensões a Resolver
 *Buracos, desvios e problemas não solucionados aguardando decisão.*
 1. **Validação do "Motor de 7 Dias":** O "Laudo de Choque em 7 dias" exige uma prova real. O tempo exato e o grau de intervenção manual ainda não foram medidos em um cliente externo (Piloto V1), bloqueando o escalonamento da oferta de entrada.
-2. **Ressonância do Termo "GTM Engineer":** A definição da Elysian como "Go-To-Market Engineers" (em vez de consultoria de vendas) pode gerar fricção cognitiva na PME local, necessitando de validação empírica de mercado.
 
 ---
 **Histórico de Ingestão:**
