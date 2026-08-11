@@ -41,12 +41,16 @@
   - **Governo:** Guerra predatória de preços em pregões, desclassificação e lentidão de atestados técnicos.
 - **Dilema do Laudo Piloto (O Laudo de Choque):** O motor analítico capaz de gerar um Laudo em 7 dias é hoje uma promessa (hipótese). A prioridade do diagnóstico não é a venda, mas validar esse motor em dados reais de PME (Fase 0 de Lançamento) cronometrando quebras e dependências.
 
-## 5. Gaps Lógicos e Tensões a Resolver
-*Buracos, desvios e problemas não solucionados aguardando decisão do fundador.*
-1. **O Paradoxo Enterprise vs. PME:** Todo o referencial acadêmico/estratégico da Aurora (MEDDIC, Bow-tie, DSRs, CLARI/Gong, NRR > 110%) vem de ambientes de SaaS Enterprise norte-americanos e empresas de tecnologia (deals complexos, múltiplos tomadores). Como isso traduz operacionalmente (e culturalmente) para PMEs regionais do Sul (ex: varejo de rua sem CRM e vendas B2B de ciclo curto)? Esta lacuna ainda carece de solução metodológica documentada.
-2. **Validação do "Motor de 7 Dias":** O "Laudo de Choque em 7 dias" exige uma prova real. O tempo exato e o grau de intervenção manual ainda não foram medidos em um cliente externo (Piloto V1), bloqueando o escalonamento da oferta de entrada.
-3. **Harmonia Documental B2B/GTM:** Não está confirmada a paridade 1:1 entre a tabela teórica de estratégia em frentes (`Modelos_Comerciais_2026.docx`) e os parâmetros de configuração do próprio motor no sistema (`PBM_Config_Motor_por_Frente.docx`).
-4. **Ressonância do Termo "GTM Engineer":** A definição da Elysian como "Go-To-Market Engineers" (em vez de consultoria de vendas) pode gerar fricção cognitiva na PME local, necessitando de validação empírica de mercado.
+## 5. Princípios de Execução PME (Framework Elysian)
+*Resolução do Paradoxo Enterprise vs. PME na trincheira operacional.*
+- **O Princípio do Porsche (SPICED + MEDDIC Dinâmico):** Na PME, o *Economic Buyer* ou o *Decision Process* frequentemente envolvem decisores ocultos (ex: cônjuges, sócios silenciosos). A objeção deve ser mapeada via *rapport* situacional (Situação/Dor) e antecipada *antes* da decisão final. Redirecionar a oferta preventivamente protege o ego (status) do cliente e evita que um *downsell* seja percebido como derrota imposta.
+- **A Matemática da Carga Emocional (A Volta Ideal da F1):** A pontuação de intenção de compra (ex: 100 vs 80) e a "Cauda de Cometa" (cadência de resposta) nunca são impostas de forma genérica. Elas são calibradas dinamicamente: o sistema mapeia a operação, extrai os melhores indicadores dos vendedores de elite (criando a "Volta Ideal da F1") e estabelece esse *benchmark* cruzado como o índice "100" para aquela cultura organizacional específica. Isso aniquila a subjetividade e a *Síndrome do Hopium*.
+
+## 6. Tensões a Resolver
+*Buracos, desvios e problemas não solucionados aguardando decisão.*
+1. **Validação do "Motor de 7 Dias":** O "Laudo de Choque em 7 dias" exige uma prova real. O tempo exato e o grau de intervenção manual ainda não foram medidos em um cliente externo (Piloto V1), bloqueando o escalonamento da oferta de entrada.
+2. **Harmonia Documental B2B/GTM:** Não está confirmada a paridade 1:1 entre a tabela teórica de estratégia em frentes (`Modelos_Comerciais_2026.docx`) e os parâmetros de configuração do próprio motor no sistema (`PBM_Config_Motor_por_Frente.docx`).
+3. **Ressonância do Termo "GTM Engineer":** A definição da Elysian como "Go-To-Market Engineers" (em vez de consultoria de vendas) pode gerar fricção cognitiva na PME local, necessitando de validação empírica de mercado.
 
 ---
 **Histórico de Ingestão:**
