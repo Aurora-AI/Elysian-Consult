@@ -47,6 +47,7 @@ pecas:
 
 - id: FOR-BAS-001
   tipo: FOR
+  dominio: CLIENTE
   bloco: BAS
   nome: "Completude de Cadastro (A1)"
   simbolo: Compl
@@ -81,6 +82,7 @@ pecas:
 
 - id: FOR-BAS-002
   tipo: FOR
+  dominio: CLIENTE
   bloco: BAS
   nome: "Segmentação RFM (A2)"
   simbolo: RFM
@@ -114,6 +116,7 @@ pecas:
 
 - id: FOR-BAS-003
   tipo: FOR
+  dominio: CLIENTE
   bloco: BAS
   nome: "Ciclo de recompra da própria base (A3)"
   simbolo: ciclo
@@ -144,6 +147,7 @@ pecas:
 
 - id: FOR-BAS-004
   tipo: FOR
+  dominio: CLIENTE
   bloco: BAS
   nome: "Churn Invisível — flag (A3)"
   simbolo: churn
@@ -174,6 +178,7 @@ pecas:
 
 - id: FOR-BAS-005
   tipo: FOR
+  dominio: CLIENTE
   bloco: BAS
   nome: "Perda em R$ por churn"
   simbolo: perda_churn
@@ -201,6 +206,7 @@ pecas:
 
 - id: FOR-BAS-006
   tipo: FOR
+  dominio: CLIENTE
   bloco: BAS
   nome: "Índice de recuperabilidade do churn"
   simbolo: silence_to_cycle_ratio
@@ -229,6 +235,7 @@ pecas:
 
 - id: FOR-BAS-007
   tipo: FOR
+  dominio: CLIENTE
   bloco: BAS
   nome: "Attach rate por categoria (A4)"
   simbolo: attach_cat
@@ -260,6 +267,7 @@ pecas:
 
 - id: FOR-BAS-008
   tipo: FOR
+  dominio: CLIENTE
   bloco: BAS
   nome: "Receita Latente em R$ (A4)"
   simbolo: R_latente
@@ -288,6 +296,7 @@ pecas:
 
 - id: FOR-BAS-009
   tipo: FOR
+  dominio: CLIENTE
   bloco: BAS
   nome: "Taxa de recompra"
   simbolo: tx_recompra
@@ -313,6 +322,7 @@ pecas:
 
 - id: FOR-BAS-010
   tipo: FOR
+  dominio: CLIENTE
   bloco: BAS
   nome: "Taxa de identificação"
   simbolo: tx_ident
@@ -342,6 +352,7 @@ pecas:
 
 - id: FOR-BAS-011
   tipo: FOR
+  dominio: CLIENTE
   bloco: BAS
   nome: "Conversão de pendentes"
   simbolo: conv_pendentes
@@ -366,6 +377,7 @@ pecas:
 
 - id: FOR-BAS-012
   tipo: FOR
+  dominio: CLIENTE
   bloco: BAS
   nome: "UPT — itens por venda"
   simbolo: UPT
@@ -396,6 +408,7 @@ pecas:
 
 - id: FOR-EST-001
   tipo: FOR
+  dominio: ESTOQUE
   bloco: EST
   nome: "Giro de estoque (B1)"
   simbolo: giro
@@ -424,6 +437,7 @@ pecas:
 
 - id: FOR-EST-002
   tipo: FOR
+  dominio: ESTOQUE
   bloco: EST
   nome: "Cobertura de estoque em dias (B1)"
   simbolo: cobertura
@@ -448,6 +462,7 @@ pecas:
 
 - id: FOR-EST-003
   tipo: FOR
+  dominio: ESTOQUE
   bloco: EST
   nome: "GMROI — versão documentada (B2)"
   simbolo: GMROI_doc
@@ -479,6 +494,7 @@ pecas:
 
 - id: FOR-EST-004
   tipo: FOR
+  dominio: ESTOQUE
   bloco: EST
   nome: "Curva ABC cruzada com giro (B3)"
   simbolo: ABC
@@ -509,6 +525,7 @@ pecas:
 
 - id: FOR-EST-005
   tipo: FOR
+  dominio: ESTOQUE
   bloco: EST
   nome: "Estoque morto — critério (B4)"
   simbolo: morto
@@ -537,6 +554,7 @@ pecas:
 
 - id: FOR-EST-006
   tipo: FOR
+  dominio: ESTOQUE
   bloco: EST
   nome: "Capital preso em estoque morto (B4)"
   simbolo: capital_preso
@@ -564,6 +582,7 @@ pecas:
 
 - id: FOR-EST-007
   tipo: FOR
+  dominio: ESTOQUE
   bloco: EST
   nome: "Índice de estoque morto"
   simbolo: idx_morto
@@ -591,6 +610,7 @@ pecas:
 
 - id: FOR-FIN-001
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: FIN
   nome: "Mensalidade mínima do Clube (C1)"
   simbolo: mensalidade_min
@@ -616,6 +636,7 @@ pecas:
 
 - id: FOR-FIN-002
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: FIN
   nome: "LTV do assinante do Clube"
   simbolo: LTV_clube
@@ -641,6 +662,7 @@ pecas:
 
 - id: FOR-FIN-003
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: FIN
   nome: "Break-even do Clube"
   simbolo: BE_clube
@@ -666,6 +688,7 @@ pecas:
 
 - id: FOR-FIN-004
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: FIN
   nome: "MRR do Clube"
   simbolo: MRR
@@ -689,6 +712,7 @@ pecas:
 
 - id: FOR-FIN-005
   tipo: FOR
+  dominio: CREDITO
   bloco: FIN
   nome: "Uplift de Ticket pelo crédito (C2)"
   simbolo: uplift
@@ -717,6 +741,7 @@ pecas:
 
 - id: FOR-FIN-006
   tipo: FOR
+  dominio: CREDITO
   bloco: FIN
   nome: "Taxa de Aprovação do parceiro (C2)"
   simbolo: aprovacao
@@ -742,6 +767,7 @@ pecas:
 
 - id: FOR-FIN-007
   tipo: FOR
+  dominio: CREDITO
   bloco: FIN
   nome: "Provisão de inadimplência — versão de risco na ótica"
   simbolo: provisao_inad
@@ -772,6 +798,7 @@ pecas:
 
 - id: FOR-FIN-008
   tipo: FOR
+  dominio: CREDITO
   bloco: FIN
   nome: "Inadimplência — versão risco zero (C2)"
   simbolo: inad_parceiro
@@ -800,6 +827,7 @@ pecas:
 
 - id: FOR-FIN-009
   tipo: FOR
+  dominio: CREDITO
   bloco: FIN
   nome: "Receita financeira da operação"
   simbolo: rec_financeira
@@ -835,6 +863,7 @@ pecas:
 
 - id: FOR-CNC-001
   tipo: FOR
+  dominio: SUPRIMENTOS
   bloco: CNC
   nome: "Economia gerada por ótica"
   simbolo: economia
@@ -861,6 +890,7 @@ pecas:
 
 - id: FOR-CNC-002
   tipo: FOR
+  dominio: SUPRIMENTOS
   bloco: CNC
   nome: "Volume agregado da rede"
   simbolo: volume_agregado
@@ -884,6 +914,7 @@ pecas:
 
 - id: FOR-CNC-003
   tipo: FOR
+  dominio: SUPRIMENTOS
   bloco: CNC
   nome: "Taxa de adesão da rede"
   simbolo: adesao_rede
@@ -908,6 +939,7 @@ pecas:
 
 - id: FOR-CNC-004
   tipo: FOR
+  dominio: SUPRIMENTOS
   bloco: CNC
   nome: "Efeito do comprar inteligente (sell-in × sell-through)"
   simbolo: efeito_concentracao
@@ -939,6 +971,7 @@ pecas:
 
 - id: FOR-AUD-001
   tipo: FOR
+  dominio: AUDITORIA
   bloco: AUD
   nome: "GMROI — versão implementada"
   simbolo: GMROI_impl
@@ -968,6 +1001,7 @@ pecas:
 
 - id: FOR-AUD-002
   tipo: FOR
+  dominio: AUDITORIA
   bloco: AUD
   nome: "Attach Rate — versão implementada"
   simbolo: attach_impl
@@ -994,6 +1028,7 @@ pecas:
 
 - id: FOR-AUD-003
   tipo: FOR
+  dominio: AUDITORIA
   bloco: AUD
   nome: "Corrosão de Ticket Médio por Vendedor — versão implementada"
   simbolo: corrosao
@@ -1024,6 +1059,7 @@ pecas:
 
 - id: FOR-AUD-004
   tipo: FOR
+  dominio: AUDITORIA
   bloco: AUD
   nome: "Risco de Concentração de receita VIP"
   simbolo: concentracao_vip
@@ -1051,6 +1087,7 @@ pecas:
 
 - id: FOR-AUD-005
   tipo: FOR
+  dominio: AUDITORIA
   bloco: AUD
   nome: "Conversão Follow-on (serviço → produto)"
   simbolo: follow_on

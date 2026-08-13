@@ -152,10 +152,15 @@ pecas:
     - "F1 §5.6: EDN_c = (M_c − V_c) ÷ (DU_t − DU_e)"
     - "F1 §5.2, §5.5, §6.7: divisores DU_e"
   impacto: "Crash ou infinito em duas datas previsíveis de todo mês."
-  correcao_candidata: "Guardas explícitas + comportamento declarado (ex. EDN no último dia = MR_c)."
+  correcao_candidata: "Guardas explícitas + comportamento declarado (ex. EDN no último dia = MRes_c)."
   bloqueia: [FOR-MET-002, FOR-MET-006, FOR-MET-007, FOR-MRG-023]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-001
+  resolucao: >
+    DU_e = 0 (dia 1) e DU_t − DU_e = 0 (último dia útil) → nulo com selo, pela política geral. No último dia útil o EDN tem leitura própria por REG-NUM-004.
 
 - id: LAC-FOR-019
   tipo: LAC
@@ -189,7 +194,12 @@ pecas:
   correcao_candidata: "Renomear um dos dois. Sugestão: MRec (receita) e MRes (residual)."
   bloqueia: [FOR-TMI-003, FOR-MET-008]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-007
+  resolvida_em: 2026-08-13
+  resolucao: >
+    MR desdobrado: MRec (Meta de Receita, grão loja, input de planejamento) e MRes_c (Meta Residual, grão vendedor×categoria, mantém o subscrito do bloco MET).
+    Símbolo original preservado em simbolo_fonte de cada peça — a procedência não se perde.
 
 - id: LAC-FOR-005
   tipo: LAC
@@ -203,7 +213,12 @@ pecas:
   correcao_candidata: "PVF (forecast) e PVU (preço unitário)."
   bloqueia: [FOR-FCT-001, FOR-MRG-001]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-007
+  resolvida_em: 2026-08-13
+  resolucao: >
+    PV mantido para Preço de Venda — casa com fato_venda.preco_unit e dim_produto.preco_venda. A Previsão de Venda vira PVS (Previsão de Venda Semanal); o S marca a janela real da fórmula.
+    Símbolo original preservado em simbolo_fonte de cada peça — a procedência não se perde.
 
 - id: LAC-FOR-007
   tipo: LAC
@@ -215,7 +230,12 @@ pecas:
   correcao_candidata: "Piso: TMIo = máx(TMIhv ; TMIhv + α(TMIp − TMIhv))."
   bloqueia: [FOR-TMI-004]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-004
+  resolucao: >
+    TMIo ganha piso em TMIhv. A régua nunca desce abaixo do que a loja já consegue, mesmo com Gap negativo.
 
 - id: LAC-FOR-008
   tipo: LAC
@@ -253,7 +273,12 @@ pecas:
   correcao_candidata: "Política única no Bloco 0 de contratos: denominador zero → índice nulo + selo 'sem base', nunca 0 nem 100."
   bloqueia: [multiplas]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-001
+  resolucao: >
+    Política única: denominador nulo → resultado NULO com selo SEM_BASE. Nunca 0 (lê-se como ruim), nunca 100 (lê-se como perfeito), nunca a média (inventa). Nulo é excluído de agregação e ranking, não tratado como zero.
 
 - id: LAC-FOR-011
   tipo: LAC
@@ -271,7 +296,12 @@ pecas:
   correcao_candidata: "Mínimo declarado por fórmula + selo de confiança quando abaixo."
   bloqueia: [FOR-SEV-005, FOR-TMI-001, FOR-TMI-002, FOR-MRG-008, FOR-MRG-012]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-002
+  resolucao: >
+    Mínimo declarado por família, medido sobre o ACUMULADO e nunca sobre a janela de cálculo. Vendedor entra em SEV/ranking/banda com ≥30 vendas acumuladas E ≥90 dias de casa; P75 por segmento exige ≥20 observações na célula. Validado contra o Gabarito: V-35 (6 vendas, 39 dias) fica fora; V-30 e V-23 ficam dentro.
 
 - id: LAC-FOR-012
   tipo: LAC
@@ -286,7 +316,12 @@ pecas:
   correcao_candidata: "Regra de cold start declarada, no padrão 'assumir-e-rotular' que o Gabarito já exige."
   bloqueia: [FOR-MET-011]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-003
+  resolucao: >
+    Escada de fallback rotulada: Pace_max da própria célula → da loja → indisponível. O rótulo do nível usado acompanha o número, com quanto falta para sair do fallback.
 
 - id: LAC-FOR-017
   tipo: LAC
@@ -312,7 +347,12 @@ pecas:
   correcao_candidata: "Renormalizar sobre os pesos disponíveis + selo 'SEV parcial' obrigatório no card."
   bloqueia: [FOR-SEV-012]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-005
+  resolucao: >
+    Renormaliza sobre as parcelas disponíveis + selo "parcial" + lista do que faltou. Piso de publicação em 60% do peso original: abaixo disso o composto não é publicado. Sem Fila e Campanhas, o SEV perde 25–30% no estágio Construção (publicável) e 40% no Cruzeiro (não publicável).
 
 - id: LAC-FOR-020
   tipo: LAC
@@ -329,13 +369,18 @@ pecas:
 - id: LAC-FOR-033
   tipo: LAC
   severidade: ALTA
-  titulo: "EDN e Meta Residual ficam negativos quando a meta é batida"
+  titulo: "EDN e Meta Residual (MRes_c) ficam negativos quando a meta é batida"
   evidencia: ["F1 §5.6 e §5.7", "Tabela de leitura do EDN não cobre valor negativo"]
   impacto: "Leitura indefinida justamente no caso de sucesso."
   correcao_candidata: "Piso em zero + leitura própria ('meta batida')."
   bloqueia: [FOR-MET-007, FOR-MET-008]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-004
+  resolucao: >
+    EDN negativo → leitura "meta batida", piso em 0. MRes_c negativo → "meta superada em R$ X"; o excedente é o achado, não a falta.
 
 - id: LAC-FOR-034
   tipo: LAC
@@ -347,7 +392,12 @@ pecas:
   correcao_candidata: "Usar semana calendário anterior e declarar."
   bloqueia: [FOR-MET-010]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-003
+  resolucao: >
+    "Semana anterior" = semana calendário anterior, atravessando a virada do mês, e isso passa a ser declarado. Elimina a indefinição da primeira semana.
 
 - id: LAC-FOR-041
   tipo: LAC
@@ -383,7 +433,12 @@ pecas:
   correcao_candidata: "Comportamento declarado: 'sem ponto de equilíbrio no mix atual' em vez de número."
   bloqueia: [FOR-MRG-015, FOR-MRG-019]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-004
+  resolucao: >
+    PE com MC% ≤ 0 → "sem ponto de equilíbrio no mix atual". Não existe PE, e é exatamente isso que precisa ser dito ao dono.
 
 - id: LAC-FOR-047
   tipo: LAC
@@ -454,7 +509,12 @@ pecas:
   evidencia: ["F4 §2 Passo 3: TMIhv = Σ(Mi × TMIhs_i), 'Mi = participação (%)'"]
   bloqueia: [FOR-TMI-002]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-005
+  resolucao: >
+    Σ Mi renormalizado sobre os segmentos efetivamente atendidos pelo vendedor.
 
 - id: LAC-FOR-022
   tipo: LAC
@@ -463,7 +523,12 @@ pecas:
   evidencia: ["F4 §3: 'α sobe a cada trimestre conforme a viabilidade' — sem valor de partida"]
   bloqueia: [FOR-TMI-004]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-003
+  resolucao: >
+    α = 0 no primeiro trimestre — a régua começa no histórico puro (TMIhv) e sobe a partir do segundo. Não é chute: é o ponto de partida que a própria fonte descreve.
 
 - id: LAC-FOR-023
   tipo: LAC
@@ -513,7 +578,12 @@ pecas:
   evidencia: ["F1 §3.2"]
   bloqueia: [FOR-FCT-002]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-001
+  resolucao: >
+    DR com VMD = 0 → nulo com leitura "sem previsão de ruptura: o item não gira". E isso É o achado de estoque morto, não uma falha de cálculo.
 
 - id: LAC-FOR-028
   tipo: LAC
@@ -531,7 +601,12 @@ pecas:
   evidencia: ["F1 §4.1: NC = (E + Pt + Va + Qa) ÷ 4"]
   bloqueia: [FOR-CMP-001]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-005
+  resolucao: >
+    NC com critério ausente renormaliza sobre os presentes, com selo. Abaixo de 60% (menos de 3 dos 4 critérios) não publica.
 
 - id: LAC-FOR-031
   tipo: LAC
@@ -561,7 +636,12 @@ pecas:
   evidencia: ["F1 §5.13"]
   bloqueia: [FOR-MET-013, PAR-MET-001]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-005
+  resolucao: >
+    Pesos w_c renormalizados sobre as categorias com meta no período.
 
 - id: LAC-FOR-038
   tipo: LAC
@@ -570,7 +650,12 @@ pecas:
   evidencia: ["F1 §6.2"]
   bloqueia: [FOR-MRG-005]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-001
+  resolucao: >
+    Part_cat sobre ΣMC ≤ 0 → nulo. Participação sobre base negativa não tem leitura.
 
 - id: LAC-FOR-039
   tipo: LAC
@@ -619,7 +704,12 @@ pecas:
   evidencia: ["F1 §4.2"]
   bloqueia: [FOR-CMP-002]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-003
+  resolucao: >
+    Sem histórico de desligamentos, a RPI usa só a Banda Topo e declara que o contraste está incompleto.
 
 - id: LAC-FOR-037
   tipo: LAC

@@ -11,7 +11,7 @@ meta:
   passe: 2-DIAGNOSTICO
   extraido_em: 2026-08-13
   escopo: "blocos BAS · EST · FIN · CNC · AUD"
-  contagem: 36
+  contagem: 39
   por_severidade: {CRITICA: 4, ALTA: 9, MEDIA: 9, BAIXA: 3}
 
 pecas:
@@ -349,6 +349,38 @@ pecas:
   quem_decide: Rodrigo
   status: ESTACIONADA
 
+- id: LAC-NUM-089
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "A Consultoria.xlsx é fixture FUNCIONAL, não volumétrica — não calibra mínimo de amostra"
+  descricao: >
+    Ao calibrar o mínimo da REG-NUM-002 apareceu que a mediana de vendas por vendedor por mês
+    na Consultoria.xlsx é 2. A causa não é erro: a fixture foi dimensionada para CARREGAR as
+    37 anomalias plantadas do Gabarito, não para representar densidade operacional. São dois
+    testes diferentes — corretude e estatística — e ela só serve para o primeiro.
+  evidencia:
+    - "Consultoria.xlsx: 41 meses · 7,4 linhas/loja/mês · R$ 3.497 de receita por loja/mês"
+    - "Rede_PetShop.xlsx: 31 meses · 16,3 linhas/loja/mês · R$ 1.319 por loja/mês"
+    - "Base de homologação planejada: 500 linhas/loja/mês — 61× mais densa"
+    - "R$ 3.497/loja/mês não descreve nenhuma ótica em operação"
+    - "A aba Gabarito tem 37 anomalias com resultado esperado — esse É o propósito do arquivo"
+  impacto: >
+    Não invalida nada do que foi extraído nem a REG-NUM-002. Invalida apenas o uso da fixture
+    como régua de VOLUME. O critério estrutural (mínimo sobre o acumulado, não sobre a janela)
+    continua validado pelo par V-35 × V-30, que é comparação relativa. Os valores absolutos
+    (30 vendas, 90 dias) seguem CANDIDATO até rodarem sobre a base volumétrica.
+  correcao_candidata: >
+    Manter as duas escalas separadas e declaradas: (a) fixture FUNCIONAL — pequena, com
+    gabarito de anomalias, valida corretude; (b) base VOLUMÉTRICA — densa, valida estatística,
+    performance e limiares. Nunca usar uma para o trabalho da outra.
+  bloqueia: []
+  quem_decide: Rodrigo
+  status: ABERTA
+  nota: >
+    Isso confirma, com número, a proposta de gerar a base em duas escalas a partir do mesmo
+    gerador e do mesmo seed. Não era preferência de engenharia: são dois testes distintos, e a
+    Consultoria.xlsx só responde por um deles.
+
 # ─────────── ALTAS ───────────
 
 - id: LAC-FOR-055
@@ -499,6 +531,82 @@ pecas:
   quem_decide: Rodrigo
   status: ABERTA
 
+- id: LAC-NUM-090
+  tipo: LAC
+  severidade: ALTA
+  titulo: "As fórmulas estatísticas nunca foram observadas em regime"
+  descricao: >
+    Confirmado pelo autor (13/08): as planilhas de teste foram feitas para testar o SISTEMA —
+    erros calculados, cenários caóticos — e nunca houve teste de escala. Elas validam
+    DETECÇÃO (achou a anomalia plantada? ignorou o falso positivo? aguentou o dado sujo?),
+    que é o que 37 casos de gabarito fazem bem.
+    O que fixture caótica não alcança é ESTABILIDADE. E boa parte do arsenal é estatística
+    pura: P75, mediana, quintil, desvio-padrão, amplitude, máximo sustentado, Pareto.
+    Nenhuma dessas foi observada num regime onde fosse estável.
+  evidencia:
+    - "Autor (13/08): 'as planilhas foram feitas para testar o sistema, erros calculados, cenários caóticos; nunca fiz um teste de escala'"
+    - "Sete famílias estatísticas no arsenal, nenhuma observada em regime"
+  formulas_expostas:
+    - "FOR-TMI-001 · FOR-SEV-005 · FOR-SEV-009 — P75 (alvo de três índices do SEV)"
+    - "FOR-BAS-003 — mediana do ciclo de recompra (north-star do Cockpit)"
+    - "FOR-BAS-002 — quintis do RFM"
+    - "FOR-MRG-012 — amplitude máx−mín (a mais sensível de todas a n pequeno)"
+    - "FOR-AUD-003 — limiar de 2 desvios-padrão"
+    - "FOR-MET-011 — Pace_max sustentado por 1 semana em 3 meses"
+    - "FOR-EST-004 — corte de Pareto 80/15/5"
+  impacto: >
+    O motor sabe que essas fórmulas RODAM e que DETECTAM. Não sabe se o P75 oscila mês a mês,
+    se o 2σ dispara aleatoriamente com amostra pequena, ou se a amplitude da dispersão salta
+    com uma venda atípica. As duas lacunas críticas mais recentes — LAC-FOR-015 (projeção
+    linear) e LAC-NUM-089 (mínimo de amostra) — são as duas de estabilidade. Não é
+    coincidência: é a classe que o teste atual estruturalmente não alcança.
+  correcao_candidata: >
+    Terceiro tipo de teste na base volumétrica: rodar cada estatística em janelas móveis ao
+    longo dos 36 meses e medir a OSCILAÇÃO, não o valor. Critério de aceite por estabilidade
+    (ex.: coeficiente de variação do P75 entre meses consecutivos abaixo de um teto), não só
+    por acerto contra gabarito.
+  bloqueia: []
+  quem_decide: Rodrigo
+  status: ABERTA
+  nota: >
+    Isso não é crítica às fixtures — elas cumpriram o papel para o qual foram feitas. É a
+    identificação de um teste que ainda não existe, e que a base volumétrica torna possível.
+
+- id: LAC-NUM-091
+  tipo: LAC
+  severidade: ALTA
+  fase: 1-CONSULTORIA
+  titulo: "A fila de auditoria foi dimensionada contra fixture pequena — em escala vira backlog"
+  descricao: >
+    A SPEC_Fase_C estabelece o princípio dimensionador da fila de triagem: o humano recebe o
+    RESÍDUO, nunca o atacado. Mas o limiar de entrada foi calibrado contra 3.044 linhas.
+    Em volume realista, a mesma taxa produz uma fila que o próprio princípio condena.
+  aritmetica:
+    - "Consultoria.xlsx: 546 de 3.044 linhas disparam o trigger de discrepância = 17,9%"
+    - "Base volumétrica (180.000 linhas), mesma taxa: ≈32.000 disparos"
+    - "Mesmo com 99% de classificação automática pelo motor: ≈320 itens na fila humana"
+    - "SPEC_Fase_C §1: 'uma fila com 300 itens é backlog morto; uma fila com 5 itens especificamente inexplicáveis é governança'"
+  evidencia:
+    - "SPEC_Fase_C §1 — princípio dimensionador declarado INEGOCIÁVEL"
+    - "Autor (13/08): '95% dos erros resolvidos; nunca fiz teste de escala'"
+  impacto: >
+    O mecanismo criado para evitar backlog vira backlog. E o efeito é perverso: fila grande
+    demais faz o consultor parar de olhar, e aí a triagem deixa de ser governança e passa a
+    ser teatro — o item pendente continua não virando fato, mas também nunca é resolvido.
+  correcao_candidata: >
+    Antes da base volumétrica, decidir qual das duas alavancas: (a) subir a taxa de
+    classificação automática (mais evidências cruzadas antes de escalar para humano); ou
+    (b) estreitar o critério de entrada — por exemplo, priorizar por R$ em risco e mandar
+    para a fila só o topo, deixando a cauda em relatório agregado.
+    Recomendável declarar um TETO ABSOLUTO de itens por rodada, derivado do tempo humano
+    disponível (a própria SPEC estima ~30s por item), e não da taxa de detecção.
+  bloqueia: []
+  quem_decide: Rodrigo
+  status: ABERTA
+  nota: >
+    Não é bug e não é crítica ao desenho. É um limiar que nunca precisou ser testado porque o
+    volume nunca chegou lá — e que a base volumétrica vai expor no primeiro run.
+
 # ─────────── MÉDIAS ───────────
 
 - id: LAC-FOR-058
@@ -547,7 +655,12 @@ pecas:
   evidencia: ["F7 C1: 'LTV = mensalidade × meses médios + margem das compras incrementais'"]
   bloqueia: [FOR-FIN-002]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-003
+  resolucao: >
+    LTV do Clube fica indisponível até 6 meses de operação. Não estimar permanência sem base.
 
 - id: LAC-FOR-070
   tipo: LAC
@@ -556,7 +669,12 @@ pecas:
   evidencia: ["F9 §8: 'economia = (preço antigo − preço concentrado) ÷ preço antigo'"]
   bloqueia: [FOR-CNC-001]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-001
+  resolucao: >
+    Sem preço antigo não há economia a declarar → nulo, não zero.
 
 - id: LAC-FOR-071
   tipo: LAC
@@ -575,7 +693,12 @@ pecas:
   evidencia: ["F10 Algoritmo 4: 'alerta se um único vendedor detém > 40% da Receita VIP'"]
   bloqueia: [FOR-AUD-004]
   quem_decide: Rodrigo
-  status: ABERTA
+  status: RESOLVIDA
+  resolvida_por: DEC-008
+  resolvida_em: 2026-08-13
+  regra_criada: REG-NUM-002
+  resolucao: >
+    Loja com menos de 3 vendedores elegíveis: concentração é estrutural, não risco. Alerta suprimido com motivo declarado.
 
 - id: LAC-FOR-076
   tipo: LAC

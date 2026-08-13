@@ -526,3 +526,29 @@ desenvolve, o dado fica limpo.
 ---
 
 **Fim da SPEC v1.0.** Próximo artefato: protótipo HTML navegável das Telas 0–5.
+
+---
+
+# ⚠️ STATUS: SUPERADO PARCIALMENTE — DEC-009 (13/08/2026)
+
+**A camada de apresentação deste documento está superada.** O conceito CHRONOS — 8 telas
+densas, muitos cards, tudo visível — partia de uma premissa de dashboard corporativo que o
+autor descartou:
+
+> *"Pessoalmente eu não utilizaria o CHRONOS. As pessoas estão querendo ler menos, não mais —
+> no máximo por demanda. As interfaces precisam ser limpas, simples. A complexidade vem da
+> demanda, não na entrega ativa."*
+
+| Camada | Destino |
+|---|---|
+| Catálogo de 65 KPIs (§4) | ✅ **absorvido** — virou 99 fórmulas no `CATALOGO/registro/formulas*.yaml` |
+| Modelo de dados canônico (§2) | ✅ **vigente** |
+| Governança de modo a/b/c (§6) | ✅ **virou** `REG-SEV-004` |
+| Sistema de alertas (§7) | ⚠️ a revisar sob o novo princípio |
+| **As 8 telas (§5) e o protótipo HTML** | ❌ **`SUPERADO`** |
+
+**O que substitui:** o bloco `ART` do registro (`CATALOGO/registro/artefatos.yaml`), governado
+por dois princípios da `DEC-009` — **superfície mínima, profundidade total** e **o drill-down
+é diagnóstico, não navegação**.
+
+Este documento permanece como registro histórico. Não usar a §5 como spec de implementação.

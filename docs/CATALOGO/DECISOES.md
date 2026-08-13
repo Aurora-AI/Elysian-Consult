@@ -378,3 +378,221 @@ perderem, fora da fila ativa. A fila de decisão passa a ordenar por frente, nã
 severidade. O foco volta para a `D-08` (Fiscal e Financeiro), que é o que trava a consultoria.
 
 ---
+
+## DEC-007 · Resolução das colisões de símbolo MR e PV
+
+**Data:** 2026-08-13 · **Decisor:** Rodrigo · **Fecha:** `LAC-FOR-004`, `LAC-FOR-005` ·
+**Fila:** D-03
+
+### O critério
+
+Não foi antiguidade nem frequência de uso. Foi **lastro no modelo de dados**: quem tem coluna
+mantém a sigla.
+
+| Sigla na fonte | Conceito | Novo símbolo | Razão |
+|---|---|---|---|
+| `MR` | Meta de **Receita** (F1 §2.3) | **`MRec`** | input de planejamento, grão loja |
+| `MR` | Meta **Residual** (F1 §5.7) | **`MRes_c`** | mantém o subscrito `_c` do bloco MET |
+| `PV` | **Preço** de Venda (F1 §6.1) | **`PV`** ✅ mantido | mapeia para `fato_venda.preco_unit` e `dim_produto.preco_venda` |
+| `PV` | **Previsão** de Venda (F1 §3.1) | **`PVS`** | Previsão de Venda Semanal — o `S` marca a janela real da fórmula |
+
+### Por que o Preço de Venda ficou com a sigla
+
+Porque ele **existe no dado**. `preco_venda` e `preco_unit` são colunas reais das sete tabelas
+canônicas; a Previsão de Venda é um cálculo sem coluna. Quando duas coisas disputam um nome,
+a que tem lastro físico ganha — o mesmo raciocínio que faz o motor vencer o documento na regra
+de precedência.
+
+### A fidelidade não se perde
+
+Toda peça renomeada carrega `simbolo_fonte` com exatamente o que o documento original escreveu:
+
+```yaml
+simbolo: MRes_c
+simbolo_fonte: "MR_c (F1 §5.7 · renomeado por DEC-007)"
+```
+
+O `Formulas_Consultoria_Aurora.md` **não foi tocado** — continua sendo o documento de origem,
+com a colisão que ele tinha. O registro passa a ser o glossário autoritativo, e o glossário da
+fonte (§7, que listava só "MR | Meta Residual" e admitia os dois PVs sem resolver) fica
+marcado como superado pelo registro.
+
+### O que isso destrava
+
+| Peça | Efeito |
+|---|---|
+| `FOR-TMI-003` · TMI de planejamento | `TMIp = MRec ÷ NVp` · sai de `CONFLITANTE` |
+| `FOR-MET-008` · Meta Residual | `MRes_c = M_c − V_c` · `CONFLITANTE` → `CANONICO` |
+| `FOR-FCT-001` · Previsão de Venda | símbolo `PVS` · a expressão **não** foi corrigida — o `IR` inflado segue em aberto (`LAC-FOR-003`) |
+| `FOR-MRG-001` · MC por item | `PV_item` mantido, marca de colisão removida |
+| Validador | as **2 reprovas V1 caem** |
+
+Nota: a `FOR-FCT-001` teve o **símbolo** resolvido e a **fórmula** não. São duas lacunas
+diferentes na mesma peça, e só uma foi decidida.
+
+---
+
+## DEC-008 · Política de números degenerados — cinco regras, dezenove lacunas
+
+**Data:** 2026-08-13 · **Decisor:** Rodrigo · **Fecha:** 19 lacunas ·
+**Cria:** `REG-NUM-001` a `005` · **Fila:** D-07
+
+### O achado que definiu a regra do meio
+
+Ao calibrar o mínimo de amostra contra o dado real, apareceu isto:
+
+| Vendedor | Vendas no último mês | Vendas acumuladas | Dias de casa | Gabarito manda |
+|---|---:|---:|---:|---|
+| **V-35** | **3** | 6 | 39 | **não penalizar** (ramp) |
+| **V-30** | **2** | 101 | 785 | avaliar normalmente |
+
+**Pela janela mensal, o novato parece mais ativo que o veterano.** O mínimo de amostra medido
+sobre a janela de cálculo não separa maturidade de sazonalidade — só o **acumulado** separa.
+A regra passou a ser sobre volume acumulado e tempo de casa, não sobre o mês corrente.
+
+### As cinco regras
+
+Cada uma trata uma família diferente, e cada uma deriva de algo que a casa já tinha escrito.
+
+| Regra | Família | O que faz | Deriva de |
+|---|---|---|---|
+| **`REG-NUM-001`** | Sem base | Denominador nulo → **NULO com selo**, nunca 0 nem 100 | `SPEC_Fase_E` §0.1 |
+| **`REG-NUM-002`** | Amostra fraca | Calcula, marca confiança, **fica fora de ranking** | `benchmark_population` do motor |
+| **`REG-NUM-003`** | Cold start | **Assumir-e-rotular, nunca chutar** | Gabarito, caso L10 |
+| **`REG-NUM-004`** | Fora do domínio | Vira **leitura**, não número | Lei da Linguagem do laudo §3.1 |
+| **`REG-NUM-005`** | Composição parcial | **Renormaliza + selo**, com piso de 60% | — |
+
+### Por que nunca zero e nunca cem
+
+`REG-NUM-001` é a que parece óbvia e não é. Um índice que não pôde ser calculado, publicado
+como **0**, é lido pelo gestor como desempenho ruim — e o vendedor é injustiçado por um dado
+que a loja não capturou. Publicado como **100**, é lido como perfeito. Preenchido com a
+**média**, inventa um desempenho que ninguém teve.
+
+As três opções mentem, em direções diferentes. A quarta — declarar a ausência — é a única
+honesta, e é a que a casa já pratica no motor.
+
+### Os mínimos declarados
+
+Validados contra o Gabarito, marcados `CANDIDATO` até rodarem sobre dado real do cliente:
+
+| Escopo | Mínimo |
+|---|---|
+| Vendedor em SEV, ranking e banda | **≥ 30 vendas acumuladas E ≥ 90 dias de casa** |
+| P75 por segmento (TMI, attach, conversão) | **≥ 20 observações na célula** |
+| Dispersão de margem da equipe | ≥ 3 vendedores elegíveis, senão intervalo interquartil |
+| Concentração de VIP | ≥ 3 vendedores; com 1 ou 2 é estrutural, não risco |
+
+### O piso de publicação do composto
+
+`REG-NUM-005` estabelece que abaixo de **60% do peso original** o índice composto não é
+publicado. Consequência concreta hoje: sem as tabelas Fila e Campanhas, o SEV perde IR e IAd
+— 25 a 30% do vetor no estágio **Construção** (publicável como parcial) e **40% no Cruzeiro**
+(abaixo do piso, não publicável).
+
+Meio índice não é um índice.
+
+### O achado colateral — e a correção do autor
+
+Calibrar a `REG-NUM-002` expôs que a mediana na `Consultoria.xlsx` é de **2 vendas por
+vendedor por mês**. O extrator registrou isso como possível problema da fixture. O autor
+corrigiu o enquadramento: **as planilhas de teste usam 36 meses de histórico por desenho.**
+
+Medido:
+
+| | linhas/loja/mês | receita/loja/mês | período |
+|---|---:|---:|---|
+| `Consultoria.xlsx` | 7,4 | **R$ 3.497** | 41 meses |
+| `Rede_PetShop.xlsx` | 16,3 | R$ 1.319 | 31 meses |
+| Base planejada (180k) | **500** | — | 36 meses |
+
+R$ 3.497 de receita por loja por mês não descreve nenhuma ótica. A fixture foi dimensionada
+para **carregar as 37 anomalias plantadas do Gabarito**, não para representar densidade.
+É **fixture funcional, não volumétrica** — e a base planejada é 61× mais densa.
+
+**O que isso muda na REG-NUM-002:**
+
+- **Sobrevive** o critério estrutural: mínimo sobre o acumulado, nunca sobre a janela. O par
+  V-35 × V-30 é comparação relativa, e a fixture funcional a suporta bem.
+- **Não sobrevive** a calibração dos valores absolutos. `≥30 vendas E ≥90 dias` não pode ser
+  validado onde a mediana mensal é 2. Seguem `CANDIDATO` até rodarem sobre a base volumétrica
+  ou sobre o dado real do Cliente #1.
+
+E confirma, com número, a separação em duas escalas: **fixture funcional** valida corretude;
+**base volumétrica** valida estatística, performance e limiares. Nunca uma no lugar da outra.
+`LAC-NUM-089` rebaixada de ALTA para MÉDIA e reescrita.
+
+---
+
+## DEC-009 · O CHRONOS sai · superfície mínima, profundidade total
+
+**Data:** 2026-08-13 · **Decisor:** Rodrigo · **Cria:** bloco `ART` ·
+**Supera:** `SPEC_Sistema_Gestao_360_v1` (camada de apresentação) e `prototipo_chronos_v1.html`
+
+### O que sai
+
+> *"Pessoalmente eu não utilizaria o CHRONOS. A ideia era outra, outra época, outra
+> necessidade, e não faz mais sentido com o desenvolvimento das tecnologias."*
+
+O CHRONOS foi concebido como painel denso — 8 telas, muitos cards, tudo visível. A premissa
+por trás dele era a de dashboard corporativo clássico: quanto mais exposto, melhor.
+
+Essa premissa morreu.
+
+> *"As pessoas estão querendo ler menos, não mais — no máximo por demanda. As interfaces
+> precisam ser limpas, simples. A complexidade vem da demanda, não na entrega ativa."*
+
+### O que sobrevive
+
+O que morre é o **conceito de interface**, não o conteúdo. Da `SPEC_Sistema_Gestao_360`:
+
+| Camada | Destino |
+|---|---|
+| Catálogo de 65 KPIs | ✅ absorvido pelo registro (99 fórmulas) |
+| Modelo de dados canônico (7 tabelas) | ✅ vigente |
+| Governança de modo (a/b/c) | ✅ vira `REG-SEV-004` |
+| **8 telas densas · protótipo HTML** | ❌ `SUPERADO` |
+
+### O princípio que substitui
+
+**Superfície mínima, profundidade total.**
+
+Os dois pedidos do autor parecem opostos e não são:
+
+> *"Nenhum detalhe ou análise é simples ou básica para ficar de fora."*
+> *"As pessoas querem ler menos."*
+
+Só convivem sob uma regra: a complexidade não é eliminada, é **latente**. Nada é removido do
+sistema; tudo é removido da **entrega ativa**. O que aparece sem pedido é mínimo; o que existe
+sob demanda é integral.
+
+### Por que isso é método, e não preferência de UI
+
+> *"Às vezes identificar inconsistências ou erros mínimos são a solução para problemas mais
+> complexos."*
+
+É exatamente o caso `ARP-013`: um erro de cadastro num único SKU explicou o "vendedor que
+corrói margem em 337%". Sem descer até a linha da NF, o laudo teria acusado a pessoa errada.
+
+O drill-down é o **mecanismo de diagnóstico**, não uma conveniência de navegação. Por isso
+entra no registro como contrato do artefato, e não como decisão de front-end.
+
+### Os dois eixos de profundidade
+
+O autor separou duas coisas que a maioria dos painéis funde:
+
+| Eixo | Movimento | Exemplo |
+|---|---|---|
+| **Vertical** | desagregar por grão | rede → loja → equipe → vendedor → venda → item → **linha de origem** |
+| **Horizontal** | fatiar por outra dimensão no MESMO grão | o mesmo vendedor por categoria · por temperatura de fila · por segmento · por período |
+
+A maioria dos dashboards só faz o vertical. O horizontal é o que permite responder *"ele vende
+mal, ou vende mal só multifocal?"* — que é a pergunta que muda a intervenção.
+
+### O piso da cadeia já existia
+
+A `SPEC_Fase_D2` (Pilar 2) já exige `source_rows` em todo achado material, com teto em
+`provenance_sample_cap`. O fundo do drill é doutrina desde julho. O que faltava era declarar
+**o caminho** da superfície até ele — e é isso que o bloco `ART` passa a carregar.
+
+---

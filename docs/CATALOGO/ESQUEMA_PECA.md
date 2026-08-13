@@ -175,6 +175,68 @@ o_que_falsificaria: "Loja que adota cadastro sem incentivo imediato e sustenta o
 
 O campo `o_que_falsificaria` não é filosofia: é o que separa axioma operante de slogan. Axioma que nada falsifica é `CANDIDATO`, não `CANONICO`.
 
+### 5.4-bis. `ART` · Artefato — o contrato entre a teoria e a tela
+
+Criado por `DEC-009`. É a peça que liga fórmula a entregável — sem ela, o dashboard volta a
+ser desenhado à mão e a teoria diverge da tela.
+
+**Os dois princípios que governam todo `ART`:**
+
+> **Superfície mínima, profundidade total.**
+> A complexidade não é eliminada, é **latente**. Nada sai do sistema; tudo sai da entrega ativa.
+>
+> **O drill-down é diagnóstico, não navegação.**
+> Erro mínimo explica problema complexo — o `ARP-013` (erro de cadastro num SKU) explicou o
+> "vendedor que corrói 337% de margem". Sem descer até a NF, o laudo acusa a pessoa errada.
+
+```yaml
+id: ART-COC-001
+tipo: ART
+nome: "Cockpit do dono"
+consumidor: dono              # dono | gestor | vendedor | consultor | cliente_final
+gatilho: "abre quando quer saber como a rede está"
+cadencia: semanal
+
+# ─── SUPERFÍCIE: o que aparece SEM pedido ───
+superficie:
+  teto_elementos: 7           # [OBRIGATÓRIO] limite duro. Estourou, não é superfície.
+  numero_ancora: FOR-BAS-003  # o UM número que justifica abrir
+  elementos: [FOR-BAS-003, FOR-BAS-004, ...]
+  o_que_NAO_aparece:          # [OBRIGATÓRIO] tão importante quanto o que aparece
+    - "nome de vendedor (REG-SEV-004)"
+    - "qualquer métrica que não vire R$ ou decisão"
+
+# ─── PROFUNDIDADE: o que existe SOB DEMANDA ───
+profundidade:
+  eixo_vertical:              # desagregar por grão — termina SEMPRE em source_rows
+    - rede
+    - loja
+    - equipe
+    - vendedor
+    - venda
+    - item
+    - linha_de_origem         # [OBRIGATÓRIO] o piso. SPEC_Fase_D2 Pilar 2.
+  eixo_horizontal:            # fatiar por outra dimensão NO MESMO grão
+    - {grao: vendedor, dimensoes: [categoria, segmento, temperatura_fila, periodo]}
+    - {grao: loja, dimensoes: [categoria, natureza_item, forma_pagamento, periodo]}
+  completude: TOTAL           # TOTAL | PARCIAL — se PARCIAL, declarar onde corta e por quê
+
+lei_de_linguagem: LAUDO       # LAUDO (R$ e consequência) | TECNICA (símbolo e taxa)
+modo_minimo: a                # a | b | c — governança de exibição (REG-SEV-004)
+regras_aplicaveis: [REG-SEV-004, REG-NUM-001]
+```
+
+**Os quatro campos que existem por causa de uma decisão, não de gosto:**
+
+- **`teto_elementos`** — sem limite duro, toda superfície vira o CHRONOS de novo. O teto é a
+  trava; a profundidade é a válvula de escape.
+- **`o_que_NAO_aparece`** — declarar a omissão força a decisão. Omissão não declarada é
+  esquecimento; declarada é design.
+- **`eixo_horizontal`** — a maioria dos painéis só desagrega. Sem o horizontal não se responde
+  *"ele vende mal, ou vende mal só multifocal?"* — que é a pergunta que muda a intervenção.
+- **`completude: TOTAL`** — o padrão é descer até a linha de origem. `PARCIAL` exige
+  justificativa escrita, porque quebra o princípio de que nenhum detalhe é básico demais.
+
 ### 5.5. `EVI` · Evidência
 
 ```yaml

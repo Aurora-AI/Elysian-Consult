@@ -43,13 +43,15 @@ meta:
       data_doc: 2026-07-08
       papel: secundária — usada só para dirimir e para o Mapa de Aplicação
   contagem: 62
-  glossario_conflito:
-    - sigla: MR
-      significados: ["Meta de Receita (F1 §2.3)", "Meta Residual (F1 §5.7)"]
-      lacuna: LAC-FOR-004
-    - sigla: PV
-      significados: ["Previsão de Venda (F1 §3.1)", "Preço de Venda (F1 §6.1)"]
-      lacuna: LAC-FOR-005
+  colisoes_resolvidas:
+    - sigla_fonte: MR
+      resolvida_por: DEC-007
+      de: ["Meta de Receita (F1 §2.3)", "Meta Residual (F1 §5.7)"]
+      para: ["MRec", "MRes_c"]
+    - sigla_fonte: PV
+      resolvida_por: DEC-007
+      de: ["Previsão de Venda (F1 §3.1)", "Preço de Venda (F1 §6.1)"]
+      para: ["PVS", "PV (mantido — casa com fato_venda.preco_unit)"]
 
 # ═══════════════════════════════════════════════════════════════
 # BLOCO SEV — Motor Determinístico
@@ -59,6 +61,7 @@ pecas:
 
 - id: FOR-SEV-001
   tipo: FOR
+  dominio: COMERCIAL
   bloco: SEV
   nome: "Normalização universal de índice"
   simbolo: IN
@@ -92,6 +95,7 @@ pecas:
 
 - id: FOR-SEV-002
   tipo: FOR
+  dominio: COMERCIAL
   bloco: SEV
   nome: "Índice de Captura — taxa crua"
   simbolo: IC_cru
@@ -121,6 +125,7 @@ pecas:
 
 - id: FOR-SEV-003
   tipo: FOR
+  dominio: COMERCIAL
   bloco: SEV
   nome: "Índice de Captura (IC) — normalizado"
   simbolo: IC
@@ -155,6 +160,7 @@ pecas:
 
 - id: FOR-SEV-004
   tipo: FOR
+  dominio: COMERCIAL
   bloco: SEV
   nome: "Attach do vendedor — taxa crua"
   simbolo: attach
@@ -181,6 +187,7 @@ pecas:
 
 - id: FOR-SEV-005
   tipo: FOR
+  dominio: COMERCIAL
   bloco: SEV
   nome: "Attach-alvo (P75 por segmento)"
   simbolo: AttachAlvo
@@ -210,6 +217,7 @@ pecas:
 
 - id: FOR-SEV-006
   tipo: FOR
+  dominio: COMERCIAL
   bloco: SEV
   nome: "Índice de Anexação (IA) — normalizado"
   simbolo: IA
@@ -243,6 +251,7 @@ pecas:
 
 - id: FOR-SEV-007
   tipo: FOR
+  dominio: COMERCIAL
   bloco: SEV
   nome: "Índice de Ticket (IT)"
   simbolo: IT
@@ -277,6 +286,7 @@ pecas:
 
 - id: FOR-SEV-008
   tipo: FOR
+  dominio: COMERCIAL
   bloco: SEV
   nome: "Conversão de fila — taxa crua"
   simbolo: ConvReal
@@ -304,6 +314,7 @@ pecas:
 
 - id: FOR-SEV-009
   tipo: FOR
+  dominio: COMERCIAL
   bloco: SEV
   nome: "Conversão-alvo por temperatura de fila"
   simbolo: ConvAlvo
@@ -330,6 +341,7 @@ pecas:
 
 - id: FOR-SEV-010
   tipo: FOR
+  dominio: COMERCIAL
   bloco: SEV
   nome: "Índice de Resgate (IR) — normalizado"
   simbolo: IR
@@ -361,6 +373,7 @@ pecas:
 
 - id: FOR-SEV-011
   tipo: FOR
+  dominio: COMERCIAL
   bloco: SEV
   nome: "Índice de Adesão (IAd) — normalizado"
   simbolo: IAd
@@ -397,6 +410,7 @@ pecas:
 
 - id: FOR-SEV-012
   tipo: FOR
+  dominio: COMERCIAL
   bloco: SEV
   nome: "Score de Engenharia de Venda (SEV)"
   simbolo: SEV
@@ -434,6 +448,7 @@ pecas:
 
 - id: PAR-SEV-001
   tipo: FOR
+  dominio: COMERCIAL
   bloco: SEV
   nome: "Régua de Pesos por Maturidade — vetor p1..p5"
   simbolo: "p⃗"
@@ -486,6 +501,7 @@ pecas:
 
 - id: FOR-TMI-001
   tipo: FOR
+  dominio: COMERCIAL
   bloco: TMI
   nome: "TMI histórico do segmento"
   simbolo: TMIhs
@@ -515,6 +531,7 @@ pecas:
 
 - id: FOR-TMI-002
   tipo: FOR
+  dominio: COMERCIAL
   bloco: TMI
   nome: "TMI histórico do vendedor (ponderado pelo mix)"
   simbolo: TMIhv
@@ -543,13 +560,15 @@ pecas:
 
 - id: FOR-TMI-003
   tipo: FOR
+  dominio: COMERCIAL
   bloco: TMI
   nome: "TMI de planejamento"
   simbolo: TMIp
   resumo: "O ticket que o negócio precisa para fechar as contas. Top-down."
-  expressao: "TMIp = MR ÷ NVp"
+  expressao: "TMIp = MRec ÷ NVp"
+  simbolo_fonte: "TMIp = MR ÷ NVp (F1 §2.3 · 'MR' renomeado para MRec por DEC-007)"
   variaveis:
-    - {simbolo: MR, nome: "Meta de Receita do período", unidade: BRL, origem: fato_meta, natureza: PARAMETRO, colisao: "MR também designa Meta Residual em FOR-MET-008"}
+    - {simbolo: MRec, nome: "Meta de Receita do período", unidade: BRL, origem: fato_meta, natureza: PARAMETRO, simbolo_fonte: MR}
     - {simbolo: NVp, nome: "Número de Vendas projetado para o período", unidade: contagem, origem: fato_meta, natureza: PARAMETRO}
   grao: loja
   janela: trimestral
@@ -568,11 +587,12 @@ pecas:
   status_canonico: CANONICO
   confianca: ALTA
   natureza_conhecimento: EMPIRICO_AUTOR
-  lacunas: [LAC-FOR-004, LAC-FOR-006]
+  lacunas: [LAC-FOR-006]
   nota_fonte: "GRÃO LOJA. O TMIhv (FOR-TMI-002) é grão VENDEDOR. A ponte FOR-TMI-004 mistura os dois — ver LAC-FOR-006."
 
 - id: FOR-TMI-004
   tipo: FOR
+  dominio: COMERCIAL
   bloco: TMI
   nome: "TMI operacional — a ponte (a régua do vendedor)"
   simbolo: TMIo
@@ -605,6 +625,7 @@ pecas:
 
 - id: FOR-TMI-005
   tipo: FOR
+  dominio: COMERCIAL
   bloco: TMI
   nome: "Gap do TMI (o achado)"
   simbolo: Gap_TMI
@@ -636,6 +657,7 @@ pecas:
 
 - id: FOR-TMI-006
   tipo: FOR
+  dominio: COMERCIAL
   bloco: TMI
   nome: "Ticket Médio Real"
   simbolo: TMR
@@ -669,11 +691,13 @@ pecas:
 
 - id: FOR-FCT-001
   tipo: FOR
+  dominio: COMERCIAL
   bloco: FCT
-  nome: "Previsão de Venda do vendedor (PV)"
-  simbolo: PV_forecast
+  nome: "Previsão de Venda Semanal do vendedor (PVS)"
+  simbolo: PVS
+  simbolo_fonte: "PV (F1 §3.1 · renomeado por DEC-007 — PV fica com Preço de Venda)"
   resumo: "Prevê quanto cada vendedor deve fechar na semana usando a taxa de conversão dele e o ticket dele."
-  expressao: "PV = AG × ( IR ÷ 100 ) × TMR"
+  expressao: "PVS = AG × ( IR ÷ 100 ) × TMR"
   variaveis:
     - {simbolo: AG, nome: "Agendamentos/contatos na fila dele para a semana", unidade: contagem, origem: fato_resgate, natureza: CRUA}
     - {simbolo: IR, nome: "Índice de Resgate (%)", unidade: percentual, origem: FOR-SEV-010, natureza: NORMALIZADA, alerta: "CONFLITO — ver LAC-FOR-003"}
@@ -696,11 +720,12 @@ pecas:
   status_canonico: CONFLITANTE
   confianca: ALTA
   natureza_conhecimento: EMPIRICO_AUTOR
-  lacunas: [LAC-FOR-003, LAC-FOR-008, LAC-FOR-005]
-  nota_fonte: "Transcrita EXATAMENTE como está na fonte, inclusive com IR normalizado. Passe 1 não corrige. O símbolo PV colide com Preço de Venda (§6.1) — renomeado aqui para PV_forecast apenas no campo simbolo, com a colisão registrada."
+  lacunas: [LAC-FOR-003, LAC-FOR-008]
+  nota_fonte: "A expressão preserva o IR normalizado como está na fonte — a correção é decisão em aberto (LAC-FOR-003). Apenas o SÍMBOLO foi resolvido: PV → PVS por DEC-007."
 
 - id: FOR-FCT-002
   tipo: FOR
+  dominio: ESTOQUE
   bloco: FCT
   nome: "Dias até a Ruptura (DR)"
   simbolo: DR
@@ -734,6 +759,7 @@ pecas:
 
 - id: FOR-CMP-001
   tipo: FOR
+  dominio: PESSOAS
   bloco: CMP
   nome: "Nota Comportamental (NC)"
   simbolo: NC
@@ -766,6 +792,7 @@ pecas:
 
 - id: FOR-CMP-002
   tipo: FOR
+  dominio: PESSOAS
   bloco: CMP
   nome: "Régua de Perfil Ideal (RPI)"
   simbolo: RPI
@@ -801,6 +828,7 @@ pecas:
 
 - id: FOR-MET-001
   tipo: FOR
+  dominio: COMERCIAL
   bloco: MET
   nome: "Atingimento Real (AR)"
   simbolo: AR_c
@@ -829,6 +857,7 @@ pecas:
 
 - id: FOR-MET-002
   tipo: FOR
+  dominio: COMERCIAL
   bloco: MET
   nome: "Projeção de Atingimento (PA)"
   simbolo: PA_c
@@ -857,6 +886,7 @@ pecas:
 
 - id: FOR-MET-003
   tipo: FOR
+  dominio: COMERCIAL
   bloco: MET
   nome: "Projeção de Atingimento em % da meta"
   simbolo: "PA%_c"
@@ -881,6 +911,7 @@ pecas:
 
 - id: FOR-MET-004
   tipo: FOR
+  dominio: COMERCIAL
   bloco: MET
   nome: "Meta Esperada proporcional ao dia (ME)"
   simbolo: ME_c
@@ -906,6 +937,7 @@ pecas:
 
 - id: FOR-MET-005
   tipo: FOR
+  dominio: COMERCIAL
   bloco: MET
   nome: "Descolamento da Meta (Gap)"
   simbolo: Gap_c
@@ -931,6 +963,7 @@ pecas:
 
 - id: FOR-MET-006
   tipo: FOR
+  dominio: COMERCIAL
   bloco: MET
   nome: "Velocidade Diária (Pace)"
   simbolo: Pace_c
@@ -954,6 +987,7 @@ pecas:
 
 - id: FOR-MET-007
   tipo: FOR
+  dominio: COMERCIAL
   bloco: MET
   nome: "Esforço Diário Necessário (EDN)"
   simbolo: EDN_c
@@ -987,10 +1021,12 @@ pecas:
 
 - id: FOR-MET-008
   tipo: FOR
+  dominio: COMERCIAL
   bloco: MET
   nome: "Meta Residual"
-  simbolo: MR_c
-  expressao: "MR_c = M_c − V_c"
+  simbolo: MRes_c
+  simbolo_fonte: "MR_c (F1 §5.7 · renomeado por DEC-007)"
+  expressao: "MRes_c = M_c − V_c"
   variaveis:
     - {simbolo: M_c, origem: fato_meta, natureza: PARAMETRO}
     - {simbolo: V_c, origem: fato_venda, natureza: CRUA}
@@ -1004,14 +1040,15 @@ pecas:
   sai: "numerador do EDN"
   casos_degenerados: [{condicao: "V_c > M_c", comportamento: "negativo — sem leitura declarada", lacuna: LAC-FOR-033}]
   procedencia: [{fonte: F1, local: "§5.7"}]
-  status_canonico: CONFLITANTE
+  status_canonico: CANONICO
+  ratificado_por: DEC-007
   confianca: ALTA
   natureza_conhecimento: LITERATURA_PUBLICA
-  lacunas: [LAC-FOR-004]
-  nota_fonte: "🔴 COLISÃO DE SÍMBOLO: MR designa Meta Residual aqui e Meta de Receita em FOR-TMI-003 (§2.3). O glossário da própria fonte (§7) lista só 'MR | Meta Residual', omitindo o outro uso."
+  nota_fonte: "A fonte usava MR para os dois conceitos, e o glossário dela (§7) listava só 'Meta Residual'. Resolvido por DEC-007: MRes_c aqui, MRec em FOR-TMI-003."
 
 - id: FOR-MET-009
   tipo: FOR
+  dominio: COMERCIAL
   bloco: MET
   nome: "Índice de Mix (IM)"
   simbolo: IM_c
@@ -1042,6 +1079,7 @@ pecas:
 
 - id: FOR-MET-010
   tipo: FOR
+  dominio: COMERCIAL
   bloco: MET
   nome: "Tendência Semanal (T)"
   simbolo: T_c
@@ -1071,6 +1109,7 @@ pecas:
 
 - id: FOR-MET-011
   tipo: FOR
+  dominio: COMERCIAL
   bloco: MET
   nome: "Elasticidade de Recuperação (ER)"
   simbolo: ER_c
@@ -1103,6 +1142,7 @@ pecas:
 
 - id: FOR-MET-012
   tipo: FOR
+  dominio: COMERCIAL
   bloco: MET
   nome: "Contribuição Marginal por Categoria (CMC)"
   simbolo: CMC_c
@@ -1130,6 +1170,7 @@ pecas:
 
 - id: FOR-MET-013
   tipo: FOR
+  dominio: COMERCIAL
   bloco: MET
   nome: "Atingimento Geral do Vendedor (AGV)"
   simbolo: AGV
@@ -1158,6 +1199,7 @@ pecas:
 
 - id: PAR-MET-001
   tipo: FOR
+  dominio: COMERCIAL
   bloco: MET
   nome: "Pesos por categoria (w_c) — AGV/AGL"
   simbolo: w_c
@@ -1191,6 +1233,7 @@ pecas:
 
 - id: FOR-MET-014
   tipo: FOR
+  dominio: COMERCIAL
   bloco: MET
   nome: "Atingimento Geral da Loja (AGL)"
   simbolo: AGL
@@ -1220,12 +1263,13 @@ pecas:
 
 - id: FOR-MRG-001
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "MC por item / SKU — Nível 1"
   simbolo: MC_item
   expressao: "MC_item = PV_item − CE_item − CV_item"
   variaveis:
-    - {simbolo: PV_item, nome: "Preço de Venda praticado (líquido de desconto)", unidade: BRL, origem: fato_venda, natureza: CRUA, colisao: "PV também designa Previsão de Venda em FOR-FCT-001"}
+    - {simbolo: PV_item, nome: "Preço de Venda praticado, líquido de desconto (PV mantém a sigla — DEC-007)", unidade: BRL, origem: fato_venda, natureza: CRUA, mapeia_para: "fato_venda.preco_unit"}
     - {simbolo: CE_item, nome: "Custo de Entrada (NF de compra)", unidade: BRL, origem: fato_compra, natureza: CRUA}
     - {simbolo: CV_item, nome: "Custos Variáveis (imposto sobre venda, comissão, taxa de cartão/Pix, frete)", unidade: BRL, origem: derivada, natureza: DERIVADA}
   grao: item
@@ -1244,12 +1288,13 @@ pecas:
   status_canonico: CANONICO
   confianca: ALTA
   natureza_conhecimento: LITERATURA_PUBLICA
-  lacunas: [LAC-FOR-005, LAC-FOR-019, LAC-FOR-020]
+  lacunas: [LAC-FOR-019, LAC-FOR-020]
   implementado_em: "src/product_b/oracle/commercial_auditor.py · detect_contribution_margin"
   verificado_contra: "Gabarito · 'Prejuízo Oculto (B5) — SKU NEG-001..003 · vendidos a R$200, custo R$190 → margem negativa'"
 
 - id: FOR-MRG-002
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "MC percentual do item"
   simbolo: "MC%_item"
@@ -1273,6 +1318,7 @@ pecas:
 
 - id: FOR-MRG-003
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "MC por categoria — Nível 2"
   simbolo: MC_cat
@@ -1294,6 +1340,7 @@ pecas:
 
 - id: FOR-MRG-004
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "MC percentual da categoria"
   simbolo: "MC%_cat"
@@ -1317,6 +1364,7 @@ pecas:
 
 - id: FOR-MRG-005
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "Participação da categoria na MC total"
   simbolo: Part_cat
@@ -1341,6 +1389,7 @@ pecas:
 
 - id: FOR-MRG-006
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "MC por vendedor — Nível 3"
   simbolo: MC_vend
@@ -1362,6 +1411,7 @@ pecas:
 
 - id: FOR-MRG-007
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "MC percentual do vendedor"
   simbolo: "MC%_vend"
@@ -1385,6 +1435,7 @@ pecas:
 
 - id: FOR-MRG-008
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "MC por categoria por vendedor (a matriz)"
   simbolo: "MC_vend,cat"
@@ -1407,6 +1458,7 @@ pecas:
 
 - id: FOR-MRG-009
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "MC por transação do vendedor"
   simbolo: "MC_tx,vend"
@@ -1430,6 +1482,7 @@ pecas:
 
 - id: FOR-MRG-010
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "MC por gestor (equipe) — Nível 4"
   simbolo: MC_gestor
@@ -1451,6 +1504,7 @@ pecas:
 
 - id: FOR-MRG-011
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "MC percentual do gestor"
   simbolo: "MC%_gestor"
@@ -1474,6 +1528,7 @@ pecas:
 
 - id: FOR-MRG-012
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "Dispersão de margem na equipe"
   simbolo: Disp_gestor
@@ -1498,6 +1553,7 @@ pecas:
 
 - id: FOR-MRG-013
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "MC por loja — Nível 5"
   simbolo: MC_loja
@@ -1521,6 +1577,7 @@ pecas:
 
 - id: FOR-MRG-014
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "MC percentual da loja"
   simbolo: "MC%_loja"
@@ -1547,6 +1604,7 @@ pecas:
 
 - id: FOR-MRG-015
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "Ponto de Equilíbrio Operacional da loja"
   simbolo: PE_loja
@@ -1574,6 +1632,7 @@ pecas:
 
 - id: FOR-MRG-016
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "Índice de Cobertura do Custo Fixo (ICCF)"
   simbolo: ICCF_loja
@@ -1601,6 +1660,7 @@ pecas:
 
 - id: FOR-MRG-017
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "MC da operação consolidada — Nível 6"
   simbolo: MC_op
@@ -1625,6 +1685,7 @@ pecas:
 
 - id: FOR-MRG-018
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "MC percentual da operação"
   simbolo: "MC%_op"
@@ -1648,6 +1709,7 @@ pecas:
 
 - id: FOR-MRG-019
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "Ponto de Equilíbrio da operação"
   simbolo: PE_op
@@ -1673,6 +1735,7 @@ pecas:
 
 - id: FOR-MRG-020
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "Alerta de Margem Negativa"
   simbolo: Alerta_MC
@@ -1700,6 +1763,7 @@ pecas:
 
 - id: FOR-MRG-021
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "Erosão de Margem por Desconto (EMD)"
   simbolo: EMD_vend
@@ -1730,6 +1794,7 @@ pecas:
 
 - id: FOR-MRG-022
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "Ranking de Destruição de Margem (RDM)"
   simbolo: RDM_vend
@@ -1756,6 +1821,7 @@ pecas:
 
 - id: FOR-MRG-023
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "MC projetada para o fim do mês"
   simbolo: MC_proj
@@ -1783,6 +1849,7 @@ pecas:
 
 - id: FOR-MRG-024
   tipo: FOR
+  dominio: FINANCEIRO
   bloco: MRG
   nome: "Gap de MC vs. meta de MC"
   simbolo: Gap_MC
