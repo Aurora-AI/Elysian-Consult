@@ -11,7 +11,7 @@ meta:
   passe: 2-DIAGNOSTICO
   extraido_em: 2026-08-13
   escopo: "blocos BAS · EST · FIN · CNC · AUD"
-  contagem: 25
+  contagem: 36
   por_severidade: {CRITICA: 4, ALTA: 9, MEDIA: 9, BAIXA: 3}
 
 pecas:
@@ -58,6 +58,59 @@ pecas:
   correcao_candidata: "F8 é um dia mais recente e é o documento dedicado ao tema — provável que supere F7. Mas F7 continua listado como método vigente."
   bloqueia: [FOR-FIN-007, FOR-FIN-008, FOR-FIN-009]
   quem_decide: Rodrigo
+  status: RESOLVIDA
+  resolvida_por: DEC-001
+  resolvida_em: 2026-08-13
+  resolucao: >
+    Nenhum dos dois modelos documentados. O risco zero do C2 fica (o parceiro assume 100%);
+    a monetização do C2 cai — a Aurora não recebe compensação, a recomendação entra no pacote
+    da consultoria; e a provisão de 8,5% do Detalhado cai junto, por não haver risco na ótica.
+    FOR-FIN-007 e FOR-FIN-009 → SUPERADO · FOR-FIN-008 → CANONICO · REG-FIN-001 criada.
+
+- id: LAC-FIN-078
+  tipo: LAC
+  severidade: BAIXA
+  titulo: "A ótica tem receita financeira própria na operação de crédito?"
+  descricao: >
+    A DEC-001 definiu a remuneração da AURORA (nenhuma). Fica em aberto se a ótica tem
+    spread, MDR compartilhado ou juros próprios, ou se o parceiro fica com toda a receita
+    financeira. Se ficar com tudo, FOR-FIN-009 não precisa ser reescrita — some do escopo.
+  evidencia:
+    - "DEC-001 trata da remuneração da Aurora, não da ótica"
+    - "F8 §1: 'a ótica ganha ticket e fidelização' — cita ticket e fidelidade, nunca receita financeira"
+  impacto: "Baixo. Afeta só o P&L financeiro por loja, que hoje não tem consumidor."
+  correcao_candidata: "Se o parceiro fica com tudo, remover FOR-FIN-009 do escopo em vez de reescrever."
+  bloqueia: [FOR-FIN-009]
+  quem_decide: Rodrigo
+  status: RESOLVIDA
+  resolvida_por: DEC-002
+  resolvida_em: 2026-08-13
+  resolucao: >
+    A ótica NÃO recebe parte do MDR, porque não tem participação no risco. Pode variar por
+    fornecedor, mas não é praxe de mercado nem o modelo Aurora. FOR-FIN-009 sai do escopo —
+    não precisa ser reescrita. Princípio explicitado: a remuneração financeira segue o risco.
+
+- id: LAC-FIN-079
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "Onde passa a viver a cláusula de retorno do dado da transação?"
+  descricao: >
+    O C2 §3 torna o retorno do dado da transação ao motor condição INEGOCIÁVEL de seleção do
+    parceiro, e declara que a alavanca para exigi-lo é o volume que a Aurora leva. A alavanca
+    sobrevive à DEC-001 (sempre foi volume, nunca comissão). Mas o INSTRUMENTO some: sem o
+    contrato de indicador/seller entre Aurora e parceiro, não há onde escrever a cláusula.
+  evidencia:
+    - "F8 §3: 'o retorno do dado da transação ao motor é condição de seleção — e o volume que a Aurora leva é a alavanca para exigi-lo na negociação'"
+    - "F8 §4: 'Devolve o dado da transação — condição inegociável'"
+    - "DEC-001: elimina o contrato de indicador/seller entre Aurora e parceiro"
+  impacto: >
+    Não bloqueia fórmula nenhuma. Bloqueia a operacionalização do C2 §3 — e sem o dado de
+    volta, cria-se a 'ferida de marketplace' dentro do próprio stack da Aurora.
+  correcao_candidata: >
+    (a) cláusula no contrato do CLIENTE com o parceiro, redigida pela Aurora; ou
+    (b) critério de curadoria do painel — a Aurora não indica quem não devolve o dado.
+  bloqueia: []
+  quem_decide: Rodrigo
   status: ABERTA
 
 - id: LAC-FOR-053
@@ -91,6 +144,210 @@ pecas:
   bloqueia: [FOR-BAS-008]
   quem_decide: Rodrigo
   status: ABERTA
+
+- id: LAC-CNC-080
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "A transparência do rebate perdeu a analogia que a justificava"
+  descricao: >
+    O Oticas_Concentradora_Compras recomenda rebate transparente (a ótica vê preço de fábrica
+    + fee) e justifica dizendo "preserva a confiança, igual à C2". Com a DEC-001, a C2 deixou
+    de ter monetização — o paralelo quebrou. A transparência do rebate continua sendo boa
+    prática, mas precisa de justificativa própria.
+  evidencia:
+    - "F9 §3 Tabela 2: 'Recomendar rebate transparente (a ótica vê preço de fábrica + fee) — preserva a confiança, igual à C2'"
+    - "DEC-001: elimina a monetização da C2"
+  impacto: "Argumentativo, não operacional. Mas é o tipo de andaime que apodrece sem ninguém notar."
+  correcao_candidata: "Justificar a transparência pelo próprio modelo bilateral: se o cliente também paga, ele tem direito de ver a composição."
+  bloqueia: []
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FIN-081
+  tipo: LAC
+  severidade: ALTA
+  titulo: "A ressalva da Cooper Card: a DEC-001 é absoluta ou admite exceção?"
+  descricao: >
+    O autor mencionou que "o que eu posso ver é com a Cooper Card uma compensação financeira
+    sobre as indicações". Duas leituras possíveis, com efeitos opostos sobre a DEC-001.
+  evidencia:
+    - "DEC-001: 'eu não recebo compensação financeira. Entra no pacote da consultoria.'"
+    - "Fala posterior do autor (13/08): ressalva sobre a Cooper Card"
+    - "Contexto: no mercado financeiro o repasse ao indicador é sobre cartões aprovados, anuidade e seguros — não sobre MDR"
+  impacto: >
+    (a) Se for descritivo, a DEC-001 fica absoluta e a neutralidade é ESTRUTURAL.
+    (b) Se for exceção, a DEC-001 ganha ressalva e a neutralidade volta a ser ARGUMENTADA —
+    perdendo justamente a força que a decisão tinha acabado de dar a ela.
+  correcao_candidata: null
+  bloqueia: [REG-FIN-001]
+  quem_decide: Rodrigo
+  status: RESOLVIDA
+  resolvida_por: DEC-004
+  resolvida_em: 2026-08-13
+  resolucao: >
+    Leitura (a), descritiva. A DEC-001 é ABSOLUTA. E veio junto o fato de mercado que
+    reclassifica o erro do C2 §2: no crédito remunera-se por ORIGINAÇÃO (venda do produto
+    financeiro), nunca por transação. O "share de MDR" era errado factualmente, não só
+    eticamente. Eixo registrado em REG-FIN-001 (ORIGINACAO) e REG-CNC-001 (VOLUME).
+
+- id: LAC-CNC-082
+  tipo: LAC
+  severidade: ALTA
+  fase: 2-CONCENTRADORA
+  titulo: "As linhas de receita da concentradora não têm fórmula"
+  descricao: >
+    A DEC-003 estabelece remuneração bilateral, e o F9 §3 lista as linhas (rebate/spread de
+    volume, marca própria, financiamento do pedido, fee de adesão). Mas nenhuma tem expressão,
+    grão ou base de cálculo — o bloco CNC só tem métricas de PROVA DE VALOR (economia, volume,
+    adesão), nenhuma de RECEITA.
+  evidencia:
+    - "F9 §3 Tabela 2: quatro linhas de receita descritas em prosa"
+    - "Registro: FOR-CNC-001 a 004 são todas métricas de valor entregue, nenhuma de receita da Aurora"
+    - "DEC-003: remuneração das duas partes, sem base de cálculo declarada"
+  impacto: >
+    O modelo de negócio da concentradora não é calculável. Sem isso não há P&L da frente,
+    nem forma de dimensionar o que ela vale.
+  correcao_candidata: "Escrever o sub-bloco CNC-Receita: base, percentual e grão de cada linha."
+  bloqueia: []
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-CNC-083
+  tipo: LAC
+  severidade: ALTA
+  fase: 2-CONCENTRADORA
+  titulo: "A concentradora é canal de aquisição e não tem métrica de aquisição"
+  descricao: >
+    A DEC-005 declara a concentradora como "a maior ferramenta de captação de clientes para a
+    consultoria". Isso a torna um canal de AQUISIÇÃO, cuja economia se lê como CAC. Nenhuma
+    métrica do bloco CNC mede isso — as quatro existentes medem prova de valor entregue à
+    ótica, não desempenho de funil.
+  evidencia:
+    - "DEC-005: 'inicialmente é a maior ferramenta de captação de clientes para a consultoria'"
+    - "FOR-CNC-001 a 004: economia, volume agregado, adesão, efeito do comprar inteligente"
+    - "F9 trata a concentradora como negócio próprio, não como canal"
+  impacto: >
+    Sem taxa de conversão concentradora → consultoria e sem CAC por essa via, não há como
+    dimensionar se o canal se paga nem comparar com outras formas de aquisição.
+  correcao_candidata: >
+    Duas métricas novas: (a) conversão = óticas do clube que viraram cliente de consultoria ÷
+    óticas do clube; (b) CAC_concentradora = custo de operar a frente ÷ clientes convertidos.
+  bloqueia: []
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FRQ-084
+  tipo: LAC
+  severidade: CRITICA
+  fase: 3-FRANQUEADORA
+  titulo: "A franqueadora não existe em nenhum documento do acervo"
+  descricao: >
+    A DEC-005 estabelece uma terceira frente — franquia de marca ótica, com a consultoria
+    dentro do pacote e isenção de taxa para a base existente. Nenhuma linha sobre isso existe
+    nos 145 arquivos inventariados. Frente inteira sem doutrina, sem economia, sem métrica.
+  evidencia:
+    - "DEC-005 · item 4"
+    - "INVENTARIO: nenhum arquivo classificado com tema franquia"
+  impacto: "A terceira perna da escada de valor não tem lastro documental."
+  correcao_candidata: "Abrir o bloco FRQ e escrever: modelo de receita, taxa de franquia, royalty, critérios de outorga, obrigações da franqueadora."
+  bloqueia: []
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FRQ-085
+  tipo: LAC
+  severidade: CRITICA
+  fase: 3-FRANQUEADORA
+  titulo: "O posicionamento anti-franquia precisa ser rederivado"
+  descricao: >
+    O material de posicionamento contrasta a Aurora com a Berry justamente por ela ser
+    franquia: "modelo fast-food", "royalties agressivos até 24%", "repasse de leads",
+    "dependência total da matriz", "processos padronizados que ignoram a biologia local da
+    loja". A DEC-005 transforma a Aurora em franqueadora. O contraste "somos o oposto de uma
+    franquia" deixa de funcionar por construção.
+  evidencia:
+    - "Metodo_Aurora_Transcricao_OCR P2 e P8 (NAO_UTILIZADO, mas o raciocínio é do autor)"
+    - "Contraste declarado: 'Royalties: Percentual sobre o Bruto × Taxa Fixa / SaaS (Soberania)'"
+    - "DEC-005: 'venderemos uma marca ótica no modelo franquia'"
+  impacto: >
+    Não é contradição fatal — a diferenciação declarada é a consultoria DENTRO da franquia e a
+    isenção para a base. Mas o argumento precisa mudar de "não somos franquia" para "somos a
+    franquia que entrega método, não pedágio". Enquanto não mudar, o discurso comercial e o
+    plano de negócio apontam para lados opostos.
+  correcao_candidata: >
+    Rederivar o posicionamento sobre o eixo REAL da diferença: o que a matriz entrega
+    (método auditável, ferramenta, dado) versus o que ela extrai (royalty sobre o bruto).
+  bloqueia: []
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FRQ-086
+  tipo: LAC
+  severidade: ALTA
+  titulo: "% sobre o valor do produto tem a mesma forma do que o posicionamento critica"
+  descricao: >
+    A remuneração da concentradora é percentual sobre o valor do produto (base de COMPRA).
+    O posicionamento critica o percentual sobre o bruto (base de VENDA) e propõe taxa fixa /
+    SaaS como alternativa soberana. As bases são diferentes e a crítica pode continuar de pé,
+    mas a FORMA é a mesma — e um franqueado que já paga % na compra vai comparar.
+  evidencia:
+    - "DEC-005: '% do valor do produto para a nossa remuneração'"
+    - "Posicionamento: 'Royalties: Percentual sobre o Bruto × Taxa Fixa / SaaS (Soberania)'"
+    - "Posicionamento: 'não cobrar pedágio sobre a receita bruta'"
+  impacto: "Coerência do discurso, sobretudo quando a franquia entrar e houver royalty a definir."
+  correcao_candidata: >
+    Declarar explicitamente por que % na COMPRA é diferente de % na VENDA.
+  bloqueia: []
+  quem_decide: Rodrigo
+  status: RESOLVIDA
+  resolvida_por: DEC-006
+  resolvida_em: 2026-08-13
+  resolucao: >
+    O eixo não é a base de cálculo, é a POSIÇÃO NA TRANSAÇÃO. A concentradora fatura para a
+    ótica — a Aurora é parte da transação, e o que ela cobra é preço de serviço. No royalty
+    de franquia e na intermediação de crédito ela estaria fora da transação, cobrando sobre
+    faturamento alheio. Soma-se que o cliente não tinha acesso ao fornecedor: o ganho é criado
+    pela central, não capturado de um fluxo preexistente. Registrado em REG-CNC-001.
+
+- id: LAC-FRQ-087
+  tipo: LAC
+  severidade: ALTA
+  fase: 3-FRANQUEADORA
+  titulo: "Franquia exige COF — e o método vira obrigação contratual"
+  descricao: >
+    Franquia no Brasil é regida pela Lei 13.966/2019, que obriga a Circular de Oferta de
+    Franquia entregue no mínimo 10 dias antes de qualquer assinatura ou pagamento. A COF deve
+    descrever, entre outros, o suporte e o treinamento fornecidos pela franqueadora. Com a
+    consultoria dentro do pacote, o MÉTODO passa a ser objeto contratualmente prometido.
+  evidencia:
+    - "DEC-005: 'a consultoria estará dentro da franquia, todos terão acesso'"
+    - "Lei 13.966/2019 — exigência de COF com descrição de suporte e treinamento"
+  impacto: >
+    Eleva o trabalho de catalogação de higiene interna para ATIVO CONTRATUAL. Um método
+    documentado, versionado e auditável é exatamente o que a COF precisa descrever — e o que
+    protege a franqueadora se o franqueado alegar que o suporte prometido não foi entregue.
+  correcao_candidata: >
+    Tratar o registro CATALOGO como insumo da COF desde já. Não é aconselhamento jurídico —
+    confirmar com advogado especializado em franchising antes de estruturar.
+  bloqueia: []
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FRQ-088
+  tipo: LAC
+  severidade: BAIXA
+  fase: 3-FRANQUEADORA
+  titulo: "Modelo associativo para a base existente — possibilidade anotada"
+  descricao: >
+    O autor levantou a hipótese de um modelo associativo para os clientes já na base, em vez
+    ou além da isenção de taxa de franquia. Declarou explicitamente que NÃO é foco agora.
+  evidencia:
+    - "DEC-006 item 3: 'podemos pensar inclusive em um modelo associativo para este cliente, mas isto não é foco agora'"
+  impacto: "Nenhum hoje. Anotado para não se perder."
+  correcao_candidata: null
+  bloqueia: []
+  quem_decide: Rodrigo
+  status: ESTACIONADA
 
 # ─────────── ALTAS ───────────
 

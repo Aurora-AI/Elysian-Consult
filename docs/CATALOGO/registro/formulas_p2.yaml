@@ -761,11 +761,14 @@ pecas:
     - {condicao: "modelo de risco", comportamento: "🔴 CONTRADIZ o C2: F8 estabelece que o parceiro assume 100% do default e a ótica tem RISCO ZERO — nesse modelo não há o que provisionar", lacuna: LAC-FOR-054}
     - {condicao: "8,5% é benchmark de mercado", comportamento: "viola a doutrina de derivar do dado do cliente", lacuna: LAC-FOR-054}
   procedencia: [{fonte: F7, local: "Parte A · C2"}]
-  status_canonico: CONFLITANTE
+  status_canonico: SUPERADO
+  superado_por: DEC-001
+  superado_em: 2026-08-13
   confianca: ALTA
   natureza_conhecimento: IMPORTADO_EXTERNO
   lacunas: [LAC-FOR-054]
-  ver_tambem: [FOR-FIN-008]
+  ver_tambem: [FOR-FIN-008, REG-FIN-001]
+  nota_decisao: "DEC-001 (13/08/2026): o parceiro assume 100% do default. A ótica não carrega risco, portanto não há inadimplência a provisionar. Peça preservada por histórico; proibida em código."
 
 - id: FOR-FIN-008
   tipo: FOR
@@ -787,11 +790,13 @@ pecas:
   casos_degenerados:
     - {condicao: "parceiro não reporta", comportamento: "F8 §3 torna o retorno do dado condição de seleção — sem dado, trocar de parceiro"}
   procedencia: [{fonte: F8, local: "§5 · Inadimplência"}]
-  status_canonico: CONFLITANTE
+  status_canonico: CANONICO
+  ratificado_por: DEC-001
+  ratificado_em: 2026-08-13
   confianca: ALTA
   natureza_conhecimento: EMPIRICO_AUTOR
-  lacunas: [LAC-FOR-054]
-  ver_tambem: [FOR-FIN-007]
+  ver_tambem: [FOR-FIN-007, REG-FIN-001]
+  nota_decisao: "DEC-001 (13/08/2026): modelo de risco zero confirmado. A inadimplência avalia a saúde do PARCEIRO e dispara a troca dele, nunca entra no P&L da ótica."
 
 - id: FOR-FIN-009
   tipo: FOR
@@ -810,14 +815,19 @@ pecas:
   entra: "transações financiadas"
   sai: "linha do P&L"
   casos_degenerados:
-    - {condicao: "quem recebe", comportamento: "🔴 [LACUNA] F7 modela receita financeira DA ÓTICA; F8 modela comissão DA AURORA paga pelo parceiro. Dois beneficiários diferentes.", lacuna: LAC-FOR-054}
+    - {condicao: "quem recebe", comportamento: "RESOLVIDO por DEC-001 — nem a Aurora (não recebe compensação) nem, pelo modelo de risco zero, a ótica. A fórmula fica sem objeto.", lacuna: LAC-FOR-054}
+    - {condicao: "a ótica tem spread ou MDR compartilhado?", comportamento: "[LACUNA] resíduo de baixo impacto", lacuna: LAC-FIN-078}
   procedencia:
     - {fonte: F7, local: "Parte A · C2"}
     - {fonte: F8, local: "§5 · Receita de comissão"}
-  status_canonico: CONFLITANTE
+  status_canonico: SUPERADO
+  superado_por: DEC-001
+  superado_em: 2026-08-13
   confianca: MEDIA
   natureza_conhecimento: EMPIRICO_AUTOR
-  lacunas: [LAC-FOR-054]
+  lacunas: [LAC-FIN-078]
+  ver_tambem: [REG-FIN-001]
+  nota_decisao: "DEC-001 (13/08/2026): a recomendação de parceiro financeiro entra no pacote da consultoria, sem compensação. A monetização da Rota 1 do C2 §2 (contrato de indicador/seller, share de MDR) fica SUPERADA."
 
 # ═══════════════════════════════════════════════════════════════
 # BLOCO CNC — Concentradora de Compras

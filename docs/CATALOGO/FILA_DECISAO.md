@@ -6,7 +6,8 @@
 > atacado. **Fila com 200 itens = esquema errado. Fila com 13 itens = governança.**
 
 **Estado (após os dois passes):** 183 peças · 99 fórmulas · 77 lacunas · 7 regras ·
-**19 decisões nesta fila** · 6 reprovas e 23 itens de fila no validador, todos rastreados.
+**19 decisões nesta fila · 1 resolvida (DEC-001), 18 abertas** · 6 reprovas e 23 itens de
+fila no validador, todos rastreados.
 
 Cada decisão fecha, em média, 3 lacunas e destrava 4 peças. Tempo estimado de leitura: 20 min.
 
@@ -285,25 +286,21 @@ de definição — por isso está aqui.
 
 ---
 
-## D-15 · Quem carrega o risco de crédito?
+## ~~D-15 · Quem carrega o risco de crédito?~~ ✅ RESOLVIDA
 
-**Lacuna:** `LAC-FOR-054` · **Destrava:** `FOR-FIN-007`, `FOR-FIN-008`, `FOR-FIN-009`
+**Decisão:** `DEC-001` · 13/08/2026 · **Lacuna fechada:** `LAC-FOR-054`
 
-Dois modelos incompatíveis convivendo, com um dia de diferença entre os documentos:
+> *"Quando eu recomendo um parceiro para financiar as vendas do cliente, eu não recebo
+> compensação financeira. Entra no pacote da consultoria."*
 
-| | `Playbook_Operacional_Detalhado` (07/07) | `Camada_Financeira_C2` (08/07) |
-|---|---|---|
-| Risco | a ótica provisiona ≈**8,5%** de inadimplência | parceiro assume **100%** — ótica tem risco zero |
-| Receita financeira | **da ótica** (MDR/juros) | **da Aurora**, paga pelo parceiro |
-| Inadimplência | linha do P&L da loja | monitorada no parceiro, avalia o parceiro |
+Não escolheu nenhum dos dois modelos documentados. Manteve o **risco zero** do C2 e eliminou
+a **monetização** — que era justamente a parte que exigia toda a arquitetura de "transparência
+radical" do C2 §2 para não parecer conflito de interesse.
 
-Muda quem tem o P&L, quem provisiona e quem recebe. E o 8,5% é benchmark de mercado, o que
-contraria a doutrina de derivar do dado.
+`FOR-FIN-007` e `FOR-FIN-009` → `SUPERADO` · `FOR-FIN-008` → `CANONICO` ·
+`REG-FIN-001` criada · resíduo de baixo impacto em `LAC-FIN-078`.
 
-**Recomendação:** o C2 é mais recente e é o documento dedicado ao tema — provavelmente supera.
-Mas o Detalhado continua listado como método vigente, então precisa do seu martelo.
-
-☐ C2 supera (risco zero) ☐ Os dois modelos coexistem por contexto ☐ Rever
+Ver `DECISOES.md` para o registro completo.
 
 ---
 
