@@ -5,10 +5,10 @@
 > **Princípio dimensionador** (herdado da `SPEC_Fase_C`): a fila recebe o resíduo, nunca o
 > atacado. **Fila com 200 itens = esquema errado. Fila com 13 itens = governança.**
 
-**Estado:** 120 peças extraídas · 51 lacunas registradas · **13 decisões nesta fila** ·
-8 reprovas no validador, todas rastreadas a uma lacuna.
+**Estado (após os dois passes):** 183 peças · 99 fórmulas · 77 lacunas · 7 regras ·
+**19 decisões nesta fila** · 6 reprovas e 23 itens de fila no validador, todos rastreados.
 
-Cada decisão fecha, em média, 3 lacunas e destrava 4 peças. Tempo estimado de leitura: 15 min.
+Cada decisão fecha, em média, 3 lacunas e destrava 4 peças. Tempo estimado de leitura: 20 min.
 
 ---
 
@@ -256,15 +256,163 @@ reconstrução não faz.
 
 ---
 
+---
+
+# 🔴 Passe 2 — divergências entre documento e código
+
+Classe nova. No passe 1 todas as fontes eram documentais; aqui entram as **versões
+implementadas** (`SPEC_Fase_B`, status EXECUTADA), que pela regra de precedência têm o nível
+mais alto. Em cinco casos elas **não descrevem a mesma coisa** que o documento.
+
+## D-14 · GMROI tem dois denominadores diferentes
+
+**Lacuna:** `LAC-FOR-052` · **Destrava:** `FOR-EST-003`, `FOR-AUD-001`
+
+| Versão | Fórmula | Denominador |
+|---|---|---|
+| Documentada (Playbook B2) | margem bruta ÷ estoque médio a custo | **estoque MÉDIO** |
+| Implementada (Algoritmo 1) | (receita − custo) ÷ capital preso | **estoque ATUAL** (`qtd_atual × custo_unit`) |
+
+Numa loja que girou bem no período mas está com estoque baixo hoje, as duas dão resultados
+opostos. E nenhuma fonte define como calcular "estoque médio" — janela? método?
+
+O GMROI é declarado *"a métrica-rainha do estoque"* e aparece no Cockpit do dono.
+
+**Nota:** a precedência diz que o código vence. Mas isso não é desempate de valor, é escolha
+de definição — por isso está aqui.
+
+☐ Estoque médio (e definir o método) ☐ Capital preso atual ☐ As duas, com nomes distintos
+
+---
+
+## D-15 · Quem carrega o risco de crédito?
+
+**Lacuna:** `LAC-FOR-054` · **Destrava:** `FOR-FIN-007`, `FOR-FIN-008`, `FOR-FIN-009`
+
+Dois modelos incompatíveis convivendo, com um dia de diferença entre os documentos:
+
+| | `Playbook_Operacional_Detalhado` (07/07) | `Camada_Financeira_C2` (08/07) |
+|---|---|---|
+| Risco | a ótica provisiona ≈**8,5%** de inadimplência | parceiro assume **100%** — ótica tem risco zero |
+| Receita financeira | **da ótica** (MDR/juros) | **da Aurora**, paga pelo parceiro |
+| Inadimplência | linha do P&L da loja | monitorada no parceiro, avalia o parceiro |
+
+Muda quem tem o P&L, quem provisiona e quem recebe. E o 8,5% é benchmark de mercado, o que
+contraria a doutrina de derivar do dado.
+
+**Recomendação:** o C2 é mais recente e é o documento dedicado ao tema — provavelmente supera.
+Mas o Detalhado continua listado como método vigente, então precisa do seu martelo.
+
+☐ C2 supera (risco zero) ☐ Os dois modelos coexistem por contexto ☐ Rever
+
+---
+
+## D-16 · Qual é o limiar do estoque morto?
+
+**Lacuna:** `LAC-FOR-053` · **Destrava:** `FOR-EST-005`, `FOR-EST-006`
+
+Três valores em circulação: **6–9 meses** (Playbook), **~250 dias** (Gabarito), **180 dias**
+(deck não-canônico). Entre 180 e 270 dias o mesmo SKU é ou não é morto — e isso define o
+número que vai para o Ato 3 do laudo.
+
+O Playbook diz que N é *"calibrado pela sazonalidade da moda de armação"* mas não dá o método.
+E o Gabarito exige que solar parado desde fevereiro **não** seja marcado (gira no verão).
+
+☐ Fixar N = ___ dias ☐ Comparar contra o mesmo período do ano anterior ☐ Ambos
+
+---
+
+## D-17 · De onde sai a "conversão esperada" da Receita Latente?
+
+**Lacuna:** `LAC-FOR-061` · **Destrava:** `FOR-BAS-008`
+
+```
+R_latente = (base sem X) × conversão esperada × ticket de X
+```
+
+É o número que abre o Executive Audit Report e produz o choque do Dia 5. **O único fator que
+não é derivado do dado é justamente o multiplicador** — nenhuma fonte diz de onde ele vem.
+
+Todo outro parâmetro do método (P75, ciclo mediano, TMI) tem derivação declarada.
+
+**Recomendação:** derivar da conversão histórica de cross-sell da própria loja, ou reusar o
+P75 do attach por segmento que já existe em `FOR-SEV-005`.
+
+☐ P75 do attach ☐ Conversão histórica de cross-sell ☐ Parâmetro do consultor (e declarar)
+
+---
+
+## D-18 · Taxa de Identificação ou IC?
+
+**Lacuna:** `LAC-FOR-062` · **Destrava:** `FOR-BAS-010`, `FOR-SEV-003`
+
+Duas métricas respondendo "o cliente foi identificado?", com denominadores diferentes,
+coexistindo no mesmo painel:
+
+- **IC** = cadastrados ÷ **atendimentos**
+- **Taxa de Identificação** = vendas identificadas ÷ **vendas totais**
+
+Pior: o Playbook v9 chama a métrica do Cockpit de *"taxa de cadastro"* e usa o denominador do
+IC; o Detalhado chama de *"taxa de identificação"* e usa vendas.
+
+**Recomendação:** Taxa de Identificação é a métrica de **Nível 0** (quando o AT não é
+observável); o IC é a de **Nível 1+**. A escada do AT já existe em `REG-SEV-001` — é só
+amarrar as duas nela.
+
+☐ Aceito ☐ Uma só métrica: ______
+
+---
+
+## D-19 · 16 fórmulas estão escritas em prosa, não em símbolos
+
+**Checagem:** `V12` (nova) · **Afeta:** blocos BAS, EST, FIN, CNC, AUD
+
+O validador ganhou uma checagem que eu não tinha previsto no esquema, porque o problema só
+apareceu no passe 2: várias fórmulas das fontes secundárias são frases, não expressões.
+
+> `giro = CMV do período ÷ estoque médio a custo`
+> `morto = SKU sem venda há mais de N meses`
+> `follow_on = clientes que fizeram follow-on ÷ total que iniciaram em serviço`
+
+São perfeitamente compreensíveis para um humano e **não implementáveis sem tradução**. Cada
+uma exige uma decisão escondida (o que é "estoque médio"? qual a janela de "posterior"?).
+
+Não é erro de extração — é como as fontes escrevem. Mas o critério de pronto do
+`ESQUEMA_PECA` §9 exige que um agente aplique a fórmula sem contexto, e prosa não passa nesse
+teste.
+
+☐ Traduzo as 16 para notação simbólica e você revisa ☐ Deixo em prosa e traduzo só na
+implementação ☐ Prioridade só nas que bloqueiam a base de homologação
+
+---
+
 # O que acontece depois
 
 | Você decide | O validador libera | Fica pronto para |
 |---|---|---|
-| D-01 a D-08 | as 8 reprovas | codificar contra o Gabarito |
-| D-09 a D-12 | o registro fecha o passe | extrair os blocos BAS, EST, FIN, CNC, AUD |
-| D-13 | `FOR-CMP-002`, `FOR-TMI-006` | — |
+| D-01 a D-08 | as reprovas críticas do passe 1 | codificar contra o Gabarito |
+| D-09 a D-12 | o registro fecha os dois passes | extrair AXI, MEC, GAT, APA, ART |
+| D-13, D-19 | as 16 peças em prosa e as 2 candidatas | implementação direta |
+| D-14 a D-18 | as 16 peças `CONFLITANTE` | o motor e a documentação convergirem |
 
-Com D-08 respondida, a Fase 4 (base de homologação) destrava. Sem ela, não.
+Com **D-08** respondida (blocos Fiscal e Financeiro), a Fase 4 — base de homologação —
+destrava. Sem ela, não.
 
 E fica valendo o critério de pronto do `ESQUEMA_PECA` §9: **fórmula documentada que não foi
-codificada contra o gabarito ainda é hipótese.** Hoje, 52 das 62 estão nesse estado.
+codificada contra o gabarito ainda é hipótese.** Hoje, **72 das 99** estão nesse estado.
+
+---
+
+## Estado do registro
+
+| | Passe 1 | Passe 2 | Total |
+|---|---:|---:|---:|
+| Fórmulas (`FOR`) | 62 | 37 | **99** |
+| Lacunas (`LAC`) | 51 | 26 | **77** |
+| Regras (`REG`) | 7 | — | **7** |
+| Peças `CONFLITANTE` | 6 | 10 | **16** |
+| Peças com gabarito | 10 | 17 | **27** |
+
+**Blocos cobertos:** SEV · TMI · FCT · CMP · MET · MRG · BAS · EST · FIN · CNC · AUD
+**Blocos que não existem em nenhuma fonte:** 🔴 **Fiscal** · 🔴 **Financeiro (fluxo/DRE)**
+**Tipos ainda não extraídos:** `AXI` · `MEC` · `GAT` · `APA` · `ART` · `EVI`

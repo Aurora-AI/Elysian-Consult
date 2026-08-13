@@ -1,0 +1,1068 @@
+# # REGISTRO · BLOCO FOR — Fórmulas (passe 2: fontes secundárias)
+# Extração PASSE 1 (FIEL) — 13/08/2026
+# Contrato: ESQUEMA_PECA.md §5.1
+#
+# ESCOPO: blocos BAS · EST · FIN · CNC · AUD
+# Fontes secundárias do INVENTARIO §4 (itens 6 a 11).
+#
+# ACHADO ESTRUTURAL DESTE PASSE: o bloco AUD contém as versões IMPLEMENTADAS de
+# fórmulas que os blocos EST e MRG documentam de outro jeito. Onde divergem, as
+# duas peças estão registradas lado a lado e marcadas CONFLITANTE — nunca fundidas.
+
+meta:
+  versao: 1.0
+  passe: 1-FIEL
+  extraido_em: 2026-08-13
+  extrator: cowork-aurora
+  fontes:
+    - id: F6
+      arquivo: docs/FONTES/metodo/Oticas_Playbook_v9_Master.docx
+      data_doc: 2026-07-08
+      papel: "Partes A, B, E — Caixa de Ferramentas e Cockpit"
+    - id: F7
+      arquivo: docs/FONTES/metodo/Oticas_Playbook_Operacional_Detalhado.docx
+      data_doc: 2026-07-07
+      papel: "o 'como' de cada análise, com fórmula"
+    - id: F8
+      arquivo: docs/FONTES/metodo/Oticas_Camada_Financeira_C2.docx
+      data_doc: 2026-07-08
+    - id: F9
+      arquivo: docs/FONTES/metodo/Oticas_Concentradora_Compras.docx
+      data_doc: 2026-07-08
+    - id: F10
+      arquivo: AuroraControler/SPEC_Fase_B_Formulas_Avancadas.md
+      data_doc: 2026-07-20
+      papel: "IMPLEMENTADA — precedência máxima pela regra §6 do esquema"
+    - id: F11
+      arquivo: docs/FONTES/dados/Consultoria.xlsx › aba Gabarito
+      data_doc: 2026-07-14
+      papel: "régua de veracidade — 37 anomalias com resultado esperado"
+  contagem: 37
+
+pecas:
+
+# ═══════════════════════════════════════════════════════════════
+# BLOCO BAS — Diagnóstico da base de clientes (o dado morto)
+# ═══════════════════════════════════════════════════════════════
+
+- id: FOR-BAS-001
+  tipo: FOR
+  bloco: BAS
+  nome: "Completude de Cadastro (A1)"
+  simbolo: Compl
+  resumo: "Pré-requisito de tudo: dá para rodar o motor?"
+  expressao: "Compl_campo = ( registros com o campo ÷ total de registros ) × 100"
+  variaveis:
+    - {simbolo: "registros com o campo", nome: "cadastros com o campo preenchido", unidade: contagem, origem: dim_cliente, natureza: CRUA}
+    - {simbolo: "total de registros", nome: "cadastros da loja", unidade: contagem, origem: dim_cliente, natureza: CRUA}
+    - {simbolo: campo, nome: "telefone/WhatsApp · CPF · data de exame", unidade: categoria, origem: dim_cliente, natureza: CRUA}
+  grao: loja_campo
+  janela: diaria
+  natureza: CRUA
+  limiares:
+    - {valor: 30, tipo: CONTINGENCIA, fonte: F6, acao: "abaixo de 30% com telefone/CPF, o choque do D5 pivota 100% para estoque (B4/B5)"}
+    - {valor: 70, tipo: META_PARTIDA, fonte: F7, acao: "meta operacional de partida com telefone/WhatsApp"}
+  onde: "Diagnóstico D1–D2, antes de rodar o resto"
+  quando: "No início; depois contínuo"
+  quem: "Consultor / EXRS"
+  entra: "cadastro bruto"
+  sai: "decide a contingência do diagnóstico"
+  casos_degenerados:
+    - {condicao: "total de registros = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}
+    - {condicao: "dois limiares (30% e 70%) sem hierarquia declarada", comportamento: "[LACUNA]", lacuna: LAC-FOR-055}
+  procedencia:
+    - {fonte: F7, local: "Parte A · A1"}
+    - {fonte: F6, local: "Parte A · A1"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  implementado_em: "src/product_b/oracle/commercial_auditor.py"
+  verificado_contra: "F11 · 'Contingência de dados (A1) — Aba Clientes: completude ~88% (telefone/CPF). >30% → motor roda normalmente'"
+
+- id: FOR-BAS-002
+  tipo: FOR
+  bloco: BAS
+  nome: "Segmentação RFM (A2)"
+  simbolo: RFM
+  resumo: "Quem são os vitais, quem está esfriando e quem já sumiu."
+  expressao: "RFM_cliente = ( quintil(R) , quintil(F) , quintil(M) )"
+  variaveis:
+    - {simbolo: R, nome: "Recência — dias desde a última compra", unidade: dias, origem: fato_venda, natureza: CRUA}
+    - {simbolo: F, nome: "Frequência — nº de compras", unidade: contagem, origem: fato_venda, natureza: CRUA}
+    - {simbolo: M, nome: "Monetário — R$ total", unidade: BRL, origem: fato_venda, natureza: CRUA}
+    - {simbolo: quintil, nome: "pontuação 1 a 5 por eixo", unidade: escala_1_5, origem: derivada, natureza: DERIVADA}
+  grao: cliente
+  janela: mensal
+  natureza: DERIVADA
+  segmentos: ["Campeões (555)", "Fiéis", "Em risco", "Hibernando", "Perdidos"]
+  onde: "Diagnóstico D2–D4 e depois mensal"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "histórico de vendas"
+  sai: "segmentos → Mapa da Mina e fila"
+  casos_degenerados:
+    - {condicao: "base menor que 5 clientes por eixo", comportamento: "[LACUNA] quintis indefinidos", lacuna: LAC-FOR-011}
+    - {condicao: "regra de corte dos segmentos nomeados", comportamento: "[LACUNA] só 'Campeões (555)' tem definição explícita; Fiéis/Em risco/Hibernando/Perdidos não têm faixa declarada", lacuna: LAC-FOR-056}
+  procedencia:
+    - {fonte: F7, local: "Parte A · A2"}
+    - {fonte: F6, local: "Parte A · A2"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  implementado_em: "src/product_b/oracle/commercial_auditor.py"
+  verificado_contra: "F11 · 'Campeões (RFM A2) — Clientes C-001..C-010: 10 clientes de alta recência/frequência/valor'"
+
+- id: FOR-BAS-003
+  tipo: FOR
+  bloco: BAS
+  nome: "Ciclo de recompra da própria base (A3)"
+  simbolo: ciclo
+  resumo: "A régua sai do dado do cliente, não de benchmark. É o north-star do Cockpit."
+  expressao: "ciclo = mediana( intervalo entre compras dos clientes vitais )"
+  variaveis:
+    - {simbolo: "intervalo entre compras", nome: "dias entre compras consecutivas do mesmo cliente", unidade: dias, origem: fato_venda, natureza: CRUA}
+    - {simbolo: "clientes vitais", nome: "os fiéis da base", unidade: conjunto, origem: FOR-BAS-002, natureza: DERIVADA}
+  grao: loja
+  janela: mensal
+  natureza: DERIVADA
+  meta_declarada: {de: "15+ meses", para: "< 12 meses", fonte: F6}
+  onde: "Cockpit — indicador-mãe"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "intervalos de compra"
+  sai: "meta de compressão + base do churn"
+  casos_degenerados:
+    - {condicao: "'clientes vitais' sem definição operacional", comportamento: "[LACUNA] F6 diz 'fiéis', F7 diz 'vitais' — nenhum define o corte", lacuna: LAC-FOR-056}
+    - {condicao: "cliente com uma só compra", comportamento: "não entra no cálculo (sem intervalo)"}
+  procedencia:
+    - {fonte: F6, local: "Parte A · A3 e Parte E · Cockpit"}
+    - {fonte: F7, local: "Parte A · A3"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  implementado_em: "src/product_b/oracle/commercial_auditor.py"
+
+- id: FOR-BAS-004
+  tipo: FOR
+  bloco: BAS
+  nome: "Churn Invisível — flag (A3)"
+  simbolo: churn
+  expressao: "churn = ( hoje − última compra ) > ciclo × 1,5"
+  variaveis:
+    - {simbolo: "última compra", unidade: data, origem: fato_venda, natureza: CRUA}
+    - {simbolo: ciclo, origem: FOR-BAS-003, natureza: DERIVADA}
+    - {simbolo: "1,5", nome: "tolerância sobre o ciclo", unidade: fator, origem: config, natureza: PARAMETRO}
+  grao: cliente
+  janela: semanal
+  natureza: DERIVADA
+  onde: "Diagnóstico e contínuo"
+  quando: "Semanal"
+  quem: "Máquina"
+  entra: "histórico datado + ciclo"
+  sai: "lista de resgate e régua de recall"
+  casos_degenerados:
+    - {condicao: "cliente sazonal (compra só no verão)", comportamento: "🔴 falso positivo — o Gabarito exige NÃO marcar. A fórmula não tem tratamento de sazonalidade.", lacuna: LAC-FOR-057}
+    - {condicao: "cliente com uma só compra", comportamento: "[LACUNA] sem ciclo próprio, cai no ciclo da loja?", lacuna: LAC-FOR-056}
+  procedencia:
+    - {fonte: F6, local: "Parte A · A3"}
+    - {fonte: F7, local: "Parte A · A3"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  implementado_em: "src/product_b/oracle/commercial_auditor.py"
+  verificado_contra: "F11 · 'Churn Invisível (A3) — C-017..C-021: 5 clientes em churn (última compra ~300-360 dias, ciclo ~180)' e 'B (falso+) · Churn sazonal — SEAS-001..005: recência ~5m mas ciclo ANUAL → NÃO é churn'"
+
+- id: FOR-BAS-005
+  tipo: FOR
+  bloco: BAS
+  nome: "Perda em R$ por churn"
+  simbolo: perda_churn
+  expressao: "perda_churn = nº de clientes em churn × ticket médio"
+  variaveis:
+    - {simbolo: "nº de clientes em churn", origem: FOR-BAS-004, natureza: DERIVADA}
+    - {simbolo: "ticket médio", unidade: BRL, origem: fato_venda, natureza: CRUA}
+  grao: loja
+  janela: semanal
+  natureza: DERIVADA
+  onde: "Executive Audit Report — o número do D5"
+  quando: "Diagnóstico e semanal"
+  quem: "Máquina"
+  entra: "lista de churn + ticket"
+  sai: "R$ perdido para o laudo"
+  casos_degenerados:
+    - {condicao: "ticket médio da loja × ticket histórico do próprio cliente", comportamento: "[LACUNA] a fonte diz 'ticket médio' sem qualificar qual", lacuna: LAC-FOR-058}
+  procedencia:
+    - {fonte: F6, local: "Parte A · A3"}
+    - {fonte: F7, local: "Parte A · A3"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  verificado_contra: "F11 · 'Perda ~ 5 x ticket médio (R$ 694,85)'"
+
+- id: FOR-BAS-006
+  tipo: FOR
+  bloco: BAS
+  nome: "Índice de recuperabilidade do churn"
+  simbolo: silence_to_cycle_ratio
+  resumo: "Quanto mais perto de 1,5, mais recuperável. Ordena a fila melhor que o cifrão."
+  expressao: "silence_to_cycle_ratio = ( hoje − última compra ) ÷ ciclo"
+  variaveis:
+    - {simbolo: ciclo, origem: FOR-BAS-003, natureza: DERIVADA}
+    - {simbolo: "última compra", unidade: data, origem: fato_venda, natureza: CRUA}
+  grao: cliente
+  janela: semanal
+  natureza: DERIVADA
+  onde: "Fila de resgate"
+  quando: "Semanal"
+  quem: "Máquina"
+  entra: "silêncio do cliente + ciclo da loja"
+  sai: "ordenação da fila"
+  casos_degenerados: [{condicao: "ciclo = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}]
+  procedencia:
+    - {fonte: F10, local: "SPEC_Fase_D parte 1 · Pilar 3 (citado)"}
+  status_canonico: CANDIDATO
+  confianca: MEDIA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  implementado_em: "src/product_b/oracle/ (Pilar 3 da Fase D)"
+  nota_fonte: "Existe no MOTOR e é citada na SPEC_Fase_D2 como pré-requisito concluído, mas NÃO está em nenhum documento de método. Fórmula reconstruída pelo nome do campo."
+  lacunas: [LAC-FOR-059]
+
+- id: FOR-BAS-007
+  tipo: FOR
+  bloco: BAS
+  nome: "Attach rate por categoria (A4)"
+  simbolo: attach_cat
+  resumo: "Quem comprou parte do kit ótico e deixou o resto na mesa."
+  expressao: "attach_cat = ( clientes com a categoria X ÷ clientes de grau ) × 100"
+  variaveis:
+    - {simbolo: "clientes com X", unidade: contagem, origem: fato_venda, natureza: CRUA}
+    - {simbolo: "clientes de grau", nome: "denominador FIXO na versão documentada", unidade: contagem, origem: fato_venda, natureza: CRUA}
+    - {simbolo: X, nome: "solar com grau · antirreflexo/lente premium · lente de contato · garantia · 2º par", unidade: categoria, origem: dim_produto, natureza: CRUA}
+  grao: loja_categoria
+  janela: semanal
+  natureza: CRUA
+  onde: "Diagnóstico e contínuo"
+  quando: "Semanal"
+  quem: "Máquina"
+  entra: "linhas de venda"
+  sai: "fila de cross-sell + attach-alvo do IA"
+  casos_degenerados:
+    - {condicao: "denominador", comportamento: "🔴 divergente da versão implementada (F10 usa 'clientes com A', parametrizado)", lacuna: LAC-FOR-060}
+    - {condicao: "clientes de grau = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}
+  procedencia:
+    - {fonte: F6, local: "Parte A · A4"}
+    - {fonte: F7, local: "Parte A · A4"}
+  status_canonico: CONFLITANTE
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  ver_tambem: [FOR-AUD-002, FOR-SEV-005]
+  verificado_contra: "F11 · 'Receita Latente (A4) — C-030..C-059 nunca compram solar. Attach solar da rede ~65,8%'"
+
+- id: FOR-BAS-008
+  tipo: FOR
+  bloco: BAS
+  nome: "Receita Latente em R$ (A4)"
+  simbolo: R_latente
+  expressao: "R_latente = ( base sem X ) × conversão esperada × ticket de X"
+  variaveis:
+    - {simbolo: "base sem X", nome: "clientes de grau que não têm a categoria X", unidade: contagem, origem: fato_venda, natureza: CRUA}
+    - {simbolo: "conversão esperada", unidade: fracao, origem: "[LACUNA]", natureza: PARAMETRO}
+    - {simbolo: "ticket de X", unidade: BRL, origem: fato_venda, natureza: CRUA}
+  grao: loja_categoria
+  janela: semanal
+  natureza: DERIVADA
+  onde: "Executive Audit Report e fila de cross-sell"
+  quando: "Diagnóstico e semanal"
+  quem: "Máquina"
+  entra: "base sem a categoria + ticket"
+  sai: "fila priorizada por R$"
+  casos_degenerados:
+    - {condicao: "origem da 'conversão esperada'", comportamento: "🔴 [LACUNA] nenhuma fonte declara de onde sai. É o único parâmetro não derivado do Bloco A — e ele multiplica o número que vai para o laudo.", lacuna: LAC-FOR-061}
+  procedencia:
+    - {fonte: F6, local: "Parte A · A4"}
+    - {fonte: F7, local: "Parte A · A4"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-061]
+
+- id: FOR-BAS-009
+  tipo: FOR
+  bloco: BAS
+  nome: "Taxa de recompra"
+  simbolo: tx_recompra
+  expressao: "tx_recompra = clientes que voltaram ÷ elegíveis no período"
+  variaveis:
+    - {simbolo: "clientes que voltaram", unidade: contagem, origem: fato_venda, natureza: CRUA}
+    - {simbolo: "elegíveis no período", nome: "clientes cujo ciclo venceu no período", unidade: contagem, origem: FOR-BAS-003, natureza: DERIVADA}
+  grao: loja
+  janela: mensal
+  natureza: CRUA
+  onde: "Cockpit"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "vendas + ciclo"
+  sai: "KPI do painel do dono"
+  casos_degenerados: [{condicao: "elegíveis = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}]
+  procedencia:
+    - {fonte: F6, local: "Parte E · Cockpit"}
+    - {fonte: F7, local: "Parte C · Cockpit"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-BAS-010
+  tipo: FOR
+  bloco: BAS
+  nome: "Taxa de identificação"
+  simbolo: tx_ident
+  resumo: "Fim do cliente anônimo. Alimenta o motor."
+  expressao: "tx_ident = vendas identificadas ÷ vendas totais"
+  variaveis:
+    - {simbolo: "vendas identificadas", nome: "vendas com cliente_id preenchido", unidade: contagem, origem: fato_venda, natureza: CRUA}
+    - {simbolo: "vendas totais", unidade: contagem, origem: fato_venda, natureza: CRUA}
+  grao: loja
+  janela: diaria
+  natureza: CRUA
+  onde: "Cockpit e Gate 2"
+  quando: "Diária"
+  quem: "Máquina"
+  entra: "vendas"
+  sai: "KPI do painel + gate de fase"
+  casos_degenerados:
+    - {condicao: "relação com o IC", comportamento: "🔴 [LACUNA] mede o mesmo propósito do IC com denominador diferente (vendas × atendimentos). Duas métricas concorrentes sem hierarquia declarada.", lacuna: LAC-FOR-062}
+  procedencia:
+    - {fonte: F6, local: "Parte E · Cockpit"}
+    - {fonte: F7, local: "Parte C · Cockpit"}
+  status_canonico: CONFLITANTE
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  ver_tambem: [FOR-SEV-003]
+  verificado_contra: "F11 · 'Lobo solitário (SEV/IC) — V-03: ~60% das vendas dele sem cliente identificado'"
+
+- id: FOR-BAS-011
+  tipo: FOR
+  bloco: BAS
+  nome: "Conversão de pendentes"
+  simbolo: conv_pendentes
+  resumo: "O lado esquerdo do funil que o varejo perde."
+  expressao: "conv_pendentes = pendentes que compraram ÷ total de pendentes"
+  variaveis:
+    - {simbolo: pendentes, nome: "deram dados e não compraram", unidade: contagem, origem: fato_atendimento, natureza: CRUA}
+  grao: loja
+  janela: semanal
+  natureza: CRUA
+  onde: "Cockpit"
+  quando: "Semanal"
+  quem: "Máquina"
+  entra: "base de pendentes"
+  sai: "KPI do painel do dono"
+  casos_degenerados:
+    - {condicao: "tabela de pendentes não existe", comportamento: "🔴 depende de fato_atendimento, ausente em todo dado real do acervo", lacuna: LAC-FOR-063}
+  procedencia: [{fonte: F6, local: "Parte E · Cockpit"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+
+- id: FOR-BAS-012
+  tipo: FOR
+  bloco: BAS
+  nome: "UPT — itens por venda"
+  simbolo: UPT
+  expressao: "UPT = itens ÷ venda"
+  variaveis:
+    - {simbolo: itens, unidade: contagem, origem: fato_venda, natureza: CRUA}
+    - {simbolo: venda, unidade: contagem, origem: fato_venda, natureza: CRUA}
+  grao: loja
+  janela: mensal
+  natureza: CRUA
+  onde: "Cockpit"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "linhas de venda"
+  sai: "KPI do painel"
+  casos_degenerados:
+    - {condicao: "apresentado junto do attach rate na mesma linha do Cockpit", comportamento: "[LACUNA] F6 e F7 grafam 'Attach rate / UPT' como um KPI só, com duas fórmulas distintas", lacuna: LAC-FOR-064}
+  procedencia:
+    - {fonte: F7, local: "Parte C · Cockpit"}
+    - {fonte: F6, local: "Parte E · Cockpit"}
+  status_canonico: CANONICO
+  confianca: MEDIA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+# ═══════════════════════════════════════════════════════════════
+# BLOCO EST — Estoque e margem
+# ═══════════════════════════════════════════════════════════════
+
+- id: FOR-EST-001
+  tipo: FOR
+  bloco: EST
+  nome: "Giro de estoque (B1)"
+  simbolo: giro
+  expressao: "giro = CMV do período ÷ estoque médio a custo"
+  variaveis:
+    - {simbolo: CMV, nome: "Custo da Mercadoria Vendida no período", unidade: BRL, origem: fato_venda, natureza: CRUA}
+    - {simbolo: "estoque médio a custo", unidade: BRL, origem: fato_estoque, natureza: DERIVADA}
+  grao: sku_categoria_loja
+  janela: mensal
+  natureza: CRUA
+  onde: "Diagnóstico D2–D4 e mensal"
+  quando: "Mensal"
+  quem: "Consultor / EXRS"
+  entra: "estoque + CMV"
+  sai: "cobertura e decisão de compra"
+  casos_degenerados:
+    - {condicao: "estoque médio = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}
+    - {condicao: "como calcular 'estoque médio'", comportamento: "🔴 [LACUNA] nenhuma fonte define a janela nem o método (média de saldos? inicial+final÷2?)", lacuna: LAC-FOR-052}
+    - {condicao: "categoria serviço", comportamento: "não tem estoque — Gabarito exige excluir", lacuna: LAC-FOR-065}
+  procedencia:
+    - {fonte: F7, local: "Parte A · B1"}
+    - {fonte: F6, local: "Parte A · B1"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-EST-002
+  tipo: FOR
+  bloco: EST
+  nome: "Cobertura de estoque em dias (B1)"
+  simbolo: cobertura
+  expressao: "cobertura = 365 ÷ giro"
+  variaveis:
+    - {simbolo: giro, origem: FOR-EST-001, natureza: CRUA}
+  grao: sku_categoria_loja
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Diagnóstico e mensal"
+  quando: "Mensal"
+  quem: "Consultor / EXRS"
+  entra: "giro"
+  sai: "ranking de capital imobilizado"
+  casos_degenerados: [{condicao: "giro = 0", comportamento: "[LACUNA] cobertura infinita — e é exatamente o estoque morto", lacuna: LAC-FOR-027}]
+  procedencia:
+    - {fonte: F7, local: "Parte A · B1"}
+    - {fonte: F6, local: "Parte A · B1"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-EST-003
+  tipo: FOR
+  bloco: EST
+  nome: "GMROI — versão documentada (B2)"
+  simbolo: GMROI_doc
+  resumo: "A métrica-rainha do estoque. Acima de 1 o estoque se paga; abaixo, destrói valor."
+  expressao: "GMROI = margem bruta (R$) ÷ estoque médio a custo"
+  variaveis:
+    - {simbolo: "margem bruta", unidade: BRL, origem: fato_venda, natureza: DERIVADA}
+    - {simbolo: "estoque médio a custo", unidade: BRL, origem: fato_estoque, natureza: DERIVADA}
+  grao: sku_categoria_loja
+  janela: mensal
+  natureza: DERIVADA
+  alvo: {valor: 1.0, tipo: FIXO}
+  onde: "Diagnóstico e mensal · Cockpit"
+  quando: "Mensal"
+  quem: "Consultor / EXRS"
+  entra: "estoque + margem"
+  sai: "decisão de compra e de mix"
+  casos_degenerados:
+    - {condicao: "denominador", comportamento: "🔴 DIVERGE da versão implementada (F10 usa capital preso = qtd_atual × custo_unit, não estoque médio)", lacuna: LAC-FOR-052}
+    - {condicao: "serviço", comportamento: "não entra — Gabarito exige", lacuna: LAC-FOR-065}
+  procedencia:
+    - {fonte: F7, local: "Parte A · B2"}
+    - {fonte: F6, local: "Parte A · B2"}
+  status_canonico: CONFLITANTE
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  ver_tambem: [FOR-AUD-001]
+  verificado_contra: "F11 · 'GMROI baixo (B2) — categoria armacao_premium: margem sobre estoque tende a <1'"
+
+- id: FOR-EST-004
+  tipo: FOR
+  bloco: EST
+  nome: "Curva ABC cruzada com giro (B3)"
+  simbolo: ABC
+  expressao: "classe = A se receita acumulada ≤ 80% ; B se ≤ 95% ; C caso contrário"
+  variaveis:
+    - {simbolo: "receita acumulada", nome: "Pareto por receita ou margem", unidade: percentual, origem: fato_venda, natureza: DERIVADA}
+  grao: sku
+  janela: mensal
+  natureza: DERIVADA
+  matriz:
+    - {combinacao: "A × baixo giro", leitura: "capital preso em item nobre — alerta"}
+    - {combinacao: "C × alto giro", leitura: "risco de ruptura em item de cauda"}
+  onde: "Diagnóstico e mensal"
+  quando: "Mensal"
+  quem: "Consultor / EXRS"
+  entra: "receita por SKU + giro"
+  sai: "política de estoque por classe"
+  casos_degenerados:
+    - {condicao: "corte de B", comportamento: "[LACUNA] F7 declara A=80% B=15% C=5%; a soma dá 100% mas o corte de B (95%) é inferido pelo extrator"}
+    - {condicao: "ordenar por receita ou por margem", comportamento: "[LACUNA] F7 diz 'receita (ou margem)' sem decidir", lacuna: LAC-FOR-066}
+  procedencia:
+    - {fonte: F7, local: "Parte A · B3"}
+    - {fonte: F6, local: "Parte A · B3"}
+  status_canonico: CANONICO
+  confianca: MEDIA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  implementado_em: "src/product_b/oracle/commercial_auditor.py (Algoritmo 4)"
+
+- id: FOR-EST-005
+  tipo: FOR
+  bloco: EST
+  nome: "Estoque morto — critério (B4)"
+  simbolo: morto
+  expressao: "morto = SKU sem venda há mais de N meses"
+  variaveis:
+    - {simbolo: N, nome: "meses sem saída", unidade: meses, origem: config, natureza: PARAMETRO, faixa_declarada: "6 a 9, calibrado pela sazonalidade da moda de armação"}
+  grao: sku_loja
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Diagnóstico e mensal"
+  quando: "Mensal"
+  quem: "Consultor / EXRS"
+  entra: "última movimentação"
+  sai: "lista para queima/devolução/promoção"
+  casos_degenerados:
+    - {condicao: "N não fixado", comportamento: "🔴 faixa 6–9 meses (F6/F7); o Gabarito usa ~250 dias; o deck não-canônico dizia 180. Três valores em circulação.", lacuna: LAC-FOR-053}
+    - {condicao: "SKU sazonal", comportamento: "🔴 falso positivo — Gabarito exige NÃO marcar solar parado desde fevereiro", lacuna: LAC-FOR-067}
+  procedencia:
+    - {fonte: F7, local: "Parte A · B4"}
+    - {fonte: F6, local: "Parte A · B4"}
+  status_canonico: CONFLITANTE
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  implementado_em: "src/product_b/oracle/commercial_auditor.py · DeadStockFinding"
+  verificado_contra: "F11 · 'Estoque Morto (B4) — DEAD-001..012 (L1): 12 SKUs sem movimento ~250 dias. Capital preso = R$ 28.800' e 'B (falso+) · Estoque morto sazonal — SOL-001..005 (L4): parado desde fev (~150d) → NÃO marcar'"
+
+- id: FOR-EST-006
+  tipo: FOR
+  bloco: EST
+  nome: "Capital preso em estoque morto (B4)"
+  simbolo: capital_preso
+  expressao: "capital_preso = Σ ( quantidade × custo ) dos SKUs mortos"
+  variaveis:
+    - {simbolo: quantidade, unidade: contagem, origem: fato_estoque, natureza: CRUA}
+    - {simbolo: custo, nome: "custo unitário", unidade: BRL, origem: fato_estoque, natureza: CRUA}
+  grao: loja
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Executive Audit Report — a âncora quando o cadastro é ruim"
+  quando: "Mensal"
+  quem: "Consultor / EXRS"
+  entra: "lista de SKUs mortos"
+  sai: "caixa a liberar, em R$"
+  casos_degenerados: [{condicao: "custo unitário ausente", comportamento: "[LACUNA]"}]
+  procedencia:
+    - {fonte: F7, local: "Parte A · B4"}
+    - {fonte: F6, local: "Parte A · B4"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  implementado_em: "src/product_b/oracle/commercial_auditor.py"
+  verificado_contra: "F11 · 'Capital preso = R$ 28.800,00'"
+
+- id: FOR-EST-007
+  tipo: FOR
+  bloco: EST
+  nome: "Índice de estoque morto"
+  simbolo: idx_morto
+  expressao: "idx_morto = valor morto ÷ estoque total"
+  variaveis:
+    - {simbolo: "valor morto", origem: FOR-EST-006, natureza: DERIVADA}
+    - {simbolo: "estoque total", unidade: BRL, origem: fato_estoque, natureza: CRUA}
+  grao: loja
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Diagnóstico"
+  quando: "Mensal"
+  quem: "Consultor / EXRS"
+  entra: "capital preso + estoque total"
+  sai: "proporção do caixa imobilizado"
+  casos_degenerados: [{condicao: "estoque total = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}]
+  procedencia: [{fonte: F7, local: "Parte A · B4"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+# ═══════════════════════════════════════════════════════════════
+# BLOCO FIN — Clube e camada financeira
+# ═══════════════════════════════════════════════════════════════
+
+- id: FOR-FIN-001
+  tipo: FOR
+  bloco: FIN
+  nome: "Mensalidade mínima do Clube (C1)"
+  simbolo: mensalidade_min
+  expressao: "mensalidade_min = custo mensal de servir ÷ ( 1 − margem-alvo )"
+  variaveis:
+    - {simbolo: "custo mensal de servir", nome: "provisão do uso esperado dos benefícios (desconto do 2º par, exame, limpeza)", unidade: BRL, origem: config, natureza: PARAMETRO}
+    - {simbolo: "margem-alvo", unidade: fracao, origem: config, natureza: PARAMETRO}
+  grao: clube
+  janela: anual
+  natureza: DERIVADA
+  onde: "Fase 3 · D16–D20"
+  quando: "Ao desenhar o clube"
+  quem: "Consultor"
+  entra: "custos de servir"
+  sai: "preço do clube"
+  casos_degenerados: [{condicao: "margem-alvo = 1", comportamento: "[LACUNA] divisão por zero", lacuna: LAC-FOR-010}]
+  procedencia:
+    - {fonte: F7, local: "Parte A · C1"}
+    - {fonte: F6, local: "Parte A · C1"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-FIN-002
+  tipo: FOR
+  bloco: FIN
+  nome: "LTV do assinante do Clube"
+  simbolo: LTV_clube
+  expressao: "LTV_clube = mensalidade × meses médios + margem das compras incrementais"
+  variaveis:
+    - {simbolo: mensalidade, unidade: BRL, origem: FOR-FIN-001, natureza: DERIVADA}
+    - {simbolo: "meses médios", nome: "permanência média do assinante", unidade: meses, origem: "[LACUNA]", natureza: PARAMETRO}
+    - {simbolo: "margem das compras incrementais", unidade: BRL, origem: fato_venda, natureza: DERIVADA}
+  grao: clube
+  janela: anual
+  natureza: DERIVADA
+  onde: "Fase 3 · D16–D20"
+  quando: "Ao desenhar o clube"
+  quem: "Consultor"
+  entra: "mensalidade + permanência"
+  sai: "valor do assinante"
+  casos_degenerados:
+    - {condicao: "clube novo, sem histórico de permanência", comportamento: "🔴 [LACUNA] 'meses médios' não tem origem no dia 1", lacuna: LAC-FOR-068}
+  procedencia: [{fonte: F7, local: "Parte A · C1"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-FIN-003
+  tipo: FOR
+  bloco: FIN
+  nome: "Break-even do Clube"
+  simbolo: BE_clube
+  expressao: "BE_clube = custos fixos do clube ÷ margem por assinante"
+  variaveis:
+    - {simbolo: "custos fixos do clube", unidade: BRL, origem: config, natureza: PARAMETRO}
+    - {simbolo: "margem por assinante", unidade: BRL, origem: FOR-FIN-001, natureza: DERIVADA}
+  grao: clube
+  janela: anual
+  natureza: DERIVADA
+  onde: "Fase 3"
+  quando: "Ao desenhar o clube"
+  quem: "Consultor"
+  entra: "custos fixos + margem unitária"
+  sai: "meta de assinantes"
+  casos_degenerados: [{condicao: "margem por assinante ≤ 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-043}]
+  procedencia:
+    - {fonte: F7, local: "Parte A · C1"}
+    - {fonte: F6, local: "Parte A · C1"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-FIN-004
+  tipo: FOR
+  bloco: FIN
+  nome: "MRR do Clube"
+  simbolo: MRR
+  expressao: "MRR = Σ mensalidades ativas"
+  variaveis:
+    - {simbolo: "mensalidades ativas", unidade: BRL, origem: fato_assinatura, natureza: CRUA}
+  grao: loja
+  janela: mensal
+  natureza: CRUA
+  onde: "Cockpit"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "assinaturas ativas"
+  sai: "KPI do painel do dono — recorrência nova"
+  casos_degenerados:
+    - {condicao: "tabela de assinatura não existe", comportamento: "🔴 fato_assinatura ausente de todo modelo de dados do acervo", lacuna: LAC-FOR-063}
+  procedencia: [{fonte: F6, local: "Parte E · Cockpit"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-FIN-005
+  tipo: FOR
+  bloco: FIN
+  nome: "Uplift de Ticket pelo crédito (C2)"
+  simbolo: uplift
+  resumo: "A prova de valor da camada financeira e a base de um eventual success fee."
+  expressao: "uplift = ( ticket médio com crédito ÷ ticket médio à vista − 1 ) × 100"
+  variaveis:
+    - {simbolo: "ticket médio com crédito", nome: "média das vendas parceladas via parceiro", unidade: BRL, origem: fato_venda, natureza: CRUA}
+    - {simbolo: "ticket médio à vista", nome: "média das vendas sem crédito", unidade: BRL, origem: fato_venda, natureza: CRUA}
+  grao: loja
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Fase 3 · D21–D25 e depois recorrente no retainer"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "vendas por forma de pagamento"
+  sai: "prova de valor da camada C2"
+  casos_degenerados:
+    - {condicao: "ticket à vista = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}
+    - {condicao: "viés de seleção", comportamento: "[LACUNA] quem escolhe parcelar já compra mais caro — a fórmula atribui ao crédito um efeito que pode ser de composição", lacuna: LAC-FOR-069}
+  procedencia:
+    - {fonte: F8, local: "§5 · Uplift de Ticket"}
+    - {fonte: F7, local: "Parte A · C2"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+
+- id: FOR-FIN-006
+  tipo: FOR
+  bloco: FIN
+  nome: "Taxa de Aprovação do parceiro (C2)"
+  simbolo: aprovacao
+  resumo: "Mede o oxigênio financeiro que o parceiro de fato destrava."
+  expressao: "aprovacao = ( limites aprovados ÷ propostas enviadas ao parceiro ) × 100"
+  variaveis:
+    - {simbolo: "limites aprovados", unidade: contagem, origem: retorno_parceiro, natureza: CRUA}
+    - {simbolo: "propostas enviadas", unidade: contagem, origem: retorno_parceiro, natureza: CRUA}
+  grao: loja_parceiro
+  janela: semanal
+  natureza: CRUA
+  onde: "Fase 3 e retainer"
+  quando: "Semanal"
+  quem: "Máquina"
+  entra: "retorno do parceiro financeiro"
+  sai: "sinal para acionar outro parceiro do painel"
+  casos_degenerados: [{condicao: "propostas = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}]
+  procedencia: [{fonte: F8, local: "§5 · Taxa de Aprovação"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  nota_fonte: "Depende do retorno do dado da transação — que F8 §3 declara ser condição inegociável de seleção do parceiro."
+
+- id: FOR-FIN-007
+  tipo: FOR
+  bloco: FIN
+  nome: "Provisão de inadimplência — versão de risco na ótica"
+  simbolo: provisao_inad
+  expressao: "provisao_inad = receita financiada × taxa de inadimplência do varejo (≈ 8,5%)"
+  variaveis:
+    - {simbolo: "receita financiada", unidade: BRL, origem: fato_venda, natureza: CRUA}
+    - {simbolo: "taxa de inadimplência", unidade: percentual, origem: benchmark_externo, natureza: PARAMETRO, valor_declarado: 8.5}
+  grao: loja
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Fase 3 · P&L financeiro"
+  quando: "Mensal"
+  quem: "Consultor"
+  entra: "volume financiado"
+  sai: "provisão no P&L"
+  casos_degenerados:
+    - {condicao: "modelo de risco", comportamento: "🔴 CONTRADIZ o C2: F8 estabelece que o parceiro assume 100% do default e a ótica tem RISCO ZERO — nesse modelo não há o que provisionar", lacuna: LAC-FOR-054}
+    - {condicao: "8,5% é benchmark de mercado", comportamento: "viola a doutrina de derivar do dado do cliente", lacuna: LAC-FOR-054}
+  procedencia: [{fonte: F7, local: "Parte A · C2"}]
+  status_canonico: CONFLITANTE
+  confianca: ALTA
+  natureza_conhecimento: IMPORTADO_EXTERNO
+  lacunas: [LAC-FOR-054]
+  ver_tambem: [FOR-FIN-008]
+
+- id: FOR-FIN-008
+  tipo: FOR
+  bloco: FIN
+  nome: "Inadimplência — versão risco zero (C2)"
+  simbolo: inad_parceiro
+  resumo: "Monitorada NO PARCEIRO, não na ótica. Avalia a saúde do parceiro, não o caixa do cliente."
+  expressao: "inad_parceiro = inadimplência da carteira do parceiro (informada)"
+  variaveis:
+    - {simbolo: "inadimplência da carteira", unidade: percentual, origem: retorno_parceiro, natureza: CRUA}
+  grao: parceiro
+  janela: mensal
+  natureza: CRUA
+  onde: "Retainer · avaliação do painel de parceiros"
+  quando: "Mensal"
+  quem: "Consultor"
+  entra: "reporte do parceiro"
+  sai: "decisão de trocar de parceiro"
+  casos_degenerados:
+    - {condicao: "parceiro não reporta", comportamento: "F8 §3 torna o retorno do dado condição de seleção — sem dado, trocar de parceiro"}
+  procedencia: [{fonte: F8, local: "§5 · Inadimplência"}]
+  status_canonico: CONFLITANTE
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-054]
+  ver_tambem: [FOR-FIN-007]
+
+- id: FOR-FIN-009
+  tipo: FOR
+  bloco: FIN
+  nome: "Receita financeira da operação"
+  simbolo: rec_financeira
+  expressao: "rec_financeira = MDR ou juros por transação"
+  variaveis:
+    - {simbolo: MDR, nome: "taxa de desconto do meio de pagamento", unidade: percentual, origem: contrato, natureza: PARAMETRO}
+  grao: loja
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Fase 3 · P&L financeiro"
+  quando: "Mensal"
+  quem: "Consultor"
+  entra: "transações financiadas"
+  sai: "linha do P&L"
+  casos_degenerados:
+    - {condicao: "quem recebe", comportamento: "🔴 [LACUNA] F7 modela receita financeira DA ÓTICA; F8 modela comissão DA AURORA paga pelo parceiro. Dois beneficiários diferentes.", lacuna: LAC-FOR-054}
+  procedencia:
+    - {fonte: F7, local: "Parte A · C2"}
+    - {fonte: F8, local: "§5 · Receita de comissão"}
+  status_canonico: CONFLITANTE
+  confianca: MEDIA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-054]
+
+# ═══════════════════════════════════════════════════════════════
+# BLOCO CNC — Concentradora de Compras
+# ═══════════════════════════════════════════════════════════════
+
+- id: FOR-CNC-001
+  tipo: FOR
+  bloco: CNC
+  nome: "Economia gerada por ótica"
+  simbolo: economia
+  resumo: "A prova de valor no dia 1."
+  expressao: "economia = ( ( preço antigo − preço concentrado ) ÷ preço antigo ) × 100"
+  variaveis:
+    - {simbolo: "preço antigo", nome: "preço de compra antes da concentração", unidade: BRL, origem: fato_compra, natureza: CRUA}
+    - {simbolo: "preço concentrado", unidade: BRL, origem: fato_compra, natureza: CRUA}
+  grao: otica_sku
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Concentradora — prova de valor"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "histórico de compra + preço negociado"
+  sai: "economia declarada ao cliente"
+  casos_degenerados:
+    - {condicao: "SKU sem histórico de compra anterior", comportamento: "[LACUNA] não há 'preço antigo'", lacuna: LAC-FOR-070}
+    - {condicao: "preço antigo = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}
+  procedencia: [{fonte: F9, local: "§8 · Métricas"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-CNC-002
+  tipo: FOR
+  bloco: CNC
+  nome: "Volume agregado da rede"
+  simbolo: volume_agregado
+  resumo: "É o que destrava os tiers de preço."
+  expressao: "volume_agregado = Σ pedidos consolidados da rede"
+  variaveis:
+    - {simbolo: "pedidos consolidados", unidade: BRL_ou_contagem, origem: fato_compra, natureza: CRUA}
+  grao: rede_fornecedor
+  janela: mensal
+  natureza: CRUA
+  onde: "Concentradora"
+  quando: "Por janela de pedido agregado"
+  quem: "Máquina"
+  entra: "pedidos das óticas"
+  sai: "poder de negociação por tier"
+  casos_degenerados: [{condicao: "unidade", comportamento: "[LACUNA] R$ ou unidades? A fonte não declara — e os tiers de fornecedor costumam ser por unidade", lacuna: LAC-FOR-071}]
+  procedencia: [{fonte: F9, local: "§8 · Métricas"}]
+  status_canonico: CANONICO
+  confianca: MEDIA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-CNC-003
+  tipo: FOR
+  bloco: CNC
+  nome: "Taxa de adesão da rede"
+  simbolo: adesao_rede
+  expressao: "adesao_rede = óticas ativas ÷ óticas da rede"
+  variaveis:
+    - {simbolo: "óticas ativas", nome: "com pedido na janela", unidade: contagem, origem: fato_compra, natureza: CRUA}
+    - {simbolo: "óticas da rede", unidade: contagem, origem: dim_otica, natureza: CRUA}
+  grao: rede
+  janela: mensal
+  natureza: CRUA
+  onde: "Concentradora"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "pedidos + cadastro da rede"
+  sai: "saúde da adesão"
+  casos_degenerados:
+    - {condicao: "definição de 'ativa'", comportamento: "[LACUNA] janela de atividade não declarada", lacuna: LAC-FOR-072}
+  procedencia: [{fonte: F9, local: "§8 · Métricas"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-CNC-004
+  tipo: FOR
+  bloco: CNC
+  nome: "Efeito do comprar inteligente (sell-in × sell-through)"
+  simbolo: efeito_concentracao
+  resumo: "A prova de que a central é inteligente e não só barata."
+  expressao: "efeito_concentracao = estoque morto (antes) − estoque morto (depois da concentração)"
+  variaveis:
+    - {simbolo: "estoque morto", origem: FOR-EST-006, natureza: DERIVADA}
+  grao: otica
+  janela: trimestral
+  natureza: DERIVADA
+  onde: "Concentradora — prova do moat"
+  quando: "Trimestral"
+  quem: "Máquina"
+  entra: "sell-in da central + sell-through do PDV"
+  sai: "menos capital preso"
+  casos_degenerados:
+    - {condicao: "janela de comparação", comportamento: "[LACUNA] 'antes' e 'depois' sem período declarado", lacuna: LAC-FOR-073}
+  procedencia: [{fonte: F9, local: "§4 e §8"}]
+  status_canonico: CANDIDATO
+  confianca: MEDIA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  nota_fonte: "F9 declara a métrica em prosa ('giro/estoque morto pós-concentração'); a expressão foi montada pelo extrator."
+
+# ═══════════════════════════════════════════════════════════════
+# BLOCO AUD — versões IMPLEMENTADAS (SPEC_Fase_B, status EXECUTADA)
+# Precedência máxima pela regra §6. Onde divergem do documentado,
+# as duas peças ficam registradas e o conflito vai para a fila.
+# ═══════════════════════════════════════════════════════════════
+
+- id: FOR-AUD-001
+  tipo: FOR
+  bloco: AUD
+  nome: "GMROI — versão implementada"
+  simbolo: GMROI_impl
+  expressao: "GMROI = ( Receita Total do SKU − Custo Total do SKU vendido ) ÷ Capital Preso"
+  variaveis:
+    - {simbolo: "Receita Total do SKU", unidade: BRL, origem: fato_venda, natureza: CRUA}
+    - {simbolo: "Custo Total do SKU vendido", unidade: BRL, origem: fato_venda, natureza: CRUA}
+    - {simbolo: "Capital Preso", nome: "qtd_atual × custo_unit — estoque ATUAL, não médio", unidade: BRL, origem: fato_estoque, natureza: DERIVADA}
+  grao: sku
+  janela: mensal
+  natureza: DERIVADA
+  onde: "commercial_auditor.py · Algoritmo 1"
+  quando: "Por rodada de auditoria"
+  quem: "Máquina"
+  entra: "vendas + estoque"
+  sai: "gmroi_alerts no audit_report"
+  casos_degenerados:
+    - {condicao: "Capital Preso = 0", comportamento: "ignorar o SKU (constraint declarada na SPEC)"}
+    - {condicao: "divergência com FOR-EST-003", comportamento: "🔴 estoque ATUAL aqui × estoque MÉDIO no documento. Numeradores e denominadores diferentes para o mesmo nome.", lacuna: LAC-FOR-052}
+  procedencia: [{fonte: F10, local: "§3 · Algoritmo 1"}]
+  status_canonico: CONFLITANTE
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  implementado_em: "src/product_b/oracle/commercial_auditor.py"
+  verificado_contra: "F11 · 'GMROI baixo (B2) — categoria armacao_premium'"
+  ver_tambem: [FOR-EST-003]
+
+- id: FOR-AUD-002
+  tipo: FOR
+  bloco: AUD
+  nome: "Attach Rate — versão implementada"
+  simbolo: attach_impl
+  expressao: "attach = ( qtd de clientes com A e B ) ÷ ( qtd de clientes com A )"
+  variaveis:
+    - {simbolo: A, nome: "categoria primária (ex. armação, ração)", unidade: categoria, origem: dim_produto, natureza: PARAMETRO}
+    - {simbolo: B, nome: "categoria secundária (ex. lente, banho)", unidade: categoria, origem: dim_produto, natureza: PARAMETRO}
+  grao: loja_par_categoria
+  janela: mensal
+  natureza: CRUA
+  onde: "commercial_auditor.py · Algoritmo 2"
+  quando: "Por rodada"
+  quem: "Máquina"
+  entra: "vendas por cliente e categoria"
+  sai: "attach_rate_opportunities + top 5 de cross-sell gap"
+  casos_degenerados:
+    - {condicao: "denominador parametrizado (A) × fixo ('clientes de grau' em FOR-BAS-007)", comportamento: "🔴 divergência de definição", lacuna: LAC-FOR-060}
+  procedencia: [{fonte: F10, local: "§3 · Algoritmo 2"}]
+  status_canonico: CONFLITANTE
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  implementado_em: "src/product_b/oracle/commercial_auditor.py"
+  ver_tambem: [FOR-BAS-007]
+
+- id: FOR-AUD-003
+  tipo: FOR
+  bloco: AUD
+  nome: "Corrosão de Ticket Médio por Vendedor — versão implementada"
+  simbolo: corrosao
+  expressao: "corrosao = Σ Desconto Concedido ÷ Σ Receita do Vendedor    onde   Desconto = preco_venda − preco_unit"
+  variaveis:
+    - {simbolo: preco_venda, nome: "preço de tabela (aba Estoque)", unidade: BRL, origem: fato_estoque, natureza: CRUA}
+    - {simbolo: preco_unit, nome: "preço real praticado (aba Vendas)", unidade: BRL, origem: fato_venda, natureza: CRUA}
+    - {simbolo: "Receita do Vendedor", unidade: BRL, origem: fato_venda, natureza: CRUA}
+  grao: vendedor
+  janela: mensal
+  natureza: DERIVADA
+  flag: {nome: is_corrosive, condicao: "desconto médio do vendedor > 2 desvios padrões da média da loja"}
+  onde: "commercial_auditor.py · Algoritmo 3"
+  quando: "Por rodada"
+  quem: "Máquina"
+  entra: "vendas cruzadas com tabela de preço"
+  sai: "seller_margin_corrosion + fila de triagem (Fase C)"
+  casos_degenerados:
+    - {condicao: "preço de tabela desalinhado da prática", comportamento: "produziu 337,78% — motivou a Fase C inteira", lacuna: LAC-FOR-002}
+    - {condicao: "flag 2σ", comportamento: "🔴 existe na implementação e NÃO no documento (EMD do Arsenal não tem flag)", lacuna: LAC-FOR-074}
+  procedencia: [{fonte: F10, local: "§3 · Algoritmo 3"}]
+  status_canonico: CONFLITANTE
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  implementado_em: "src/product_b/oracle/commercial_auditor.py"
+  verificado_contra: "SPEC_Fase_C §1 · V-30/L9-Serra"
+  ver_tambem: [FOR-MRG-021]
+
+- id: FOR-AUD-004
+  tipo: FOR
+  bloco: AUD
+  nome: "Risco de Concentração de receita VIP"
+  simbolo: concentracao_vip
+  resumo: "Risco de sequestro de base — vendedor controlando os VIPs."
+  expressao: "concentracao_vip = % da Receita VIP atrelada a cada vendedor"
+  variaveis:
+    - {simbolo: "Receita VIP", nome: "receita dos top 20% de clientes que representam 80% da receita", unidade: BRL, origem: fato_venda, natureza: DERIVADA}
+  grao: vendedor
+  janela: mensal
+  natureza: DERIVADA
+  alerta: {condicao: "um único vendedor detém > 40% da Receita VIP da loja", acao: "emitir alerta"}
+  onde: "commercial_auditor.py · Algoritmo 4"
+  quando: "Por rodada"
+  quem: "Máquina"
+  entra: "curva ABC de clientes + vendedor"
+  sai: "concentration_risk"
+  casos_degenerados:
+    - {condicao: "loja com 1 ou 2 vendedores", comportamento: "[LACUNA] concentração alta é estrutural, não risco", lacuna: LAC-FOR-075}
+  procedencia: [{fonte: F10, local: "§3 · Algoritmo 4"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  implementado_em: "src/product_b/oracle/commercial_auditor.py"
+  verificado_contra: "F11 · 'A · Concentração de receita — Cliente KEY-001 (L5): 1 cliente ~35% da receita da loja'"
+
+- id: FOR-AUD-005
+  tipo: FOR
+  bloco: AUD
+  nome: "Conversão Follow-on (serviço → produto)"
+  simbolo: follow_on
+  resumo: "Valida se o serviço de conserto atrai venda de produto rentável."
+  expressao: "follow_on = clientes que fizeram follow-on ÷ total de clientes que iniciaram em serviço"
+  variaveis:
+    - {simbolo: "clientes que iniciaram em serviço", nome: "cuja primeira transação foi categoria = 'servico'", unidade: contagem, origem: fato_venda, natureza: CRUA}
+    - {simbolo: "follow-on", nome: "transação posterior de categoria = 'produto'", unidade: contagem, origem: fato_venda, natureza: CRUA}
+  grao: loja
+  janela: trimestral
+  natureza: CRUA
+  onde: "commercial_auditor.py · Algoritmo 5"
+  quando: "Por rodada"
+  quem: "Máquina"
+  entra: "sequência temporal de transações por cliente"
+  sai: "prova do efeito CAC do serviço"
+  casos_degenerados:
+    - {condicao: "janela de follow-on", comportamento: "[LACUNA] 'posterior' sem limite de tempo — um produto comprado 3 anos depois conta?", lacuna: LAC-FOR-076}
+    - {condicao: "loja sem linha de serviço", comportamento: "denominador zero", lacuna: LAC-FOR-010}
+  procedencia: [{fonte: F10, local: "§3 · Algoritmo 5"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  implementado_em: "src/product_b/oracle/commercial_auditor.py"
+  verificado_contra: "F11 · 'SVC · Efeito CAC / follow-on — L7/L6/L8: maior lift ABSOLUTO na L8'"

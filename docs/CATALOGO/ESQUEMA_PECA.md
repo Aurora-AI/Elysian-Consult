@@ -240,6 +240,7 @@ O caso do vetor de pesos é exatamente uma inversão: dois satélites (nível 4)
 | V9 | Peça `CONFLITANTE` sem `LAC` associada | 🟡 Fila |
 | V10 | `AXI` sem `o_que_falsificaria` | 🟡 Rebaixa a `CANDIDATO` |
 | V11 | `FOR` sem `implementado_em` **e** sem `verificado_contra` | 🟡 Marca `HIPOTESE` |
+| V12 | `FOR` com expressão em prosa, não simbólica | 🟡 Fila — não implementável sem tradução |
 
 Os oito problemas encontrados na leitura do `Formulas_Consultoria_Aurora.md` — colisão de `MR` e `PV`, `EDN` dividindo por zero, bandas do SEV com fronteira ambígua, `PV` usando índice normalizado como probabilidade, `ER` indefinido nos três primeiros meses — **todos caem em V1–V5**. Nenhum exigiu inteligência. Exigiu contrato.
 

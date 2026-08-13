@@ -1,0 +1,370 @@
+# # REGISTRO · BLOCO LAC — Lacunas do passe 2 (fontes secundárias)
+# Extração PASSE 2 (DIAGNÓSTICO) — 13/08/2026
+# Contrato: ESQUEMA_PECA.md §5.6 e §10
+#
+# ACHADO ESTRUTURAL: 5 das 25 lacunas deste passe são divergências entre
+# DOCUMENTO e CÓDIGO IMPLEMENTADO — uma classe que não existia no passe 1,
+# onde todas as fontes eram documentais.
+
+meta:
+  versao: 1.0
+  passe: 2-DIAGNOSTICO
+  extraido_em: 2026-08-13
+  escopo: "blocos BAS · EST · FIN · CNC · AUD"
+  contagem: 25
+  por_severidade: {CRITICA: 4, ALTA: 9, MEDIA: 9, BAIXA: 3}
+
+pecas:
+
+# ─────────── CRÍTICAS ───────────
+
+- id: LAC-FOR-052
+  tipo: LAC
+  severidade: CRITICA
+  titulo: "GMROI tem dois denominadores diferentes — documento × código"
+  descricao: >
+    O método documentado divide a margem bruta pelo ESTOQUE MÉDIO a custo. O motor
+    implementado divide pelo CAPITAL PRESO (qtd_atual × custo_unit) — o estoque ATUAL.
+    São métricas diferentes com o mesmo nome, e a métrica é declarada "a rainha do estoque".
+  evidencia:
+    - "F7/F6 (B2): 'GMROI = Margem bruta (R$) ÷ Estoque médio (a custo)'"
+    - "F10 (SPEC_Fase_B, EXECUTADA) Algoritmo 1: '(Receita Total − Custo Total) / Capital Preso' com 'Capital Preso = qtd_atual * custo_unit'"
+    - "Nenhuma fonte define como calcular 'estoque médio' (janela? método?)"
+  impacto: >
+    Numa loja que girou bem no período mas está com estoque baixo agora, as duas
+    versões dão resultados opostos. O GMROI aparece no Cockpit do dono como KPI.
+  correcao_candidata: "Pela precedência (§6), o código executado vence. Mas a divergência não é de valor — é de definição. Precisa de decisão, não de desempate."
+  bloqueia: [FOR-EST-003, FOR-AUD-001]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-054
+  tipo: LAC
+  severidade: CRITICA
+  titulo: "Dois modelos de risco de crédito incompatíveis convivendo"
+  descricao: >
+    O Playbook Detalhado modela a ótica CARREGANDO o risco (provisionar ≈8,5% de
+    inadimplência, receita financeira própria via MDR/juros). A Camada Financeira C2
+    estabelece o oposto: o parceiro assume 100% do default, a ótica tem RISCO ZERO,
+    e quem é remunerado é a Aurora, pelo parceiro.
+  evidencia:
+    - "F7 (07/07) Parte A · C2: 'Provisão de inadimplência ancorada no varejo (≈8,5%) — provisionar, não ignorar' · 'Receita financeira = MDR/juros por transação'"
+    - "F8 (08/07) §1: 'parceiros que assumem 100% do risco de default. A ótica ganha ticket e fidelização; não vira banco'"
+    - "F8 §5: 'Inadimplência — monitorada no parceiro, não na ótica (a ótica tem risco zero)'"
+    - "F8 §2: 'A Aurora é remunerada pelos parceiros financeiros, não pelo dono da ótica'"
+  impacto: >
+    Muda quem tem o P&L, quem provisiona, e quem recebe. Três fórmulas do bloco FIN
+    dependem disso. E o 8,5% é benchmark externo, violando a doutrina de derivar do dado.
+  correcao_candidata: "F8 é um dia mais recente e é o documento dedicado ao tema — provável que supere F7. Mas F7 continua listado como método vigente."
+  bloqueia: [FOR-FIN-007, FOR-FIN-008, FOR-FIN-009]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-053
+  tipo: LAC
+  severidade: CRITICA
+  titulo: "Estoque morto tem três limiares em circulação"
+  descricao: "O N de 'SKU sem venda há N meses' nunca foi fixado."
+  evidencia:
+    - "F7/F6 (B4): '6–9 meses, calibrado pela sazonalidade da moda de armação'"
+    - "F11 (Gabarito): DEAD-001..012 marcados com '~250 dias' (≈8,2 meses)"
+    - "Deck NAO_UTILIZADO: '180 dias' — não é doutrina, mas circulou em material comercial"
+  impacto: "Entre 180 e 270 dias, o mesmo SKU é ou não é estoque morto. Define o número que vai para o Ato 3 do laudo."
+  correcao_candidata: "Fixar N, ou declarar o método de calibração pela sazonalidade (que a fonte menciona e não descreve)."
+  bloqueia: [FOR-EST-005, FOR-EST-006]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-061
+  tipo: LAC
+  severidade: CRITICA
+  titulo: "A 'conversão esperada' da Receita Latente não tem origem declarada"
+  descricao: >
+    R_latente = (base sem X) × conversão esperada × ticket de X. É o número que abre o
+    Executive Audit Report e produz o choque do Dia 5. O único fator não derivado do dado
+    é justamente o multiplicador.
+  evidencia:
+    - "F6 e F7 (A4): a expressão aparece nos dois, sem definir a origem de 'conversão esperada'"
+    - "Contraste: todo outro parâmetro do método (P75, ciclo, TMI) tem derivação declarada"
+  impacto: "O número mais persuasivo do laudo depende de um parâmetro chutado."
+  correcao_candidata: "Derivar da conversão histórica de cross-sell da própria loja, ou do P75 do attach por segmento (que já existe em FOR-SEV-005)."
+  bloqueia: [FOR-BAS-008]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+# ─────────── ALTAS ───────────
+
+- id: LAC-FOR-055
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Completude tem dois limiares sem hierarquia"
+  evidencia:
+    - "F6: '<30% com telefone/CPF → o choque do D5 pivota 100% para estoque'"
+    - "F7: 'Meta operacional de partida: >70% com telefone/WhatsApp'"
+    - "F11: 'completude ~88% · >30% → motor de recompra roda normalmente'"
+  impacto: "Entre 30% e 70% o comportamento não está definido: roda, roda com ressalva, ou pivota?"
+  correcao_candidata: "Declarar as três faixas e o que cada uma dispara."
+  bloqueia: [FOR-BAS-001]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-056
+  tipo: LAC
+  severidade: ALTA
+  titulo: "'Clientes vitais/fiéis' não tem definição operacional"
+  descricao: >
+    O ciclo de recompra — o north-star do Cockpit — é a mediana do intervalo entre compras
+    dos 'clientes vitais' (F7) ou 'fiéis' (F6). Nenhuma fonte define o corte. E os segmentos
+    RFM nomeados (Fiéis, Em risco, Hibernando, Perdidos) também não têm faixa declarada;
+    só 'Campeões (555)' é explícito.
+  evidencia:
+    - "F7 A3: 'mediana do intervalo entre compras dos clientes vitais'"
+    - "F6 A3: 'mediana do intervalo entre compras dos fiéis'"
+    - "F6/F7 A2: segmentos listados sem regra de corte"
+  impacto: "O indicador-mãe do painel do dono depende de um conjunto indefinido."
+  correcao_candidata: "Definir o corte RFM de cada segmento e qual deles alimenta o ciclo."
+  bloqueia: [FOR-BAS-002, FOR-BAS-003, FOR-BAS-004]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-057
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Churn não trata sazonalidade — e o Gabarito exige"
+  evidencia:
+    - "F6/F7 A3: churn = (hoje − última compra) > ciclo × 1,5, sem componente sazonal"
+    - "F11: 'B (falso+) · Churn sazonal — SEAS-001..005 (L5): só compram solar no verão. Recência ~5m mas ciclo ANUAL → NÃO é churn'"
+  impacto: "Falso positivo em toda base com comportamento sazonal — e ótica tem."
+  correcao_candidata: "Ciclo por cliente quando houver histórico suficiente, em vez do ciclo único da loja."
+  bloqueia: [FOR-BAS-004]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-067
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Estoque morto não trata sazonalidade — e o Gabarito exige"
+  evidencia:
+    - "F6/F7 B4: critério puramente temporal"
+    - "F11: 'B (falso+) · Estoque morto sazonal — SOL-001..005 (L4): solar parado desde fev (~150d) → NÃO é morto (gira no verão). Não marcar B4.'"
+    - "F7 reconhece o problema ('N calibrado pela sazonalidade') mas não dá o método"
+  impacto: "Solar marcado como morto no inverno, todo ano."
+  correcao_candidata: "Comparar contra o mesmo período do ano anterior, não contra dias corridos."
+  bloqueia: [FOR-EST-005]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-060
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Attach rate: denominador fixo no documento, parametrizado no código"
+  evidencia:
+    - "F6/F7 A4: 'clientes com a categoria X ÷ clientes de grau' — denominador sempre grau"
+    - "F10 Algoritmo 2: '(clientes com A e B) ÷ (clientes com A)' — A é parâmetro"
+  impacto: "A versão documentada não consegue medir attach entre duas categorias que não sejam grau — e o PetShop (ração→banho) precisa disso."
+  correcao_candidata: "Adotar a forma parametrizada; a de grau vira o caso particular do nicho ótico."
+  bloqueia: [FOR-BAS-007, FOR-AUD-002]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-062
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Taxa de identificação e IC medem o mesmo com denominadores diferentes"
+  descricao: >
+    A Taxa de Identificação (Cockpit) usa vendas totais no denominador. O IC (SEV) usa
+    atendimentos totais. As duas respondem 'o cliente foi identificado?' e coexistem
+    sem hierarquia declarada — inclusive no mesmo painel.
+  evidencia:
+    - "F6 Parte E: 'Taxa de cadastro por vendedor = clientes identificados ÷ atendimentos (AT)'"
+    - "F7 Parte C: 'Taxa de identificação = vendas identificadas ÷ vendas totais'"
+    - "F1 §1.1: IC = AC ÷ AT"
+  impacto: >
+    Duas métricas com o mesmo nome popular e números diferentes. Pior: o próprio F6
+    define a 'taxa de cadastro' do Cockpit com o denominador do IC, e o F7 com o de vendas.
+  correcao_candidata: "Declarar a Taxa de Identificação como a métrica de Nível 0 (quando AT não é observável) e o IC como a de Nível 1+."
+  bloqueia: [FOR-BAS-010, FOR-SEV-003]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-063
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Três tabelas de fato citadas por fórmulas do Cockpit não existem"
+  descricao: "Conversão de pendentes exige fato_atendimento; MRR exige fato_assinatura; o IR exige fato_resgate. Nenhuma existe em dado real do acervo."
+  evidencia:
+    - "F6 Parte E · Cockpit: 'Conversão de pendentes' e 'MRR do Clube'"
+    - "INVENTARIO §4 e SPEC_Sistema_Gestao_360 §2.3"
+  impacto: "3 dos 7 KPIs do painel do dono não têm fonte de dado."
+  correcao_candidata: "Definir a captura no PDV antes de prometer o Cockpit completo."
+  bloqueia: [FOR-BAS-011, FOR-FIN-004]
+  quem_decide: Rodrigo
+  status: ABERTA
+  ver_tambem: [LAC-FOR-018]
+
+- id: LAC-FOR-065
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Serviço não pode entrar nas métricas de estoque — regra não documentada"
+  evidencia:
+    - "F11: 'SVC · Motor separa serviço — categoria servico: serviço não tem estoque → não entra em GMROI; não deve poluir ticket médio de produto'"
+    - "Nenhuma fórmula do bloco EST declara a exclusão"
+  impacto: "Giro, cobertura e GMROI distorcidos em toda loja com linha de serviço."
+  correcao_candidata: "Exclusão declarada por natureza de item em todas as fórmulas de estoque."
+  bloqueia: [FOR-EST-001, FOR-EST-002, FOR-EST-003]
+  quem_decide: Rodrigo
+  status: ABERTA
+  ver_tambem: [LAC-FOR-042]
+
+- id: LAC-FOR-074
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Flag de corrosão a 2σ existe no código e não no documento"
+  evidencia:
+    - "F10 Algoritmo 3: 'flag is_corrosive: true se o desconto médio do vendedor for > 2 desvios padrões da média da loja'"
+    - "F1 §6.7 (EMD): nenhuma flag, nenhum limiar"
+  impacto: "A versão documentada não distingue erosão normal de anômala — e é a que alguém vai implementar."
+  correcao_candidata: "Trazer o limiar 2σ para a peça documentada, junto com a trava da Fase C."
+  bloqueia: [FOR-MRG-021, FOR-AUD-003]
+  quem_decide: Rodrigo
+  status: ABERTA
+  ver_tambem: [LAC-FOR-002]
+
+- id: LAC-FOR-069
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Uplift de ticket pelo crédito tem viés de seleção não tratado"
+  descricao: "Quem escolhe parcelar já tende a comprar mais caro. A fórmula atribui ao crédito um efeito que pode ser de composição da amostra."
+  evidencia: ["F8 §5: 'Uplift = (ticket com crédito ÷ ticket à vista − 1) × 100' · declarado como 'a prova de valor da camada e a base de um eventual success fee'"]
+  impacto: "Se virar success fee, a Aurora cobra sobre um efeito parcialmente espúrio."
+  correcao_candidata: "Comparar o mesmo cliente antes e depois, ou controlar por segmento de ticket."
+  bloqueia: [FOR-FIN-005]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+# ─────────── MÉDIAS ───────────
+
+- id: LAC-FOR-058
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "'Ticket médio' da perda por churn não é qualificado"
+  descricao: "Ticket médio da loja ou ticket histórico do próprio cliente? Muda o número que abre o laudo."
+  evidencia: ["F6/F7 A3: 'R$ perdido = nº em churn × ticket médio'"]
+  bloqueia: [FOR-BAS-005]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-059
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "Índice de recuperabilidade existe no motor e em nenhum documento de método"
+  descricao: "silence_to_cycle_ratio é citado como pré-requisito concluído da Fase D, mas nunca foi documentado como fórmula. A expressão no registro foi reconstruída pelo nome do campo."
+  evidencia: ["SPEC_Fase_D2 · 'Pilar 3: índice de recuperabilidade da fila de churn (silence_to_cycle_ratio)'"]
+  bloqueia: [FOR-BAS-006]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-064
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "'Attach rate / UPT' é um KPI do Cockpit com duas fórmulas distintas"
+  evidencia: ["F7 Parte C: 'Attach rate / UPT | clientes com cat. X ÷ base / itens ÷ venda'"]
+  bloqueia: [FOR-BAS-012]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-066
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "Curva ABC: ordenar por receita ou por margem?"
+  evidencia: ["F7 B3: 'ordenar SKUs por receita (ou margem) acumulada'"]
+  impacto: "Um SKU de alta receita e margem negativa vira classe A por receita e classe C por margem."
+  bloqueia: [FOR-EST-004]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-068
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "LTV do Clube exige permanência média que não existe no dia 1"
+  evidencia: ["F7 C1: 'LTV = mensalidade × meses médios + margem das compras incrementais'"]
+  bloqueia: [FOR-FIN-002]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-070
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "Economia da concentradora sem histórico de compra anterior"
+  evidencia: ["F9 §8: 'economia = (preço antigo − preço concentrado) ÷ preço antigo'"]
+  bloqueia: [FOR-CNC-001]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-071
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "Volume agregado sem unidade declarada"
+  descricao: "R$ ou unidades? Os tiers de fornecedor costumam ser por unidade, e a métrica existe para destravar tier."
+  evidencia: ["F9 §8: 'Volume agregado — total consolidado da rede'"]
+  bloqueia: [FOR-CNC-002]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-075
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "Concentração de VIP em loja de 1 ou 2 vendedores é estrutural, não risco"
+  evidencia: ["F10 Algoritmo 4: 'alerta se um único vendedor detém > 40% da Receita VIP'"]
+  bloqueia: [FOR-AUD-004]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-076
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "Follow-on sem janela temporal"
+  descricao: "'Transação posterior' sem limite: um produto comprado três anos depois do conserto conta como efeito do serviço?"
+  evidencia: ["F10 Algoritmo 5"]
+  bloqueia: [FOR-AUD-005]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+# ─────────── BAIXAS ───────────
+
+- id: LAC-FOR-072
+  tipo: LAC
+  severidade: BAIXA
+  titulo: "'Ótica ativa' sem janela de atividade declarada"
+  evidencia: ["F9 §8: 'Taxa de adesão = óticas ativas ÷ óticas da rede'"]
+  bloqueia: [FOR-CNC-003]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-073
+  tipo: LAC
+  severidade: BAIXA
+  titulo: "Efeito da concentração sem janela de comparação"
+  evidencia: ["F9 §4 e §8: 'giro/estoque morto pós-concentração'"]
+  bloqueia: [FOR-CNC-004]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-077
+  tipo: LAC
+  severidade: BAIXA
+  titulo: "Dados sujos que o Gabarito exige tratar não têm fórmula em lugar nenhum"
+  descricao: >
+    Devoluções com qtd negativa, identidade cross-store (mesmo CPF com ids diferentes
+    em duas lojas), linhas quebradas (data malformada, categoria vazia, venda_id duplicado)
+    e outliers de digitação. O Gabarito cobra todos; nenhuma fórmula do acervo os menciona.
+  evidencia:
+    - "F11: 'C (sujo) · Devoluções — L6, qtd=-1 (6 linhas): estornos devem entrar líquidos'"
+    - "F11: 'C (sujo) · Identidade cross-store — XS-01A (L4) e XS-01B (L7), mesmo CPF → deduplicar por CPF'"
+    - "F11: 'C (sujo) · Linhas quebradas — L10: 1 data malformada, 1 categoria vazia, 1 venda_id duplicado → ingestão honesta'"
+    - "F11: 'C (sujo) · Outlier de digitação — L9: preço R$33.900 e qtd=99'"
+  impacto: "São regras de ingestão, não de cálculo — mas contaminam todo cálculo se ausentes."
+  correcao_candidata: "Bloco REG de ingestão, separado das fórmulas."
+  bloqueia: []
+  quem_decide: Rodrigo
+  status: ABERTA

@@ -149,12 +149,27 @@ def validar(pecas):
         # peça de PARÂMETRO define valores por tabela, não por expressão algébrica
         usadas = set() if p.get("tabela") else simbolos_da_expressao(p.get("expressao", ""))
         proprio = {p.get("simbolo"), p.get("id")}
+        orfaos = []
         for u in usadas:
             if u in proprio or u in declaradas:
                 continue
             if any(u in d or d in u for d in declaradas if d):
                 continue
-            add(REPROVA, "V4", pid, f"símbolo '{u}' usado na expressão e não declarado em 'variaveis'")
+            orfaos.append(u)
+
+        # V12 — expressão em prosa: a fonte escreveu em linguagem natural, não em símbolos.
+        # Três ou mais órfãos em minúsculas é assinatura de prosa, não de símbolo faltando.
+        prosa = [o for o in orfaos if o.islower() and len(o) >= 4]
+        if len(orfaos) >= 2 or any(len(o) >= 6 and o.islower() for o in orfaos) \
+                or p.get("notacao") == "PROSA":
+            prosa = prosa or orfaos
+            add(FILA, "V12", pid,
+                f"expressão em PROSA, não simbólica — não implementável sem tradução "
+                f"(termos: {', '.join(sorted(prosa)[:4])}…)")
+        else:
+            for u in orfaos:
+                add(REPROVA, "V4", pid,
+                    f"símbolo '{u}' usado na expressão e não declarado em 'variaveis'")
 
         # --- V3 casos degenerados não vazios ---
         cd = p.get("casos_degenerados") or []
