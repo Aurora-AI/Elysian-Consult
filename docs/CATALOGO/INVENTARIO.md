@@ -1,10 +1,10 @@
 # INVENTÁRIO DO ACERVO AURORA / ELYSIAN — Fase 0
 
-> **Status:** EXECUTADO em 13/08/2026
+> **Status:** EXECUTADO em 13/08/2026 · **reinventariado após a reorganização** (§6)
 > **Escopo varrido:** `ElysianConsult/**` + `AuroraControler/{*.md, *.json, docs/Documentos Gerais, docs/Vault, docs/superpowers, laudo_executivo}`
 > **Fora do escopo:** `AuroraControler/{src, tests, libs, aurora-frontend, output, reports, scratch}` — código e artefatos de execução, sem densidade doutrinária
 > **Método:** varredura + hash SHA-256 (12 díg.) + **teste de legibilidade por extração real de texto**, não por extensão
-> **Anexo:** `INVENTARIO.csv` — os 141 arquivos com classe, tamanho, data, hash e diagnóstico
+> **Anexo:** `INVENTARIO.csv` — todos os arquivos com classe, tamanho, data, hash e diagnóstico (caminhos pós-reorganização)
 
 ---
 
@@ -113,19 +113,19 @@ O método parou de ser escrito em julho; desde então o movimento é de consolid
 
 Ordem de precedência aplicada. **5 arquivos primários, 6 secundários.**
 
-| # | Arquivo | Papel | Peso |
-|---|---|---|---|
-| 1 | `Formulas_Consultoria_Aurora.md` | Arsenal — autodeclarado fonte única. **Único com Blocos 5 e 6** | Primário |
-| 2 | `Oticas_ParteF_Score_Formula.docx` | Os 5 índices, escada do AT, bandas | Primário |
-| 3 | `Oticas_ParteF_Blindagem_SEV.docx` | Regra de normalização universal | Primário |
-| 4 | `Oticas_ParteF_TMI.docx` | Engenharia do TMI | Primário |
-| 5 | `Oticas_Mapa_Aplicacao_Formulas.docx` | Onde · Quando · Quem · Entra→Sai | Primário |
-| 6 | `Oticas_Playbook_v9_Master.docx` | A1–A4, B1–B5, C1–C2, Cockpit, pesos | Secundário |
-| 7 | `Oticas_Playbook_Operacional_Detalhado.docx` | Detalhe de A1–A4 com fórmula | Secundário |
-| 8 | `Oticas_Camada_Financeira_C2.docx` | Uplift, aprovação | Secundário |
-| 9 | `Oticas_Concentradora_Compras.docx` | Economia, adesão, volume | Secundário |
-| 10 | `SPEC_Fase_B_Formulas_Avancadas.md` | GMROI, attach, corrosão, ABC, follow-on **implementados** | Secundário |
-| 11 | `Consultoria.xlsx` › aba `Gabarito` | 37 anomalias com resultado esperado — **a régua de veracidade** | Verificação |
+| # | Arquivo (caminho pós-reorganização) | `sha` | Papel | Peso |
+|---|---|---|---|---|
+| 1 | `docs/FONTES/formulas/Formulas_Consultoria_Aurora.md` | `320176f23d10` | Arsenal — autodeclarado fonte única. **Único com Blocos 5 e 6** | Primário |
+| 2 | `docs/FONTES/formulas/Oticas_ParteF_Score_Formula.docx` | `14341d6690b4` | Os 5 índices, escada do AT, bandas | Primário |
+| 3 | `docs/FONTES/formulas/Oticas_ParteF_Blindagem_SEV.docx` | `04be2e5a9164` | Regra de normalização universal | Primário |
+| 4 | `docs/FONTES/formulas/Oticas_ParteF_TMI.docx` | `5fe0e623592c` | Engenharia do TMI | Primário |
+| 5 | `docs/FONTES/formulas/Oticas_Mapa_Aplicacao_Formulas.docx` | `116ebaf7eccd` | Onde · Quando · Quem · Entra→Sai | Primário |
+| 6 | `docs/FONTES/metodo/Oticas_Playbook_v9_Master.docx` | — | A1–A4, B1–B5, C1–C2, Cockpit, pesos | Secundário |
+| 7 | `docs/FONTES/metodo/Oticas_Playbook_Operacional_Detalhado.docx` | — | Detalhe de A1–A4 com fórmula | Secundário |
+| 8 | `docs/FONTES/metodo/Oticas_Camada_Financeira_C2.docx` | — | Uplift, aprovação | Secundário |
+| 9 | `docs/FONTES/metodo/Oticas_Concentradora_Compras.docx` | — | Economia, adesão, volume | Secundário |
+| 10 | `AuroraControler/SPEC_Fase_B_Formulas_Avancadas.md` | — | GMROI, attach, corrosão, ABC, follow-on **implementados** | Secundário |
+| 11 | `docs/FONTES/dados/Consultoria.xlsx` › aba `Gabarito` | — | 37 anomalias com resultado esperado — **a régua de veracidade** | Verificação |
 
 ### Lacunas conhecidas antes de começar
 
@@ -152,7 +152,64 @@ As duas linhas vermelhas confirmam o diagnóstico anterior: **a base de homologa
 | **3** | Vetor de pesos do estágio **Construção** | `Score_Formula` e `Arsenal` = 0,25/0,25/0,20/0,20/0,10 · `Playbook_v9` = 0,30/0,25/0,20/0,15/0,10 | Muda todo SEV calculado |
 | **4** | `Doutrina-Sandeep` é doutrina (D) ou infra de agente (I)? | 8 arquivos + 2 system-prompts, sem citação cruzada | Define se entra na extração |
 | **5** | Escrever os blocos **Fiscal** e **Financeiro** | Não existem | Bloqueia 1/3 da base de homologação |
+| **6** | `Oticas_Motor_Dois_Relogios.docx` migra para `FONTES/metodo/`? | Doutrina do moat hospedada em `AuroraControler/docs/Documentos Gerais/` | Move entre repositórios |
 
 ---
 
-*Fase 0 encerrada. Próximo artefato: `ESQUEMA_PECA.md` — o contrato de extração.*
+---
+
+## 6. Reorganização executada — 13/08/2026
+
+Aprovada pelo autor. **39 arquivos movidos com `git mv`** (histórico preservado), em dois commits:
+`0e4f58a` checkpoint do estado anterior → reorganização.
+
+### 6.1. Decisão de arquitetura
+
+**`Atuais/` e `Historico/` foram extintas.** Elas codificavam canonicidade no nome da pasta, e o
+`ESQUEMA_PECA.md` define canonicidade como **campo** (`status_canonico`). Manter as duas coisas
+reintroduz "dois lugares produzindo verdade" — o bug que o P2 proíbe.
+
+A pasta passa a organizar por **natureza do material**; a vigência vive só no registro.
+
+```
+docs/
+├── FONTES/          37 arq. · material de origem, imutável após ingestão
+│   ├── metodo/      16   playbooks, PBM, framework, motor pós-IA
+│   ├── formulas/     5   Arsenal, ParteF (SEV/TMI/Blindagem), Mapa
+│   ├── dados/        6   Consultoria, PetShop, baselines v1–v3, Beta
+│   ├── comercial/    4   apresentações, linguagem simples
+│   ├── pesquisa/     3   GTM PMEs, Metodologias Pós-IA, prompt
+│   └── intel/        3   Método Aurora + 360 Óticas + transcrição OCR
+├── CATALOGO/         governança
+│   └── render/       gerados — nunca editados à mão
+└── SPEC/             specs de produto derivadas
+```
+
+### 6.2. Movimentos que resolvem achados
+
+| Arquivo | De | Para | Achado |
+|---|---|---|---|
+| `Metodo_Aurora_Transcricao_OCR.md` | `Historico/` | `FONTES/intel/` | Agora ao lado do PDF que transcreve — a separação era a causa de §2.1 |
+| `Playbook_Entrega_Elysian_v1.docx` | `Historico/` | `FONTES/metodo/` | Resolve a fila #2 sem julgar vigência (passa a ser campo) |
+| `Elysian_SSOT.md` | `SSOT/` | `CATALOGO/render/` | Deixa de ser escrito à mão; ver `render/README.md` |
+| `metodologia_consolidada.md` | `Atuais/` | `CATALOGO/` | É síntese derivada, não fonte — é a tentativa anterior deste mesmo trabalho |
+
+### 6.3. O que **não** foi movido, e por quê
+
+**`AuroraControler/docs/Vault/` — intocado.** O Vault é append-only por doutrina da casa. As três
+duplicatas divergentes (achado A-02) permanecem no disco e serão marcadas `SUPERADO` **no registro**.
+Versionar não é apagar história.
+
+**`Oticas_Motor_Dois_Relogios.docx`** segue em `AuroraControler/docs/Documentos Gerais/`. É o único
+arquivo de doutrina comprovadamente na pasta errada, mas mover entre repositórios é decisão do autor.
+**Item #6 da fila.**
+
+### 6.4. Pendência operacional
+
+As pastas `docs/Atuais/`, `docs/Historico/` e `docs/SSOT/` ficaram **vazias**. O git não versiona
+diretório vazio — elas somem em qualquer clone novo, mas persistem na cópia local. Apagar manualmente.
+
+---
+
+*Fase 0 encerrada e reconciliada com a nova estrutura. Contrato de extração: `ESQUEMA_PECA.md`.*
+*Próximo: Fase 2 — extração do bloco `FOR` sobre os 11 arquivos-alvo de §4.*
