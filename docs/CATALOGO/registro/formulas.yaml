@@ -1,0 +1,1807 @@
+# # REGISTRO · BLOCO FOR — Fórmulas
+# Extração PASSE 1 (FIEL) — 13/08/2026
+# Contrato: ESQUEMA_PECA.md §5.1
+#
+# ESCOPO DESTE PASSE: os 5 arquivos primários de docs/FONTES/formulas/
+#   Blocos cobertos: SEV · TMI · FCT · CMP · MET · MRG
+#   PENDENTE (passe 2, fontes secundárias): BAS (A1–A4) · EST (B1–B4) · FIN (C1–C2) · CNC · AUD
+#
+# REGRA DO PASSE 1: transcrição fiel. Nenhuma fórmula foi corrigida.
+# Todo problema detectado virou LAC em lacunas.yaml. Divergência entre fontes
+# gerou duas peças CONFLITANTE, nunca uma média.
+
+meta:
+  versao: 1.0
+  passe: 1-FIEL
+  extraido_em: 2026-08-13
+  extrator: cowork-aurora
+  fontes:
+    - id: F1
+      arquivo: docs/FONTES/formulas/Formulas_Consultoria_Aurora.md
+      sha: 320176f23d10
+      data_doc: 2026-08-13
+      titulo: "Arsenal Completo de Fórmulas — Consultoria Aurora"
+      autodeclaracao: "fonte única de todas as fórmulas"
+    - id: F2
+      arquivo: docs/FONTES/formulas/Oticas_ParteF_Score_Formula.docx
+      sha: 14341d6690b4
+      data_doc: 2026-07-08
+    - id: F3
+      arquivo: docs/FONTES/formulas/Oticas_ParteF_Blindagem_SEV.docx
+      sha: 04be2e5a9164
+      data_doc: 2026-07-08
+    - id: F4
+      arquivo: docs/FONTES/formulas/Oticas_ParteF_TMI.docx
+      sha: 5fe0e623592c
+      data_doc: 2026-07-08
+    - id: F5
+      arquivo: docs/FONTES/formulas/Oticas_Mapa_Aplicacao_Formulas.docx
+      sha: 116ebaf7eccd
+      data_doc: 2026-07-08
+    - id: F6
+      arquivo: docs/FONTES/metodo/Oticas_Playbook_v9_Master.docx
+      data_doc: 2026-07-08
+      papel: secundária — usada só para dirimir e para o Mapa de Aplicação
+  contagem: 62
+  glossario_conflito:
+    - sigla: MR
+      significados: ["Meta de Receita (F1 §2.3)", "Meta Residual (F1 §5.7)"]
+      lacuna: LAC-FOR-004
+    - sigla: PV
+      significados: ["Previsão de Venda (F1 §3.1)", "Preço de Venda (F1 §6.1)"]
+      lacuna: LAC-FOR-005
+
+# ═══════════════════════════════════════════════════════════════
+# BLOCO SEV — Motor Determinístico
+# ═══════════════════════════════════════════════════════════════
+
+pecas:
+
+- id: FOR-SEV-001
+  tipo: FOR
+  bloco: SEV
+  nome: "Normalização universal de índice"
+  simbolo: IN
+  resumo: "Converte a taxa crua de qualquer índice em 'quão perto do ideal', com teto."
+  expressao: "IN = mín( Real ÷ Alvo ; 1 ) × 100"
+  variaveis:
+    - {simbolo: Real, nome: "taxa realizada do índice", unidade: razao, origem: derivada, natureza: CRUA}
+    - {simbolo: Alvo, nome: "alvo derivado do dado", unidade: razao, origem: derivada, natureza: DERIVADA}
+  grao: vendedor
+  janela: mensal
+  natureza: NORMALIZADA
+  teto: 100
+  piso: 0
+  onde: "Camada 1 · todo índice do SEV"
+  quando: "Mensal; alvos recalibram trimestral"
+  quem: "Máquina"
+  entra: "taxa crua + alvo derivado"
+  sai: "índice 0–100 comparável entre parcelas"
+  casos_degenerados:
+    - {condicao: "Alvo = 0", comportamento: "[LACUNA] não definido na fonte", lacuna: LAC-FOR-010}
+    - {condicao: "Real > Alvo", comportamento: "teto em 100 (definido)"}
+  procedencia:
+    - {fonte: F3, local: "§1", trecho: "IN = mín(Real ÷ Alvo ; 1) × 100"}
+    - {fonte: F1, local: "§1.3"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  ver_tambem: [FOR-SEV-003, FOR-SEV-005, FOR-SEV-009, FOR-SEV-011]
+  implementado_em: null
+  verificado_contra: null
+
+- id: FOR-SEV-002
+  tipo: FOR
+  bloco: SEV
+  nome: "Índice de Captura — taxa crua"
+  simbolo: IC_cru
+  resumo: "Fração dos atendimentos que o vendedor cadastrou."
+  expressao: "IC_cru = AC ÷ AT"
+  variaveis:
+    - {simbolo: AC, nome: "Atendimentos Cadastrados (com CPF/contato)", unidade: contagem, origem: fato_atendimento, natureza: CRUA}
+    - {simbolo: AT, nome: "Atendimentos Totais", unidade: contagem, origem: fato_atendimento, natureza: CRUA}
+  grao: vendedor
+  janela: mensal
+  natureza: CRUA
+  onde: "Camada 1"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "eventos de atendimento e cadastro"
+  sai: "insumo do FOR-SEV-003"
+  casos_degenerados:
+    - {condicao: "AT = 0", comportamento: "[LACUNA] não definido na fonte", lacuna: LAC-FOR-010}
+    - {condicao: "AT não observável (loja Nível 0)", comportamento: "proxy declarado: Cadastros Novos ÷ Vendas Totais — vira razão, não taxa", ref: REG-SEV-001}
+  procedencia:
+    - {fonte: F1, local: "§1.1"}
+    - {fonte: F2, local: "§1 · Índice de Captura"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-006]
+
+- id: FOR-SEV-003
+  tipo: FOR
+  bloco: SEV
+  nome: "Índice de Captura (IC) — normalizado"
+  simbolo: IC
+  resumo: "Único índice cujo alvo é 100% de verdade: identificar todo atendimento."
+  expressao: "IC = mín( AC ÷ AT ; 1 ) × 100"
+  variaveis:
+    - {simbolo: AC, nome: "Atendimentos Cadastrados", unidade: contagem, origem: fato_atendimento, natureza: CRUA}
+    - {simbolo: AT, nome: "Atendimentos Totais", unidade: contagem, origem: fato_atendimento, natureza: CRUA}
+  grao: vendedor
+  janela: mensal
+  natureza: NORMALIZADA
+  alvo: {valor: 1.0, tipo: FIXO, justificativa: "o ideal é identificar todo cliente atendido — não precisa derivação"}
+  teto: 100
+  piso: 0
+  onde: "Camada 1 · parcela p1 do SEV"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "eventos de venda e cadastro"
+  sai: "parcela do SEV"
+  casos_degenerados:
+    - {condicao: "AT = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}
+    - {condicao: "AT por autorreporte do vendedor", comportamento: "fonte manda preferir AT contado pelo sistema; autorreporte infla o índice", ref: REG-SEV-002}
+  procedencia:
+    - {fonte: F3, local: "§2 · IC"}
+    - {fonte: F1, local: "§1.3"}
+    - {fonte: F6, local: "Parte G · IC"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  ver_tambem: [FOR-SEV-002, REG-SEV-001]
+  lacunas: [LAC-FOR-006]
+
+- id: FOR-SEV-004
+  tipo: FOR
+  bloco: SEV
+  nome: "Attach do vendedor — taxa crua"
+  simbolo: attach
+  expressao: "attach = VC ÷ VG"
+  variaveis:
+    - {simbolo: VC, nome: "Vendas com item Complementar (solar com grau, lente de contato, 2º par, antirreflexo)", unidade: contagem, origem: fato_venda, natureza: CRUA}
+    - {simbolo: VG, nome: "Vendas de óculos de Grau", unidade: contagem, origem: fato_venda, natureza: CRUA}
+  grao: vendedor
+  janela: mensal
+  natureza: CRUA
+  onde: "Camada 1"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "linhas de venda"
+  sai: "insumo do FOR-SEV-006 e do alvo FOR-SEV-005"
+  casos_degenerados:
+    - {condicao: "VG = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}
+  procedencia:
+    - {fonte: F1, local: "§1.1"}
+    - {fonte: F3, local: "§2 · IA"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-SEV-005
+  tipo: FOR
+  bloco: SEV
+  nome: "Attach-alvo (P75 por segmento)"
+  simbolo: AttachAlvo
+  resumo: "O alvo é o que os melhores da loja já anexam naquele tipo de cliente."
+  expressao: "AttachAlvo = P75( attach por vendedor, por segmento )"
+  variaveis:
+    - {simbolo: attach, nome: "VC ÷ VG", unidade: razao, origem: FOR-SEV-004, natureza: CRUA}
+    - {simbolo: segmento, nome: "base do produto (grau simples, multifocal, solar)", unidade: categoria, origem: dim_produto, natureza: CRUA}
+  grao: loja_segmento
+  janela: trimestral
+  natureza: DERIVADA
+  onde: "Config do IA"
+  quando: "Recalibra trimestral"
+  quem: "Máquina"
+  entra: "attach por vendedor por segmento"
+  sai: "denominador do IA"
+  casos_degenerados:
+    - {condicao: "amostra insuficiente no segmento", comportamento: "[LACUNA] mínimo de amostra não definido", lacuna: LAC-FOR-011}
+    - {condicao: "venda não etiquetada por segmento", comportamento: "[LACUNA] fonte prevê fallback só para o TMI (P75 geral), não para o attach", lacuna: LAC-FOR-012}
+  procedencia:
+    - {fonte: F3, local: "§2 · IA"}
+    - {fonte: F1, local: "§1.3"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  ver_tambem: [FOR-SEV-006]
+
+- id: FOR-SEV-006
+  tipo: FOR
+  bloco: SEV
+  nome: "Índice de Anexação (IA) — normalizado"
+  simbolo: IA
+  resumo: "Mede se ele expande o ticket ou só tira pedido."
+  expressao: "IA = mín( AttachReal ÷ AttachAlvo ; 1 ) × 100"
+  variaveis:
+    - {simbolo: AttachReal, nome: "attach realizado do vendedor", unidade: razao, origem: FOR-SEV-004, natureza: CRUA}
+    - {simbolo: AttachAlvo, nome: "P75 do attach por segmento", unidade: razao, origem: FOR-SEV-005, natureza: DERIVADA}
+  grao: vendedor
+  janela: mensal
+  natureza: NORMALIZADA
+  alvo: FOR-SEV-005
+  teto: 100
+  piso: 0
+  onde: "Camada 1 · parcela p2 do SEV"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "attach real + P75 do segmento"
+  sai: "parcela do SEV"
+  casos_degenerados:
+    - {condicao: "AttachAlvo = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}
+  procedencia:
+    - {fonte: F3, local: "§2 · IA"}
+    - {fonte: F1, local: "§1.3"}
+    - {fonte: F6, local: "Parte G · IA"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  nota_fonte: "F3 e F6 mandam triangular o P75 com o 'kit clínico' do catálogo; o gap entre os dois é Receita Latente. A triangulação não tem fórmula declarada."
+  lacunas: [LAC-FOR-013]
+
+- id: FOR-SEV-007
+  tipo: FOR
+  bloco: SEV
+  nome: "Índice de Ticket (IT)"
+  simbolo: IT
+  resumo: "Mede se ele vende o mix de valor ou só o barato."
+  expressao: "IT = mín( TMR ÷ TMIo ; 1 ) × 100"
+  variaveis:
+    - {simbolo: TMR, nome: "Ticket Médio Real do vendedor", unidade: BRL, origem: FOR-TMI-006, natureza: CRUA}
+    - {simbolo: TMIo, nome: "Ticket Médio Ideal operacional", unidade: BRL, origem: FOR-TMI-004, natureza: DERIVADA}
+  grao: vendedor
+  janela: mensal
+  natureza: NORMALIZADA
+  alvo: FOR-TMI-004
+  teto: 100
+  piso: 0
+  onde: "Camada 1 · parcela p3 do SEV"
+  quando: "Mensal; denominador recalibra trimestral"
+  quem: "Máquina"
+  entra: "ticket real + TMI operacional"
+  sai: "parcela do SEV"
+  casos_degenerados:
+    - {condicao: "TMIo = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}
+    - {condicao: "vendedor com poucas vendas no período", comportamento: "[LACUNA] mínimo de amostra não definido", lacuna: LAC-FOR-011}
+  procedencia:
+    - {fonte: F1, local: "§1.1", trecho: "IT = (TMR ÷ TMI) × 100 (teto em 100)"}
+    - {fonte: F1, local: "§1.3", trecho: "alvo = TMI operacional"}
+    - {fonte: F4, local: "§1"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  nota_fonte: "F1 §1.1 escreve 'TMI' sem qualificar; F1 §1.3 e F4 esclarecem que é o TMI OPERACIONAL. Extraído com o denominador qualificado."
+  verificado_contra: "docs/FONTES/dados/Consultoria.xlsx › Gabarito · 'Justiça por mix (TMI) — V-02 (grau simples) x V-04 (multifocal)'"
+
+- id: FOR-SEV-008
+  tipo: FOR
+  bloco: SEV
+  nome: "Conversão de fila — taxa crua"
+  simbolo: ConvReal
+  expressao: "ConvReal = RC ÷ RT"
+  variaveis:
+    - {simbolo: RC, nome: "Resgates Convertidos (contatos da fila que voltaram e compraram)", unidade: contagem, origem: fato_resgate, natureza: CRUA}
+    - {simbolo: RT, nome: "Resgates Trabalhados (contatos atribuídos a ele)", unidade: contagem, origem: fato_resgate, natureza: CRUA}
+  grao: vendedor_temperatura
+  janela: mensal
+  natureza: CRUA
+  onde: "Camada 1"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "fila de resgate trabalhada"
+  sai: "insumo do FOR-SEV-010 e do FOR-FCT-001"
+  casos_degenerados:
+    - {condicao: "RT = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}
+  procedencia:
+    - {fonte: F1, local: "§1.1"}
+    - {fonte: F3, local: "§2 · IR"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  nota_fonte: "CRÍTICO: esta é a variável que o FOR-FCT-001 (PV) precisa, e não o índice normalizado FOR-SEV-010. Ver LAC-FOR-003."
+
+- id: FOR-SEV-009
+  tipo: FOR
+  bloco: SEV
+  nome: "Conversão-alvo por temperatura de fila"
+  simbolo: ConvAlvo
+  resumo: "Segmenta por temperatura, senão pune quem pegou a lista fria."
+  expressao: "ConvAlvo = P75( conversão da fila, por temperatura )"
+  variaveis:
+    - {simbolo: temperatura, nome: "tipo de fila (recall de exame vencido = quente; reativação fria = fria)", unidade: categoria, origem: fato_resgate, natureza: CRUA}
+  grao: loja_temperatura
+  janela: trimestral
+  natureza: DERIVADA
+  onde: "Config do IR"
+  quando: "Recalibra trimestral"
+  quem: "Máquina"
+  entra: "conversões da fila por temperatura"
+  sai: "denominador do IR"
+  casos_degenerados:
+    - {condicao: "temperatura não registrada na fila", comportamento: "[LACUNA] campo não existe em nenhum modelo de dados do acervo", lacuna: LAC-FOR-014}
+  procedencia:
+    - {fonte: F3, local: "§2 · IR"}
+    - {fonte: F1, local: "§1.3"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+
+- id: FOR-SEV-010
+  tipo: FOR
+  bloco: SEV
+  nome: "Índice de Resgate (IR) — normalizado"
+  simbolo: IR
+  resumo: "Mede se ele executa a fila diária que o motor entrega ou a ignora."
+  expressao: "IR = mín( ConvReal ÷ ConvAlvo ; 1 ) × 100"
+  variaveis:
+    - {simbolo: ConvReal, nome: "RC ÷ RT", unidade: razao, origem: FOR-SEV-008, natureza: CRUA}
+    - {simbolo: ConvAlvo, nome: "P75 por temperatura", unidade: razao, origem: FOR-SEV-009, natureza: DERIVADA}
+  grao: vendedor
+  janela: mensal
+  natureza: NORMALIZADA
+  alvo: FOR-SEV-009
+  teto: 100
+  piso: 0
+  onde: "Camada 1 · parcela p4 do SEV"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "conversão real + alvo por temperatura"
+  sai: "parcela do SEV"
+  casos_degenerados:
+    - {condicao: "ConvAlvo = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}
+  procedencia:
+    - {fonte: F3, local: "§2 · IR"}
+    - {fonte: F1, local: "§1.3"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-003]
+
+- id: FOR-SEV-011
+  tipo: FOR
+  bloco: SEV
+  nome: "Índice de Adesão (IAd) — normalizado"
+  simbolo: IAd
+  resumo: "Mede o alinhamento à prioridade da semana. O alvo NÃO é 100%."
+  expressao: "IAd = mín( AdesãoReal ÷ AdesãoAlvo ; 1 ) × 100"
+  variaveis:
+    - {simbolo: AdesãoReal, nome: "VCa ÷ VT", unidade: razao, origem: fato_venda, natureza: CRUA}
+    - {simbolo: VCa, nome: "Vendas da Campanha vigente", unidade: contagem, origem: fato_venda, natureza: CRUA}
+    - {simbolo: VT, nome: "Vendas Totais do vendedor no período", unidade: contagem, origem: fato_venda, natureza: CRUA}
+    - {simbolo: AdesãoAlvo, nome: "participação-meta da campanha (do plano)", unidade: razao, origem: dim_campanha, natureza: DERIVADA}
+  grao: vendedor
+  janela: mensal
+  natureza: NORMALIZADA
+  alvo: {origem: dim_campanha, tipo: PLANEJADO, justificativa: "não se quer só venda de campanha — super-adesão canibaliza o mix"}
+  teto: 100
+  piso: 0
+  onde: "Camada 1 · parcela p5 do SEV"
+  quando: "Mensal"
+  quem: "Máquina / Consultor define o alvo"
+  entra: "vendas de campanha + participação-meta"
+  sai: "parcela do SEV"
+  casos_degenerados:
+    - {condicao: "sem campanha vigente no período", comportamento: "[LACUNA] não definido na fonte", lacuna: LAC-FOR-015}
+    - {condicao: "super-adesão (AdesãoReal >> AdesãoAlvo)", comportamento: "fonte sugere banda-alvo (penaliza acima e abaixo), mas não a define", lacuna: LAC-FOR-016}
+  procedencia:
+    - {fonte: F3, local: "§2 · IAd"}
+    - {fonte: F1, local: "§1.3"}
+    - {fonte: F6, local: "Parte G · IAd"}
+  status_canonico: CONFLITANTE
+  confianca: MEDIA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-017]
+  nota_fonte: "Denominador divergente entre fontes: F1 §1.1 e F3 dizem VT (vendas totais); F6 (Parte G) diz VTC. Extraído com VT (2 fontes contra 1) e registrado como conflito."
+
+- id: FOR-SEV-012
+  tipo: FOR
+  bloco: SEV
+  nome: "Score de Engenharia de Venda (SEV)"
+  simbolo: SEV
+  resumo: "Combina os cinco índices normalizados num número único por vendedor."
+  expressao: "SEV = (IC×p1) + (IA×p2) + (IT×p3) + (IR×p4) + (IAd×p5)"
+  variaveis:
+    - {simbolo: IC, origem: FOR-SEV-003, natureza: NORMALIZADA}
+    - {simbolo: IA, origem: FOR-SEV-006, natureza: NORMALIZADA}
+    - {simbolo: IT, origem: FOR-SEV-007, natureza: NORMALIZADA}
+    - {simbolo: IR, origem: FOR-SEV-010, natureza: NORMALIZADA}
+    - {simbolo: IAd, origem: FOR-SEV-011, natureza: NORMALIZADA}
+    - {simbolo: "p1..p5", nome: "vetor de pesos do estágio da loja", unidade: fracao, origem: PAR-SEV-001, natureza: PARAMETRO, restricao: "Σp = 1,00"}
+  grao: vendedor
+  janela: mensal
+  natureza: DERIVADA
+  teto: 100
+  piso: 0
+  onde: "Painel de performance"
+  quando: "Mensal; pesos recalibram trimestral"
+  quem: "Máquina"
+  entra: "5 índices normalizados + vetor de pesos do estágio"
+  sai: "banda do painel"
+  casos_degenerados:
+    - {condicao: "um ou mais índices sem dado (IR/IAd sem tabela Fila/Campanhas)", comportamento: "[LACUNA] fonte não define renormalização parcial", lacuna: LAC-FOR-018}
+    - {condicao: "comparação entre lojas de vetores diferentes", comportamento: "fonte proíbe comparação de frente; só tendência intra-loja", ref: REG-SEV-003}
+  procedencia:
+    - {fonte: F1, local: "§1.2"}
+    - {fonte: F3, local: "§3"}
+    - {fonte: F6, local: "Parte G · SEV composição"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-001, LAC-FOR-019]
+  verificado_contra: "Gabarito · 'Lobo solitário (SEV/IC) — V-03' e 'Vendedor novo (ramp) — V-35 · NÃO penalizar'"
+
+- id: PAR-SEV-001
+  tipo: FOR
+  bloco: SEV
+  nome: "Régua de Pesos por Maturidade — vetor p1..p5"
+  simbolo: "p⃗"
+  resumo: "Os pesos seguem o estágio da loja; lojas da mesma rede podem estar em estágios diferentes."
+  expressao: "p⃗ = f(estagio_loja)"
+  natureza: PARAMETRO
+  grao: loja
+  janela: trimestral
+  variaveis:
+    - {simbolo: estagio_loja, nome: "Cego | Construção | Cruzeiro", unidade: categoria, origem: config, natureza: PARAMETRO}
+  tabela:
+    - estagio: Cego
+      fases: "1–2 (dado ruim)"
+      p: {IC: 0.45, IA: 0.15, IT: 0.10, IR: 0.20, IAd: 0.10}
+      prioridade: "Encher a base — a loja está cega"
+      fontes_concordantes: [F1, F2, F6]
+    - estagio: Construção
+      fases: "padrão"
+      p_variante_A: {IC: 0.25, IA: 0.25, IT: 0.20, IR: 0.20, IAd: 0.10}
+      p_variante_A_fontes: [F1, F2]
+      p_variante_B: {IC: 0.30, IA: 0.25, IT: 0.20, IR: 0.15, IAd: 0.10}
+      p_variante_B_fontes: [F6]
+      prioridade: "Equilíbrio: alimentar o motor e a Receita Latente"
+      status: CONFLITANTE
+    - estagio: Cruzeiro
+      fases: "4"
+      p: {IC: 0.15, IA: 0.25, IT: 0.20, IR: 0.30, IAd: 0.10}
+      prioridade: "Usar a fila (IR) de forma agressiva"
+      fontes_concordantes: [F1, F2, F6]
+  onde: "Config do SEV"
+  quando: "Recalibra trimestral"
+  quem: "Consultor"
+  entra: "estágio de maturidade da loja"
+  sai: "vetor de pesos do SEV"
+  casos_degenerados:
+    - {condicao: "índice saturado (σ entre vendedores abaixo de limiar)", comportamento: "fonte manda rebaixar o peso e subir o do que ainda discrimina — limiar NÃO definido", lacuna: LAC-FOR-020}
+  procedencia:
+    - {fonte: F1, local: "§1.2 · tabela"}
+    - {fonte: F2, local: "§ composição · Tabela 2"}
+    - {fonte: F6, local: "Parte G · Régua de Pesos · Tabela 5"}
+  status_canonico: CONFLITANTE
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-001]
+  nota_fonte: "PASSE 1 NÃO ESCOLHEU. As duas variantes do estágio Construção estão registradas lado a lado. Só o estágio Construção diverge; Cego e Cruzeiro têm as três fontes concordando."
+
+# ═══════════════════════════════════════════════════════════════
+# BLOCO TMI — Engenharia do Ticket Médio Ideal
+# ═══════════════════════════════════════════════════════════════
+
+- id: FOR-TMI-001
+  tipo: FOR
+  bloco: TMI
+  nome: "TMI histórico do segmento"
+  simbolo: TMIhs
+  resumo: "O ideal não é a média — é o que a própria loja já alcança quando vende bem."
+  expressao: "TMIhs = P75( tickets das vendas do segmento s, na própria loja )"
+  variaveis:
+    - {simbolo: s, nome: "segmento (grau simples, multifocal, solar com grau, lente de contato)", unidade: categoria, origem: fato_venda, natureza: CRUA}
+  grao: loja_segmento
+  janela: trimestral
+  natureza: DERIVADA
+  onde: "Config do IT"
+  quando: "Recalibra trimestral"
+  quem: "Máquina"
+  entra: "vendas por segmento"
+  sai: "TMIhv (FOR-TMI-002)"
+  casos_degenerados:
+    - {condicao: "venda não etiquetada por tipo", comportamento: "fonte define fallback: P75 geral, e marca a segmentação como pendência da fase de higiene", ref: REG-TMI-001}
+    - {condicao: "amostra insuficiente no segmento", comportamento: "[LACUNA] mínimo não definido", lacuna: LAC-FOR-011}
+  procedencia:
+    - {fonte: F4, local: "§2 · Passo 2"}
+    - {fonte: F1, local: "§2.1"}
+    - {fonte: F6, local: "Parte G · Passo 1–2"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  nota_fonte: "Racional declarado: 25% das vendas já batem (é possível), 75% ficam abaixo (é aspiracional), e sobe sozinho conforme a loja melhora."
+
+- id: FOR-TMI-002
+  tipo: FOR
+  bloco: TMI
+  nome: "TMI histórico do vendedor (ponderado pelo mix)"
+  simbolo: TMIhv
+  resumo: "Pondera o ideal pela composição real de clientes daquele vendedor. Remove a sorte."
+  expressao: "TMIhv = Σ ( Mi × TMIhs_i )"
+  variaveis:
+    - {simbolo: Mi, nome: "participação (%) das vendas do vendedor no segmento i", unidade: fracao, origem: fato_venda, natureza: CRUA}
+    - {simbolo: TMIhs_i, nome: "TMI histórico do segmento i", unidade: BRL, origem: FOR-TMI-001, natureza: DERIVADA}
+  grao: vendedor
+  janela: trimestral
+  natureza: DERIVADA
+  onde: "Config do IT"
+  quando: "Recalibra trimestral"
+  quem: "Máquina"
+  entra: "mix do vendedor + TMI por segmento"
+  sai: "ponto de partida da ponte (FOR-TMI-004)"
+  casos_degenerados:
+    - {condicao: "Σ Mi ≠ 1", comportamento: "[LACUNA] normalização não declarada", lacuna: LAC-FOR-021}
+    - {condicao: "vendedor sem vendas no período", comportamento: "[LACUNA]", lacuna: LAC-FOR-011}
+  procedencia:
+    - {fonte: F4, local: "§2 · Passo 3"}
+    - {fonte: F1, local: "§2.2"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+
+- id: FOR-TMI-003
+  tipo: FOR
+  bloco: TMI
+  nome: "TMI de planejamento"
+  simbolo: TMIp
+  resumo: "O ticket que o negócio precisa para fechar as contas. Top-down."
+  expressao: "TMIp = MR ÷ NVp"
+  variaveis:
+    - {simbolo: MR, nome: "Meta de Receita do período", unidade: BRL, origem: fato_meta, natureza: PARAMETRO, colisao: "MR também designa Meta Residual em FOR-MET-008"}
+    - {simbolo: NVp, nome: "Número de Vendas projetado para o período", unidade: contagem, origem: fato_meta, natureza: PARAMETRO}
+  grao: loja
+  janela: trimestral
+  natureza: DERIVADA
+  onde: "Planejamento trimestral"
+  quando: "Trimestral, com o dono"
+  quem: "Consultor + Dono"
+  entra: "meta de receita e projeção de vendas"
+  sai: "destino da ponte + o Gap"
+  casos_degenerados:
+    - {condicao: "NVp = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}
+    - {condicao: "orçamento irreal", comportamento: "fonte classifica como Hopium — revê, não persegue", ref: REG-TMI-002}
+  procedencia:
+    - {fonte: F4, local: "§3"}
+    - {fonte: F1, local: "§2.3"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-004, LAC-FOR-006]
+  nota_fonte: "GRÃO LOJA. O TMIhv (FOR-TMI-002) é grão VENDEDOR. A ponte FOR-TMI-004 mistura os dois — ver LAC-FOR-006."
+
+- id: FOR-TMI-004
+  tipo: FOR
+  bloco: TMI
+  nome: "TMI operacional — a ponte (a régua do vendedor)"
+  simbolo: TMIo
+  resumo: "Começa no histórico (realista) e caminha para o planejamento no ritmo que o mix permite."
+  expressao: "TMIo = TMIhv + α × ( TMIp − TMIhv )"
+  variaveis:
+    - {simbolo: TMIhv, nome: "TMI histórico do vendedor", unidade: BRL, origem: FOR-TMI-002, natureza: DERIVADA, grao: vendedor}
+    - {simbolo: TMIp, nome: "TMI de planejamento", unidade: BRL, origem: FOR-TMI-003, natureza: DERIVADA, grao: loja}
+    - {simbolo: α, nome: "fração da ponte já percorrida", unidade: fracao, dominio: "[0, 1]", origem: config, natureza: PARAMETRO}
+  grao: vendedor
+  janela: trimestral
+  natureza: DERIVADA
+  onde: "Denominador do IT"
+  quando: "Trimestral; o consultor define o α"
+  quem: "Consultor"
+  entra: "TMIhv + TMIp"
+  sai: "denominador do IT (FOR-SEV-007)"
+  casos_degenerados:
+    - {condicao: "TMIp < TMIhv", comportamento: "[LACUNA] Gap fica negativo e a régua DESCE. Piso não declarado.", lacuna: LAC-FOR-007}
+    - {condicao: "α = 1", comportamento: "[LACUNA] todos os vendedores convergem para o mesmo TMIp de loja, dissolvendo a ponderação por mix que é a tese do bloco", lacuna: LAC-FOR-006}
+    - {condicao: "primeiro trimestre (sem histórico de α)", comportamento: "[LACUNA] α inicial não definido", lacuna: LAC-FOR-022}
+  procedencia:
+    - {fonte: F4, local: "§3 · TMI operacional"}
+    - {fonte: F1, local: "§2.4"}
+    - {fonte: F6, local: "Parte G · Passo 4"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-006, LAC-FOR-007, LAC-FOR-022]
+
+- id: FOR-TMI-005
+  tipo: FOR
+  bloco: TMI
+  nome: "Gap do TMI (o achado)"
+  simbolo: Gap_TMI
+  resumo: "O tamanho da transformação. Classificado em operacional, estrutural ou Hopium."
+  expressao: "Gap_TMI = TMIp − TMIhv"
+  variaveis:
+    - {simbolo: TMIp, origem: FOR-TMI-003, natureza: DERIVADA}
+    - {simbolo: TMIhv, origem: FOR-TMI-002, natureza: DERIVADA}
+  grao: vendedor
+  janela: trimestral
+  natureza: DERIVADA
+  onde: "Diagnóstico trimestral"
+  quando: "Trimestral"
+  quem: "Consultor"
+  entra: "as duas leituras do TMI"
+  sai: "classificação da transformação"
+  classificacao:
+    - {tipo: operacional, criterio: "fechável por mix e coaching (mais tratamento de lente, 2º par, armação de valor)", acao: "vira a meta que a régua persegue"}
+    - {tipo: estrutural, criterio: "o mercado/posicionamento não entrega esse ticket", acao: "decisão do dono: repor preço, mudar público"}
+    - {tipo: hopium, criterio: "o próprio orçamento é irreal", acao: "revisar, não perseguir"}
+  casos_degenerados:
+    - {condicao: "classificação do gap", comportamento: "[LACUNA] os três tipos não têm critério NUMÉRICO — a separação é julgamento do consultor", lacuna: LAC-FOR-023}
+  procedencia:
+    - {fonte: F4, local: "§3 · O gap é o achado"}
+    - {fonte: F1, local: "§2.5"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+
+- id: FOR-TMI-006
+  tipo: FOR
+  bloco: TMI
+  nome: "Ticket Médio Real"
+  simbolo: TMR
+  expressao: "TMR = receita do vendedor no período ÷ nº de vendas do vendedor no período"
+  variaveis:
+    - {simbolo: receita, unidade: BRL, origem: fato_venda, natureza: CRUA}
+    - {simbolo: "nº de vendas", unidade: contagem, origem: fato_venda, natureza: CRUA}
+  grao: vendedor
+  janela: mensal
+  natureza: CRUA
+  onde: "Camada 1 e 2"
+  quando: "Mensal (IT) e semanal (PV)"
+  quem: "Máquina"
+  entra: "vendas do vendedor"
+  sai: "numerador do IT; fator do PV"
+  casos_degenerados:
+    - {condicao: "nº de vendas = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}
+    - {condicao: "outlier de digitação", comportamento: "Gabarito exige robustez (P75), não média — a fórmula da fonte usa média", lacuna: LAC-FOR-024}
+  procedencia:
+    - {fonte: F1, local: "§1.1 · legenda", trecho: "TMR = Ticket Médio Real do vendedor"}
+  status_canonico: CANDIDATO
+  confianca: MEDIA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  nota_fonte: "A expressão NÃO está escrita em nenhuma fonte — só a legenda. Reconstruída pelo extrator a partir do nome. Marcada CANDIDATO por isso."
+  lacunas: [LAC-FOR-025]
+  verificado_contra: "Gabarito · 'Outlier de digitação — L9: preço R$33.900 e qtd=99 · usar P75/robustez, não média'"
+
+# ═══════════════════════════════════════════════════════════════
+# BLOCO FCT — Motor Probabilístico
+# ═══════════════════════════════════════════════════════════════
+
+- id: FOR-FCT-001
+  tipo: FOR
+  bloco: FCT
+  nome: "Previsão de Venda do vendedor (PV)"
+  simbolo: PV_forecast
+  resumo: "Prevê quanto cada vendedor deve fechar na semana usando a taxa de conversão dele e o ticket dele."
+  expressao: "PV = AG × ( IR ÷ 100 ) × TMR"
+  variaveis:
+    - {simbolo: AG, nome: "Agendamentos/contatos na fila dele para a semana", unidade: contagem, origem: fato_resgate, natureza: CRUA}
+    - {simbolo: IR, nome: "Índice de Resgate (%)", unidade: percentual, origem: FOR-SEV-010, natureza: NORMALIZADA, alerta: "CONFLITO — ver LAC-FOR-003"}
+    - {simbolo: TMR, nome: "Ticket Médio Real do vendedor", unidade: BRL, origem: FOR-TMI-006, natureza: CRUA}
+  grao: vendedor
+  janela: semanal
+  natureza: DERIVADA
+  onde: "Camada 2 · operação"
+  quando: "Semanal"
+  quem: "Máquina"
+  entra: "SEV + fila + ticket"
+  sai: "forecast; a soma dos PV é apresentada como o forecast da loja"
+  casos_degenerados:
+    - {condicao: "IR normalizado usado como probabilidade de conversão", comportamento: "🔴 [LACUNA CRÍTICA] a Blindagem (F3) redefiniu IR como índice contra alvo; usá-lo aqui como taxa infla o forecast", lacuna: LAC-FOR-003}
+    - {condicao: "vendedor sem fila (AG = 0)", comportamento: "PV = 0 — mas o passante não está modelado", lacuna: LAC-FOR-008}
+    - {condicao: "maturação", comportamento: "F6 declara que a Camada 2 amadurece em 60–90 dias; sem regra de confiança declarada", lacuna: LAC-FOR-026}
+  procedencia:
+    - {fonte: F1, local: "§3.1"}
+    - {fonte: F2, local: "Camada 2 · Previsão de Venda"}
+  status_canonico: CONFLITANTE
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-003, LAC-FOR-008, LAC-FOR-005]
+  nota_fonte: "Transcrita EXATAMENTE como está na fonte, inclusive com IR normalizado. Passe 1 não corrige. O símbolo PV colide com Preço de Venda (§6.1) — renomeado aqui para PV_forecast apenas no campo simbolo, com a colisão registrada."
+
+- id: FOR-FCT-002
+  tipo: FOR
+  bloco: FCT
+  nome: "Dias até a Ruptura (DR)"
+  simbolo: DR
+  resumo: "Antecipa o esgotamento dos SKUs da Curva A antes que ele aconteça."
+  expressao: "DR = EA ÷ VMD"
+  variaveis:
+    - {simbolo: EA, nome: "Estoque Atual (unidades)", unidade: contagem, origem: fato_estoque, natureza: CRUA}
+    - {simbolo: VMD, nome: "Venda Média Diária projetada", unidade: contagem_dia, origem: derivada, natureza: DERIVADA}
+  grao: sku_loja
+  janela: semanal
+  natureza: DERIVADA
+  onde: "Camada 2 · operação e compra"
+  quando: "Semanal"
+  quem: "Máquina"
+  entra: "estoque + hábito de mix da equipe (Camada 1)"
+  sai: "alerta de ruptura; alimenta a compra"
+  casos_degenerados:
+    - {condicao: "VMD = 0 (SKU sem giro)", comportamento: "[LACUNA] divisão por zero — e é justamente o estoque morto", lacuna: LAC-FOR-027}
+    - {condicao: "como projetar a VMD", comportamento: "[LACUNA] a fonte diz 'baseada no hábito de mix da equipe' sem fórmula", lacuna: LAC-FOR-028}
+    - {condicao: "comparação com lead time", comportamento: "[LACUNA] a fonte não declara o lead time como variável, mas o alerta depende dele"}
+  procedencia:
+    - {fonte: F1, local: "§3.2"}
+    - {fonte: F2, local: "Camada 2 · Dias até a Ruptura"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+# ═══════════════════════════════════════════════════════════════
+# BLOCO CMP — Motor Analítico-Comportamental
+# ═══════════════════════════════════════════════════════════════
+
+- id: FOR-CMP-001
+  tipo: FOR
+  bloco: CMP
+  nome: "Nota Comportamental (NC)"
+  simbolo: NC
+  resumo: "Média simples dos quatro critérios humanos. Não substitui o SEV — complementa."
+  expressao: "NC = ( E + Pt + Va + Qa ) ÷ 4"
+  variaveis:
+    - {simbolo: E, nome: "Ética", unidade: escala_0_100, origem: gestor, natureza: SUBJETIVA}
+    - {simbolo: Pt, nome: "Pontualidade", unidade: escala_0_100, origem: gestor, natureza: SUBJETIVA}
+    - {simbolo: Va, nome: "alinhamento a Valores", unidade: escala_0_100, origem: gestor, natureza: SUBJETIVA}
+    - {simbolo: Qa, nome: "Qualidade do atendimento (cliente oculto / NPS)", unidade: escala_0_100, origem: pesquisa, natureza: SUBJETIVA}
+  grao: vendedor
+  janela: trimestral
+  natureza: DERIVADA
+  teto: 100
+  piso: 0
+  onde: "Camada 3 · crivo do gestor"
+  quando: "Trimestral (ou mensal)"
+  quem: "Gestor"
+  entra: "observação / cliente oculto"
+  sai: "crivo de perfil; matriz SEV × NC"
+  casos_degenerados:
+    - {condicao: "critério não avaliado", comportamento: "[LACUNA] média de 4 com um ausente não definida", lacuna: LAC-FOR-029}
+  procedencia:
+    - {fonte: F1, local: "§4.1"}
+    - {fonte: F2, local: "Camada 3"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  nota_fonte: "Governança inseparável: SEV alto + NC baixa = 'Âncora tóxico'; SEV baixo + NC alta = desenvolver, não demitir. LGPD/trabalhista — só no modo (c)."
+
+- id: FOR-CMP-002
+  tipo: FOR
+  bloco: CMP
+  nome: "Régua de Perfil Ideal (RPI)"
+  simbolo: RPI
+  resumo: "Isola o que separa quem vence de quem falha — deriva do contraste, não só do topo."
+  expressao: "RPI = assinatura(Banda Topo) − assinatura(Banda Base + quem saiu)"
+  variaveis:
+    - {simbolo: assinatura, nome: "conjunto de índices (IC, IA, IT, IR) + traços (NC) que caracteriza o grupo", unidade: vetor, origem: derivada, natureza: DERIVADA}
+  grao: loja
+  janela: anual
+  natureza: DERIVADA
+  onde: "Retainer, ao contratar"
+  quando: "Amadurece em meses"
+  quem: "Consultor + Gestor"
+  entra: "contraste topo × base/saíram"
+  sai: "perfil de contratação"
+  casos_degenerados:
+    - {condicao: "operação de subtração entre vetores", comportamento: "🔴 [LACUNA] a fonte declara que 'a subtração é conceitual'. NÃO é computável como escrita.", lacuna: LAC-FOR-009}
+    - {condicao: "sem histórico de desligamentos", comportamento: "[LACUNA] o termo 'quem saiu' fica vazio", lacuna: LAC-FOR-030}
+  procedencia:
+    - {fonte: F1, local: "§4.2"}
+    - {fonte: F2, local: "A Régua de Perfil Ideal"}
+  status_canonico: CANDIDATO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-009]
+  nota_fonte: "Registrada como FOR por fidelidade — as fontes a apresentam entre as fórmulas. Mas não produz número; candidata a reclassificação como MEC no Passe 3."
+
+# ═══════════════════════════════════════════════════════════════
+# BLOCO MET — Atingimento de Metas por Categoria
+# Fonte ÚNICA: F1 §5. Não existe em nenhum outro arquivo do acervo.
+# Categorias: OS · LGS · LMF · LTR · SRV · ACC   (subscrito c)
+# ═══════════════════════════════════════════════════════════════
+
+- id: FOR-MET-001
+  tipo: FOR
+  bloco: MET
+  nome: "Atingimento Real (AR)"
+  simbolo: AR_c
+  expressao: "AR_c = ( V_c ÷ M_c ) × 100"
+  variaveis:
+    - {simbolo: V_c, nome: "Volume realizado na categoria c", unidade: BRL_ou_contagem, origem: fato_venda, natureza: CRUA}
+    - {simbolo: M_c, nome: "Meta mensal da categoria c", unidade: BRL_ou_contagem, origem: fato_meta, natureza: PARAMETRO}
+  grao: vendedor_categoria
+  janela: mensal_acumulado
+  natureza: CRUA
+  teto: null
+  piso: 0
+  onde: "Painel de metas"
+  quando: "Diária (acumulado do mês)"
+  quem: "Máquina"
+  entra: "vendas por categoria + meta"
+  sai: "Gap, CRA, AGV"
+  casos_degenerados:
+    - {condicao: "M_c = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}
+    - {condicao: "V_c > M_c", comportamento: "AR > 100 — sem teto declarado; propaga para o AGV", lacuna: LAC-FOR-013}
+    - {condicao: "unidade de V_c e M_c", comportamento: "[LACUNA] a fonte diz 'volume' e fato_meta tem meta_valor E meta_quantidade — qual?", lacuna: LAC-FOR-031}
+  procedencia: [{fonte: F1, local: "§5.1"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+
+- id: FOR-MET-002
+  tipo: FOR
+  bloco: MET
+  nome: "Projeção de Atingimento (PA)"
+  simbolo: PA_c
+  resumo: "Extrapola o realizado até o fim do mês pelo ritmo de dias úteis."
+  expressao: "PA_c = ( V_c ÷ DU_e ) × DU_t"
+  variaveis:
+    - {simbolo: V_c, unidade: BRL_ou_contagem, origem: fato_venda, natureza: CRUA}
+    - {simbolo: DU_e, nome: "Dias Úteis transcorridos", unidade: contagem, origem: dim_tempo, natureza: CRUA}
+    - {simbolo: DU_t, nome: "Dias Úteis totais do mês", unidade: contagem, origem: dim_tempo, natureza: CRUA}
+  grao: vendedor_categoria
+  janela: mensal_projetado
+  natureza: DERIVADA
+  onde: "Painel de metas"
+  quando: "Diária"
+  quem: "Máquina"
+  entra: "realizado + calendário"
+  sai: "PA% e CRA"
+  casos_degenerados:
+    - {condicao: "DU_e = 0 (dia 1 do mês)", comportamento: "🔴 divisão por zero", lacuna: LAC-FOR-032}
+    - {condicao: "sazonalidade intra-mês", comportamento: "🔴 [LACUNA] a extrapolação é LINEAR e assume distribuição uniforme pelos dias úteis. O varejo concentra em quinzena/fim de mês.", lacuna: LAC-FOR-015}
+  procedencia: [{fonte: F1, local: "§5.2"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  lacunas: [LAC-FOR-015, LAC-FOR-032]
+
+- id: FOR-MET-003
+  tipo: FOR
+  bloco: MET
+  nome: "Projeção de Atingimento em % da meta"
+  simbolo: "PA%_c"
+  expressao: "PA%_c = ( PA_c ÷ M_c ) × 100"
+  variaveis:
+    - {simbolo: PA_c, origem: FOR-MET-002, natureza: DERIVADA}
+    - {simbolo: M_c, origem: fato_meta, natureza: PARAMETRO}
+  grao: vendedor_categoria
+  janela: mensal_projetado
+  natureza: DERIVADA
+  onde: "Painel de metas · entrada da CRA"
+  quando: "Diária"
+  quem: "Máquina"
+  entra: "projeção + meta"
+  sai: "classificação de risco (CRA)"
+  casos_degenerados: [{condicao: "M_c = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}]
+  procedencia: [{fonte: F1, local: "§5.2"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  lacunas: [LAC-FOR-015]
+
+- id: FOR-MET-004
+  tipo: FOR
+  bloco: MET
+  nome: "Meta Esperada proporcional ao dia (ME)"
+  simbolo: ME_c
+  resumo: "Quanto do mês já passou, em percentual."
+  expressao: "ME_c = ( DU_e ÷ DU_t ) × 100"
+  variaveis:
+    - {simbolo: DU_e, origem: dim_tempo, natureza: CRUA}
+    - {simbolo: DU_t, origem: dim_tempo, natureza: CRUA}
+  grao: mes
+  janela: diaria
+  natureza: DERIVADA
+  onde: "Painel de metas"
+  quando: "Diária"
+  quem: "Máquina"
+  entra: "calendário"
+  sai: "referência do Gap"
+  casos_degenerados: [{condicao: "DU_t = 0", comportamento: "[LACUNA] impossível na prática"}]
+  procedencia: [{fonte: F1, local: "§5.3"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  nota_fonte: "O subscrito c aparece na fonte mas a expressão não depende da categoria — ME é igual para todas. Transcrito como está."
+
+- id: FOR-MET-005
+  tipo: FOR
+  bloco: MET
+  nome: "Descolamento da Meta (Gap)"
+  simbolo: Gap_c
+  expressao: "Gap_c = AR_c − ME_c"
+  variaveis:
+    - {simbolo: AR_c, origem: FOR-MET-001, natureza: CRUA}
+    - {simbolo: ME_c, origem: FOR-MET-004, natureza: DERIVADA}
+  grao: vendedor_categoria
+  janela: diaria
+  natureza: DERIVADA
+  interpretacao: {positivo: adiantado, negativo: atrasado}
+  onde: "Painel de metas"
+  quando: "Diária"
+  quem: "Máquina"
+  entra: "atingimento + fração do mês"
+  sai: "CMC; leitura de ritmo"
+  casos_degenerados: [{condicao: "herda os de AR e ME", comportamento: "propaga"}]
+  procedencia: [{fonte: F1, local: "§5.4"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-015]
+
+- id: FOR-MET-006
+  tipo: FOR
+  bloco: MET
+  nome: "Velocidade Diária (Pace)"
+  simbolo: Pace_c
+  expressao: "Pace_c = V_c ÷ DU_e"
+  variaveis:
+    - {simbolo: V_c, origem: fato_venda, natureza: CRUA}
+    - {simbolo: DU_e, origem: dim_tempo, natureza: CRUA}
+  grao: vendedor_categoria
+  janela: diaria
+  natureza: DERIVADA
+  onde: "Painel de metas"
+  quando: "Diária"
+  quem: "Máquina"
+  entra: "realizado + dias transcorridos"
+  sai: "referência do EDN e da Tendência"
+  casos_degenerados: [{condicao: "DU_e = 0", comportamento: "🔴 divisão por zero no dia 1", lacuna: LAC-FOR-032}]
+  procedencia: [{fonte: F1, local: "§5.5"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-MET-007
+  tipo: FOR
+  bloco: MET
+  nome: "Esforço Diário Necessário (EDN)"
+  simbolo: EDN_c
+  resumo: "Quanto precisa vender por dia útil restante para bater a meta."
+  expressao: "EDN_c = ( M_c − V_c ) ÷ ( DU_t − DU_e )"
+  variaveis:
+    - {simbolo: M_c, origem: fato_meta, natureza: PARAMETRO}
+    - {simbolo: V_c, origem: fato_venda, natureza: CRUA}
+    - {simbolo: DU_t, origem: dim_tempo, natureza: CRUA}
+    - {simbolo: DU_e, origem: dim_tempo, natureza: CRUA}
+  grao: vendedor_categoria
+  janela: diaria
+  natureza: DERIVADA
+  onde: "Painel de metas · entrada da CRA"
+  quando: "Diária"
+  quem: "Máquina"
+  entra: "meta residual + dias restantes"
+  sai: "CRA e Elasticidade"
+  leitura:
+    - {condicao: "EDN_c ≤ Pace_c", leitura: "Confortável — mantendo ritmo bate a meta"}
+    - {condicao: "EDN_c ≤ 1,5 × Pace_c", leitura: "Recuperável — precisa acelerar até 50%"}
+    - {condicao: "EDN_c > 1,5 × Pace_c", leitura: "Crítico — intervenção do gestor"}
+  casos_degenerados:
+    - {condicao: "DU_t = DU_e (último dia útil do mês)", comportamento: "🔴 divisão por zero — acontece TODO mês", lacuna: LAC-FOR-032}
+    - {condicao: "V_c > M_c (meta batida)", comportamento: "🔴 EDN negativo, sem leitura definida", lacuna: LAC-FOR-033}
+  procedencia: [{fonte: F1, local: "§5.6 + tabela de leitura"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-032, LAC-FOR-033]
+
+- id: FOR-MET-008
+  tipo: FOR
+  bloco: MET
+  nome: "Meta Residual"
+  simbolo: MR_c
+  expressao: "MR_c = M_c − V_c"
+  variaveis:
+    - {simbolo: M_c, origem: fato_meta, natureza: PARAMETRO}
+    - {simbolo: V_c, origem: fato_venda, natureza: CRUA}
+  grao: vendedor_categoria
+  janela: mensal_acumulado
+  natureza: DERIVADA
+  onde: "Painel de metas"
+  quando: "Diária"
+  quem: "Máquina"
+  entra: "meta e realizado"
+  sai: "numerador do EDN"
+  casos_degenerados: [{condicao: "V_c > M_c", comportamento: "negativo — sem leitura declarada", lacuna: LAC-FOR-033}]
+  procedencia: [{fonte: F1, local: "§5.7"}]
+  status_canonico: CONFLITANTE
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  lacunas: [LAC-FOR-004]
+  nota_fonte: "🔴 COLISÃO DE SÍMBOLO: MR designa Meta Residual aqui e Meta de Receita em FOR-TMI-003 (§2.3). O glossário da própria fonte (§7) lista só 'MR | Meta Residual', omitindo o outro uso."
+
+- id: FOR-MET-009
+  tipo: FOR
+  bloco: MET
+  nome: "Índice de Mix (IM)"
+  simbolo: IM_c
+  resumo: "Se a categoria está sobre ou sub-representada frente ao mix planejado."
+  expressao: "IM_c = P_real_c ÷ P_meta_c    onde   P_real_c = V_c ÷ ΣV   e   P_meta_c = M_c ÷ ΣM"
+  variaveis:
+    - {simbolo: P_real_c, nome: "participação real da categoria", unidade: fracao, origem: derivada, natureza: DERIVADA}
+    - {simbolo: P_meta_c, nome: "participação planejada da categoria", unidade: fracao, origem: derivada, natureza: DERIVADA}
+    - {simbolo: V_c, nome: "Volume realizado na categoria c", unidade: BRL_ou_contagem, origem: fato_venda, natureza: CRUA}
+    - {simbolo: M_c, nome: "Meta mensal da categoria c", unidade: BRL_ou_contagem, origem: fato_meta, natureza: PARAMETRO}
+    - {simbolo: "ΣV", nome: "volume total de todas as categorias", unidade: BRL_ou_contagem, origem: fato_venda, natureza: CRUA}
+    - {simbolo: "ΣM", nome: "meta total de todas as categorias", unidade: BRL_ou_contagem, origem: fato_meta, natureza: PARAMETRO}
+  grao: vendedor_categoria
+  janela: mensal_acumulado
+  natureza: DERIVADA
+  interpretacao: {igual_1: "mix perfeito", maior_1: "sobre-representada", menor_1: "sub-representada"}
+  onde: "Painel de metas"
+  quando: "Diária"
+  quem: "Máquina"
+  entra: "mix real + mix planejado"
+  sai: "leitura de composição"
+  casos_degenerados:
+    - {condicao: "ΣV = 0 ou ΣM = 0 ou P_meta_c = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}
+  procedencia: [{fonte: F1, local: "§5.8"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-MET-010
+  tipo: FOR
+  bloco: MET
+  nome: "Tendência Semanal (T)"
+  simbolo: T_c
+  expressao: "T_c = Pace_c(semana atual) ÷ Pace_c(semana anterior)"
+  variaveis:
+    - {simbolo: Pace_c, origem: FOR-MET-006, natureza: DERIVADA}
+  grao: vendedor_categoria
+  janela: semanal
+  natureza: DERIVADA
+  interpretacao:
+    - {condicao: "T > 1,05", leitura: Acelerando}
+    - {condicao: "0,95 ≤ T ≤ 1,05", leitura: Estável}
+    - {condicao: "T < 0,95", leitura: Desacelerando}
+  onde: "Painel de metas · entrada da CRA"
+  quando: "Semanal"
+  quem: "Máquina"
+  entra: "pace de duas semanas"
+  sai: "CRA"
+  casos_degenerados:
+    - {condicao: "primeira semana do mês", comportamento: "🔴 [LACUNA] 'semana anterior' não definida — a semana anterior do mês, ou a semana calendário anterior? A CRA depende de T e fica inclassificável.", lacuna: LAC-FOR-011}
+    - {condicao: "Pace da semana anterior = 0", comportamento: "[LACUNA] divisão por zero", lacuna: LAC-FOR-010}
+  procedencia: [{fonte: F1, local: "§5.9"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-034]
+
+- id: FOR-MET-011
+  tipo: FOR
+  bloco: MET
+  nome: "Elasticidade de Recuperação (ER)"
+  simbolo: ER_c
+  resumo: "Se o esforço necessário cabe dentro do que o vendedor já provou conseguir."
+  expressao: "ER_c = EDN_c ÷ Pace_max_c"
+  variaveis:
+    - {simbolo: EDN_c, origem: FOR-MET-007, natureza: DERIVADA}
+    - {simbolo: Pace_max_c, nome: "maior velocidade diária sustentada por 1 semana nos últimos 3 meses", unidade: BRL_dia, origem: derivada, natureza: DERIVADA}
+  grao: vendedor_categoria
+  janela: mensal
+  natureza: DERIVADA
+  interpretacao:
+    - {condicao: "ER ≤ 1", leitura: Viável}
+    - {condicao: "1 < ER ≤ 1,3", leitura: Apertada}
+    - {condicao: "ER > 1,3", leitura: "Improvável — não queime o vendedor"}
+  onde: "Painel de metas"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "esforço necessário + teto histórico do vendedor"
+  sai: "leitura de viabilidade"
+  casos_degenerados:
+    - {condicao: "vendedor com menos de 3 meses de histórico", comportamento: "🔴 [LACUNA] Pace_max indefinido. Ocorre em todo primeiro trimestre de implantação — exatamente quando a consultoria está lá.", lacuna: LAC-FOR-012}
+    - {condicao: "Pace_max = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}
+  procedencia: [{fonte: F1, local: "§5.11"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-012]
+  verificado_contra: "Gabarito · 'Vendedor novo (ramp) — V-35 (L10), contratado ~40 dias · NÃO penalizar'"
+
+- id: FOR-MET-012
+  tipo: FOR
+  bloco: MET
+  nome: "Contribuição Marginal por Categoria (CMC)"
+  simbolo: CMC_c
+  expressao: "CMC_c = ( V_c ÷ ΣV ) × ( Gap_c ÷ Σ|Gap| )"
+  variaveis:
+    - {simbolo: V_c, origem: fato_venda, natureza: CRUA}
+    - {simbolo: Gap_c, origem: FOR-MET-005, natureza: DERIVADA}
+  grao: vendedor_categoria
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Painel de metas"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "peso da categoria + descolamento"
+  sai: "[LACUNA] a fonte não declara que decisão isto dirige"
+  casos_degenerados:
+    - {condicao: "Σ|Gap| = 0 (tudo no ritmo)", comportamento: "🔴 divisão por zero", lacuna: LAC-FOR-010}
+    - {condicao: "numerador com sinal, denominador em módulo", comportamento: "[LACUNA] mistura declarada na fonte; interpretação do resultado não explicada", lacuna: LAC-FOR-035}
+  procedencia: [{fonte: F1, local: "§5.12"}]
+  status_canonico: CANDIDATO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-035]
+  nota_fonte: "Única fórmula do Bloco 5 sem campo 'Para que serve' na fonte. Marcada CANDIDATO por propósito não declarado."
+
+- id: FOR-MET-013
+  tipo: FOR
+  bloco: MET
+  nome: "Atingimento Geral do Vendedor (AGV)"
+  simbolo: AGV
+  expressao: "AGV = Σ ( AR_c × w_c )"
+  variaveis:
+    - {simbolo: AR_c, origem: FOR-MET-001, natureza: CRUA}
+    - {simbolo: w_c, nome: "peso da categoria", unidade: fracao, origem: PAR-MET-001, natureza: PARAMETRO, restricao: "Σw = 1,00"}
+  grao: vendedor
+  janela: mensal
+  natureza: DERIVADA
+  teto: null
+  piso: 0
+  onde: "Painel de metas"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "atingimento por categoria + pesos"
+  sai: "nota única de atingimento"
+  casos_degenerados:
+    - {condicao: "AR_c sem teto", comportamento: "🔴 [LACUNA] estourar uma categoria de meta pequena levanta o AGV inteiro. O SEV tem teto por índice; o AGV não.", lacuna: LAC-FOR-013}
+    - {condicao: "categoria sem meta no mês", comportamento: "[LACUNA] renormalização dos pesos não declarada", lacuna: LAC-FOR-036}
+  procedencia: [{fonte: F1, local: "§5.13"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-013, LAC-FOR-014]
+
+- id: PAR-MET-001
+  tipo: FOR
+  bloco: MET
+  nome: "Pesos por categoria (w_c) — AGV/AGL"
+  simbolo: w_c
+  expressao: "w_c = valor fixo por categoria (tabela)"
+  natureza: PARAMETRO
+  grao: rede
+  janela: fixa
+  variaveis:
+    - {simbolo: c, nome: "categoria", unidade: categoria, origem: dim_produto, natureza: CRUA}
+  tabela:
+    - {categoria: LMF, nome: "Multifocais", w: 0.25, racional: "Maior margem e ticket"}
+    - {categoria: LTR, nome: "Transition", w: 0.20, racional: "Alto valor agregado"}
+    - {categoria: LGS, nome: "Grau Simples", w: 0.20, racional: "Volume base"}
+    - {categoria: OS, nome: "Óculos de Sol", w: 0.15, racional: "Margem forte, sazonal"}
+    - {categoria: SRV, nome: "Serviços", w: 0.10, racional: "Fidelização"}
+    - {categoria: ACC, nome: "Acessórios", w: 0.10, racional: "Complemento"}
+  soma_verificada: 1.00
+  onde: "Config do AGV/AGL"
+  quando: "[LACUNA] cadência de revisão não declarada"
+  quem: "[LACUNA] não declarado"
+  entra: "—"
+  sai: "pesos do AGV"
+  casos_degenerados:
+    - {condicao: "cliente sem alguma categoria no mix", comportamento: "[LACUNA]", lacuna: LAC-FOR-036}
+  procedencia: [{fonte: F1, local: "§5.13 · tabela 'Peso Sugerido'"}]
+  status_canonico: CANDIDATO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-014]
+  nota_fonte: "🔴 A fonte rotula como 'Peso Sugerido' com coluna 'Racional' — são valores fixados por julgamento, NÃO derivados do dado. Contradiz a doutrina declarada no Playbook v9 ('todo número ideal é derivado do dado do próprio cliente e caminha por glide path — nunca chutado'). Registrado como CANDIDATO."
+
+- id: FOR-MET-014
+  tipo: FOR
+  bloco: MET
+  nome: "Atingimento Geral da Loja (AGL)"
+  simbolo: AGL
+  expressao: "AGL = Σ ( AR_c(loja) × w_c )"
+  variaveis:
+    - {simbolo: "AR_c(loja)", nome: "atingimento real da categoria na loja", unidade: percentual, origem: FOR-MET-001, natureza: CRUA}
+    - {simbolo: w_c, origem: PAR-MET-001, natureza: PARAMETRO}
+  grao: loja
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Painel de metas · visão gerencial"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "atingimento da loja por categoria"
+  sai: "nota única da loja"
+  casos_degenerados: [{condicao: "herda os do AGV", comportamento: "propaga", lacuna: LAC-FOR-013}]
+  procedencia: [{fonte: F1, local: "§5.14"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+
+# ═══════════════════════════════════════════════════════════════
+# BLOCO MRG — Margem de Contribuição desdobrada
+# Fonte ÚNICA: F1 §6. Não existe em nenhum outro arquivo do acervo.
+# NOTA: o cabeçalho da fonte diz "5 Níveis" mas o corpo tem 6 (§6.1 a §6.6).
+# ═══════════════════════════════════════════════════════════════
+
+- id: FOR-MRG-001
+  tipo: FOR
+  bloco: MRG
+  nome: "MC por item / SKU — Nível 1"
+  simbolo: MC_item
+  expressao: "MC_item = PV_item − CE_item − CV_item"
+  variaveis:
+    - {simbolo: PV_item, nome: "Preço de Venda praticado (líquido de desconto)", unidade: BRL, origem: fato_venda, natureza: CRUA, colisao: "PV também designa Previsão de Venda em FOR-FCT-001"}
+    - {simbolo: CE_item, nome: "Custo de Entrada (NF de compra)", unidade: BRL, origem: fato_compra, natureza: CRUA}
+    - {simbolo: CV_item, nome: "Custos Variáveis (imposto sobre venda, comissão, taxa de cartão/Pix, frete)", unidade: BRL, origem: derivada, natureza: DERIVADA}
+  grao: item
+  janela: tempo_real
+  natureza: CRUA
+  onde: "Diagnóstico e operação"
+  quando: "Diária"
+  quem: "Máquina"
+  entra: "preço, custo, variáveis"
+  sai: "todos os níveis superiores de MC"
+  casos_degenerados:
+    - {condicao: "'imposto sobre venda' sob Simples Nacional", comportamento: "🔴 [LACUNA] o DAS incide sobre a receita bruta do mês por faixa (RBT12), não por item. A alocação por item não está definida.", lacuna: LAC-FOR-019}
+    - {condicao: "custo_entrada divergente da NF de compra", comportamento: "assinatura de erro cadastral — ver evidência ARP-013", lacuna: LAC-FOR-037}
+    - {condicao: "comissão contada em CV e folha contada em CF", comportamento: "🔴 risco de dupla contagem no Ponto de Equilíbrio", lacuna: LAC-FOR-020}
+  procedencia: [{fonte: F1, local: "§6.1"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  lacunas: [LAC-FOR-005, LAC-FOR-019, LAC-FOR-020]
+  implementado_em: "src/product_b/oracle/commercial_auditor.py · detect_contribution_margin"
+  verificado_contra: "Gabarito · 'Prejuízo Oculto (B5) — SKU NEG-001..003 · vendidos a R$200, custo R$190 → margem negativa'"
+
+- id: FOR-MRG-002
+  tipo: FOR
+  bloco: MRG
+  nome: "MC percentual do item"
+  simbolo: "MC%_item"
+  expressao: "MC%_item = ( MC_item ÷ PV_item ) × 100"
+  variaveis:
+    - {simbolo: MC_item, origem: FOR-MRG-001, natureza: DERIVADA}
+    - {simbolo: PV_item, origem: fato_venda, natureza: CRUA}
+  grao: item
+  janela: tempo_real
+  natureza: DERIVADA
+  onde: "Alerta de margem"
+  quando: "Diária"
+  quem: "Máquina"
+  entra: "MC do item"
+  sai: "alerta TRAVA/RISCO/OK"
+  casos_degenerados: [{condicao: "PV_item = 0 (brinde, bonificação)", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}]
+  procedencia: [{fonte: F1, local: "§6.1"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-MRG-003
+  tipo: FOR
+  bloco: MRG
+  nome: "MC por categoria — Nível 2"
+  simbolo: MC_cat
+  expressao: "MC_cat = Σ (i ∈ cat) MC_item_i"
+  variaveis: [{simbolo: MC_item, origem: FOR-MRG-001, natureza: DERIVADA}]
+  grao: categoria_loja
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Análise de mix"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "MC dos itens da categoria"
+  sai: "participação e decisão de mix"
+  casos_degenerados: [{condicao: "categoria sem venda no período", comportamento: "MC = 0 (definido por soma vazia)"}]
+  procedencia: [{fonte: F1, local: "§6.2"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-MRG-004
+  tipo: FOR
+  bloco: MRG
+  nome: "MC percentual da categoria"
+  simbolo: "MC%_cat"
+  expressao: "MC%_cat = ( MC_cat ÷ R_cat ) × 100"
+  variaveis:
+    - {simbolo: MC_cat, origem: FOR-MRG-003, natureza: DERIVADA}
+    - {simbolo: R_cat, nome: "Receita total da categoria (soma dos PV)", unidade: BRL, origem: fato_venda, natureza: CRUA}
+  grao: categoria_loja
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Análise de mix"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "MC e receita da categoria"
+  sai: "leitura de rentabilidade"
+  casos_degenerados: [{condicao: "R_cat = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}]
+  procedencia: [{fonte: F1, local: "§6.2"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-MRG-005
+  tipo: FOR
+  bloco: MRG
+  nome: "Participação da categoria na MC total"
+  simbolo: Part_cat
+  resumo: "Responde: qual categoria mais contribui para pagar o custo fixo?"
+  expressao: "Part_cat = ( MC_cat ÷ Σ MC_cat ) × 100"
+  variaveis: [{simbolo: MC_cat, origem: FOR-MRG-003, natureza: DERIVADA}]
+  grao: categoria_loja
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Análise de mix"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "MC por categoria"
+  sai: "ranking de contribuição"
+  casos_degenerados:
+    - {condicao: "Σ MC_cat = 0 ou negativo", comportamento: "[LACUNA] participação sobre base negativa não tem leitura", lacuna: LAC-FOR-038}
+  procedencia: [{fonte: F1, local: "§6.2"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  nota_extrator: "Candidata natural a substituir os pesos chutados w_c do PAR-MET-001. Não aplicado no Passe 1 — é correção, não extração. Ver LAC-FOR-014."
+
+- id: FOR-MRG-006
+  tipo: FOR
+  bloco: MRG
+  nome: "MC por vendedor — Nível 3"
+  simbolo: MC_vend
+  expressao: "MC_vend = Σ (i ∈ vendas do vendedor) MC_item_i"
+  variaveis: [{simbolo: MC_item, origem: FOR-MRG-001, natureza: DERIVADA}]
+  grao: vendedor
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Painel de performance"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "MC dos itens vendidos por ele"
+  sai: "RDM, dispersão da equipe"
+  casos_degenerados: [{condicao: "pseudo-entidade (vendedor genérico do PDV)", comportamento: "excluir — regra existente no motor (is_pseudo_entity), não declarada na fonte", lacuna: LAC-FOR-039}]
+  procedencia: [{fonte: F1, local: "§6.3"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-MRG-007
+  tipo: FOR
+  bloco: MRG
+  nome: "MC percentual do vendedor"
+  simbolo: "MC%_vend"
+  expressao: "MC%_vend = ( MC_vend ÷ R_vend ) × 100"
+  variaveis:
+    - {simbolo: MC_vend, origem: FOR-MRG-006, natureza: DERIVADA}
+    - {simbolo: R_vend, nome: "Receita total gerada pelo vendedor", unidade: BRL, origem: fato_venda, natureza: CRUA}
+  grao: vendedor
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Painel de performance"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "MC e receita do vendedor"
+  sai: "RDM e dispersão"
+  casos_degenerados: [{condicao: "R_vend = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}]
+  procedencia: [{fonte: F1, local: "§6.3"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-MRG-008
+  tipo: FOR
+  bloco: MRG
+  nome: "MC por categoria por vendedor (a matriz)"
+  simbolo: "MC_vend,cat"
+  resumo: "Responde: o vendedor X vende Multifocal com margem boa ou está dando desconto que corrói?"
+  expressao: "MC_vend,cat = Σ (i ∈ vendas_vend ∩ cat) MC_item_i"
+  variaveis: [{simbolo: MC_item, origem: FOR-MRG-001, natureza: DERIVADA}]
+  grao: vendedor_categoria
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Painel de performance · drill-down"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "MC dos itens por vendedor e categoria"
+  sai: "matriz de coaching"
+  casos_degenerados: [{condicao: "célula com amostra mínima", comportamento: "[LACUNA]", lacuna: LAC-FOR-011}]
+  procedencia: [{fonte: F1, local: "§6.3"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+
+- id: FOR-MRG-009
+  tipo: FOR
+  bloco: MRG
+  nome: "MC por transação do vendedor"
+  simbolo: "MC_tx,vend"
+  expressao: "MC_tx,vend = MC_vend ÷ N_vend"
+  variaveis:
+    - {simbolo: MC_vend, origem: FOR-MRG-006, natureza: DERIVADA}
+    - {simbolo: N_vend, nome: "Número de transações do vendedor", unidade: contagem, origem: fato_venda, natureza: CRUA}
+  grao: vendedor
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Painel de performance"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "MC total e nº de transações"
+  sai: "margem média por venda"
+  casos_degenerados: [{condicao: "N_vend = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}]
+  procedencia: [{fonte: F1, local: "§6.3"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-MRG-010
+  tipo: FOR
+  bloco: MRG
+  nome: "MC por gestor (equipe) — Nível 4"
+  simbolo: MC_gestor
+  expressao: "MC_gestor = Σ (v ∈ equipe do gestor) MC_vend_v"
+  variaveis: [{simbolo: MC_vend, origem: FOR-MRG-006, natureza: DERIVADA}]
+  grao: gestor
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Painel gerencial"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "MC dos vendedores da equipe"
+  sai: "MC% e dispersão do gestor"
+  casos_degenerados: [{condicao: "vendedor transferido no meio do mês", comportamento: "[LACUNA] atribuição de equipe ao longo do tempo não declarada", lacuna: LAC-FOR-040}]
+  procedencia: [{fonte: F1, local: "§6.4"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-MRG-011
+  tipo: FOR
+  bloco: MRG
+  nome: "MC percentual do gestor"
+  simbolo: "MC%_gestor"
+  expressao: "MC%_gestor = ( MC_gestor ÷ R_gestor ) × 100"
+  variaveis:
+    - {simbolo: MC_gestor, origem: FOR-MRG-010, natureza: DERIVADA}
+    - {simbolo: R_gestor, nome: "Receita total da equipe do gestor", unidade: BRL, origem: fato_venda, natureza: CRUA}
+  grao: gestor
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Painel gerencial"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "MC e receita da equipe"
+  sai: "leitura de rentabilidade da equipe"
+  casos_degenerados: [{condicao: "R_gestor = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}]
+  procedencia: [{fonte: F1, local: "§6.4"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-MRG-012
+  tipo: FOR
+  bloco: MRG
+  nome: "Dispersão de margem na equipe"
+  simbolo: Disp_gestor
+  resumo: "Dispersão alta = falta de padrão na negociação dentro da equipe."
+  expressao: "Disp_gestor = MC%_vend(máx) − MC%_vend(mín)"
+  variaveis: [{simbolo: "MC%_vend", origem: FOR-MRG-007, natureza: DERIVADA}]
+  grao: gestor
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Painel gerencial"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "MC% de cada vendedor da equipe"
+  sai: "sinal de falta de padrão"
+  casos_degenerados:
+    - {condicao: "vendedor com pouquíssimas vendas no extremo", comportamento: "🔴 [LACUNA] amplitude (máx − mín) é dominada por um outlier. Com 5 vendedores por loja, uma venda ruim destrói a métrica. Sem mínimo de amostra declarado.", lacuna: LAC-FOR-011}
+  procedencia: [{fonte: F1, local: "§6.4"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-011]
+
+- id: FOR-MRG-013
+  tipo: FOR
+  bloco: MRG
+  nome: "MC por loja — Nível 5"
+  simbolo: MC_loja
+  expressao: "MC_loja = Σ (v ∈ loja) MC_vend_v"
+  variaveis: [{simbolo: MC_vend, origem: FOR-MRG-006, natureza: DERIVADA}]
+  grao: loja
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Painel de presidência"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "MC dos vendedores da loja"
+  sai: "PE e ICCF"
+  casos_degenerados:
+    - {condicao: "venda sem vendedor atribuído", comportamento: "🔴 [LACUNA] somar por vendedor perde as vendas sem vendedor. A MC da loja deveria somar ITENS, não vendedores.", lacuna: LAC-FOR-041}
+  procedencia: [{fonte: F1, local: "§6.5"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  verificado_contra: "Gabarito · 'MACRO M1 · Prejuízo mascarado — L7-Oeste e L9-Serra: batem faturamento, margem NEGATIVA'"
+
+- id: FOR-MRG-014
+  tipo: FOR
+  bloco: MRG
+  nome: "MC percentual da loja"
+  simbolo: "MC%_loja"
+  expressao: "MC%_loja = ( MC_loja ÷ R_loja ) × 100"
+  variaveis:
+    - {simbolo: MC_loja, origem: FOR-MRG-013, natureza: DERIVADA}
+    - {simbolo: R_loja, nome: "Receita total da loja", unidade: BRL, origem: fato_venda, natureza: CRUA}
+  grao: loja
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Painel de presidência"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "MC e receita da loja"
+  sai: "denominador do Ponto de Equilíbrio"
+  casos_degenerados:
+    - {condicao: "R_loja = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}
+    - {condicao: "receita de serviço × receita de produto", comportamento: "🔴 [LACUNA] o Gabarito exige decompor (serviço mascara produto em L7). A fórmula agrega tudo.", lacuna: LAC-FOR-042}
+  procedencia: [{fonte: F1, local: "§6.5"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  verificado_contra: "Gabarito · 'SVC · Serviço mascara produto (L7): serviços almofadam o total, margem de PRODUTO segue ~-R$4k'"
+
+- id: FOR-MRG-015
+  tipo: FOR
+  bloco: MRG
+  nome: "Ponto de Equilíbrio Operacional da loja"
+  simbolo: PE_loja
+  resumo: "A receita mínima para cobrir o custo fixo."
+  expressao: "PE_loja = CF_loja ÷ ( MC%_loja ÷ 100 )"
+  variaveis:
+    - {simbolo: CF_loja, nome: "Custo Fixo mensal da loja (aluguel, folha, energia, sistemas)", unidade: BRL, origem: fato_custo_fixo, natureza: CRUA}
+    - {simbolo: "MC%_loja", origem: FOR-MRG-014, natureza: DERIVADA}
+  grao: loja
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Painel de presidência"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "custo fixo + margem percentual"
+  sai: "receita mínima em R$"
+  casos_degenerados:
+    - {condicao: "MC%_loja ≤ 0", comportamento: "🔴 PE negativo ou infinito — a loja não tem ponto de equilíbrio. Sem tratamento declarado.", lacuna: LAC-FOR-043}
+    - {condicao: "folha inclui comissão já contada em CV", comportamento: "🔴 dupla contagem", lacuna: LAC-FOR-020}
+  procedencia: [{fonte: F1, local: "§6.5"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  lacunas: [LAC-FOR-020, LAC-FOR-043]
+
+- id: FOR-MRG-016
+  tipo: FOR
+  bloco: MRG
+  nome: "Índice de Cobertura do Custo Fixo (ICCF)"
+  simbolo: ICCF_loja
+  expressao: "ICCF_loja = MC_loja ÷ CF_loja"
+  variaveis:
+    - {simbolo: MC_loja, origem: FOR-MRG-013, natureza: DERIVADA}
+    - {simbolo: CF_loja, origem: fato_custo_fixo, natureza: CRUA}
+  grao: loja
+  janela: mensal
+  natureza: DERIVADA
+  interpretacao:
+    - {condicao: "ICCF < 1", leitura: "A loja não cobre o custo fixo — prejuízo operacional"}
+    - {condicao: "ICCF = 1", leitura: "Empata (breakeven)"}
+    - {condicao: "ICCF > 1", leitura: "Gera lucro operacional"}
+  onde: "Painel de presidência"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "MC e custo fixo"
+  sai: "semáforo de saúde da loja"
+  casos_degenerados: [{condicao: "CF_loja = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}]
+  procedencia: [{fonte: F1, local: "§6.5"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+
+- id: FOR-MRG-017
+  tipo: FOR
+  bloco: MRG
+  nome: "MC da operação consolidada — Nível 6"
+  simbolo: MC_op
+  expressao: "MC_op = Σ (l ∈ lojas) MC_loja_l"
+  variaveis: [{simbolo: MC_loja, origem: FOR-MRG-013, natureza: DERIVADA}]
+  grao: rede
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Painel de presidência"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "MC de todas as lojas"
+  sai: "PE da operação"
+  casos_degenerados:
+    - {condicao: "agregação esconde loja no vermelho", comportamento: "Gabarito exige que o motor detecte — 'agregado da rede esconde'", lacuna: LAC-FOR-042}
+  procedencia: [{fonte: F1, local: "§6.6"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  nota_fonte: "A fonte titula o bloco como '5 Níveis' mas apresenta 6 (§6.1 a §6.6). Discrepância de título registrada em LAC-FOR-044."
+  verificado_contra: "Gabarito · 'MACRO M1 · agregado da rede esconde'"
+
+- id: FOR-MRG-018
+  tipo: FOR
+  bloco: MRG
+  nome: "MC percentual da operação"
+  simbolo: "MC%_op"
+  expressao: "MC%_op = ( MC_op ÷ R_op ) × 100"
+  variaveis:
+    - {simbolo: MC_op, origem: FOR-MRG-017, natureza: DERIVADA}
+    - {simbolo: R_op, nome: "Receita total da operação", unidade: BRL, origem: fato_venda, natureza: CRUA}
+  grao: rede
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Painel de presidência"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "MC e receita consolidadas"
+  sai: "denominador do PE da operação"
+  casos_degenerados: [{condicao: "R_op = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}]
+  procedencia: [{fonte: F1, local: "§6.6"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-MRG-019
+  tipo: FOR
+  bloco: MRG
+  nome: "Ponto de Equilíbrio da operação"
+  simbolo: PE_op
+  expressao: "PE_op = CF_op ÷ ( MC%_op ÷ 100 )"
+  variaveis:
+    - {simbolo: CF_op, nome: "Custo Fixo total de todas as lojas + overhead corporativo", unidade: BRL, origem: fato_custo_fixo, natureza: CRUA}
+    - {simbolo: "MC%_op", origem: FOR-MRG-018, natureza: DERIVADA}
+  grao: rede
+  janela: mensal
+  natureza: DERIVADA
+  onde: "Painel de presidência"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "custo fixo consolidado + margem"
+  sai: "receita mínima da rede"
+  casos_degenerados:
+    - {condicao: "MC%_op ≤ 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-043}
+    - {condicao: "overhead corporativo", comportamento: "[LACUNA] o modelo de dados (fato_custo_fixo) tem grão loja e não comporta overhead corporativo", lacuna: LAC-FOR-045}
+  procedencia: [{fonte: F1, local: "§6.6"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+
+- id: FOR-MRG-020
+  tipo: FOR
+  bloco: MRG
+  nome: "Alerta de Margem Negativa"
+  simbolo: Alerta_MC
+  resumo: "Semáforo por transação."
+  expressao: "Alerta_MC = 🔴 TRAVA se MC_item ≤ 0 ; 🟡 RISCO se MC%_item < MC%_piso ; 🟢 OK caso contrário"
+  variaveis:
+    - {simbolo: MC_item, origem: FOR-MRG-001, natureza: DERIVADA}
+    - {simbolo: "MC%_item", origem: FOR-MRG-002, natureza: DERIVADA}
+    - {simbolo: "MC%_piso", nome: "Margem mínima aceitável definida pelo dono/consultor", unidade: percentual, origem: config, natureza: PARAMETRO, exemplo: 15}
+  grao: item
+  janela: tempo_real
+  natureza: DERIVADA
+  onde: "Alerta operacional"
+  quando: "Diária"
+  quem: "Máquina"
+  entra: "MC do item + piso configurado"
+  sai: "alerta ao dono e ao consultor"
+  casos_degenerados:
+    - {condicao: "promoção sinalizada", comportamento: "Gabarito exige NÃO marcar como prejuízo (PROMO-001: R$112 sobre custo R$100 = margem pequena positiva). Sem regra de exceção declarada na fonte.", lacuna: LAC-FOR-046}
+  procedencia: [{fonte: F1, local: "§6.7"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  verificado_contra: "Gabarito · 'B (falso+) · Desconto promocional — SKU PROMO-001 (L8) · NÃO marcar como prejuízo'"
+
+- id: FOR-MRG-021
+  tipo: FOR
+  bloco: MRG
+  nome: "Erosão de Margem por Desconto (EMD)"
+  simbolo: EMD_vend
+  resumo: "Identifica quem está comprando a venda com a margem da loja."
+  expressao: "EMD_vend = ( Σ Desc_vend ÷ R_vend ) × 100"
+  variaveis:
+    - {simbolo: Desc_vend, nome: "Soma dos descontos concedidos pelo vendedor", unidade: BRL, origem: derivada, natureza: DERIVADA}
+    - {simbolo: R_vend, nome: "Receita do vendedor", unidade: BRL, origem: fato_venda, natureza: CRUA}
+  grao: vendedor
+  janela: mensal
+  natureza: DERIVADA
+  teto: null
+  onde: "Painel de performance"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "descontos e receita"
+  sai: "ranking de erosão"
+  casos_degenerados:
+    - {condicao: "preço de tabela desalinhado da prática da loja", comportamento: "🔴 fórmula SEM TETO — produziu 337,78% em dado real (V-30/L9-Serra). A Fase C criou triagem obrigatória por causa disso; a fonte NÃO carrega essa trava.", lacuna: LAC-FOR-002}
+    - {condicao: "R_vend = 0", comportamento: "[LACUNA]", lacuna: LAC-FOR-010}
+  procedencia: [{fonte: F1, local: "§6.7"}]
+  status_canonico: CONFLITANTE
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-002]
+  implementado_em: "src/product_b/oracle/commercial_auditor.py · Algoritmo 3 (SPEC_Fase_B)"
+  nota_fonte: "🔴 A versão implementada tem trava de triagem (SPEC_Fase_C) que a versão documentada não tem. Quem implementar a partir do Arsenal reconstrói o bug dos 337%."
+
+- id: FOR-MRG-022
+  tipo: FOR
+  bloco: MRG
+  nome: "Ranking de Destruição de Margem (RDM)"
+  simbolo: RDM_vend
+  expressao: "RDM_vend = MC%_vend − MC%_loja"
+  variaveis:
+    - {simbolo: "MC%_vend", origem: FOR-MRG-007, natureza: DERIVADA}
+    - {simbolo: "MC%_loja", origem: FOR-MRG-014, natureza: DERIVADA}
+  grao: vendedor
+  janela: mensal
+  natureza: DERIVADA
+  interpretacao: {negativo: "destrói margem frente à média da loja", positivo: "preserva margem acima da média"}
+  onde: "Painel de performance"
+  quando: "Mensal"
+  quem: "Máquina"
+  entra: "MC% do vendedor e da loja"
+  sai: "ranking relativo"
+  casos_degenerados:
+    - {condicao: "o vendedor está dentro da média contra a qual é comparado", comportamento: "🔴 [LACUNA] com 5 vendedores por loja, cada um é ~20% da própria referência. Sem leave-one-out nem mediana declarados.", lacuna: LAC-FOR-047}
+  procedencia: [{fonte: F1, local: "§6.7"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-047]
+
+- id: FOR-MRG-023
+  tipo: FOR
+  bloco: MRG
+  nome: "MC projetada para o fim do mês"
+  simbolo: MC_proj
+  expressao: "MC_proj = ( MC_acum ÷ DU_e ) × DU_t"
+  variaveis:
+    - {simbolo: MC_acum, nome: "MC acumulada no mês", unidade: BRL, origem: FOR-MRG-001, natureza: DERIVADA}
+    - {simbolo: DU_e, origem: dim_tempo, natureza: CRUA}
+    - {simbolo: DU_t, origem: dim_tempo, natureza: CRUA}
+  grao: loja
+  janela: mensal_projetado
+  natureza: DERIVADA
+  onde: "Painel financeiro"
+  quando: "Diária"
+  quem: "Máquina"
+  entra: "MC acumulada + calendário"
+  sai: "Gap de MC"
+  casos_degenerados:
+    - {condicao: "DU_e = 0", comportamento: "🔴 divisão por zero", lacuna: LAC-FOR-032}
+    - {condicao: "sazonalidade intra-mês", comportamento: "🔴 mesma extrapolação linear do FOR-MET-002", lacuna: LAC-FOR-015}
+  procedencia: [{fonte: F1, local: "§6.7"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: LITERATURA_PUBLICA
+  lacunas: [LAC-FOR-015, LAC-FOR-032]
+
+- id: FOR-MRG-024
+  tipo: FOR
+  bloco: MRG
+  nome: "Gap de MC vs. meta de MC"
+  simbolo: Gap_MC
+  expressao: "Gap_MC = MC_proj − MC_meta"
+  variaveis:
+    - {simbolo: MC_proj, origem: FOR-MRG-023, natureza: DERIVADA}
+    - {simbolo: MC_meta, nome: "meta de margem de contribuição", unidade: BRL, origem: fato_meta, natureza: PARAMETRO}
+  grao: loja
+  janela: mensal_projetado
+  natureza: DERIVADA
+  onde: "Painel financeiro"
+  quando: "Diária"
+  quem: "Máquina"
+  entra: "projeção e meta de MC"
+  sai: "alerta de descolamento de margem"
+  casos_degenerados:
+    - {condicao: "MC_meta não existe", comportamento: "🔴 [LACUNA] fato_meta do modelo proposto tem meta_valor e meta_quantidade, mas NÃO meta de margem", lacuna: LAC-FOR-048}
+  procedencia: [{fonte: F1, local: "§6.7"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-048]

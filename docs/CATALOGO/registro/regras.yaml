@@ -1,0 +1,154 @@
+# # REGISTRO · BLOCO REG — Regras e travas inseparáveis das fórmulas
+# Extração PASSE 1 (FIEL) — 13/08/2026
+# Contrato: ESQUEMA_PECA.md §5.2
+#
+# ESCOPO: apenas as regras que uma fórmula do bloco FOR referencia diretamente.
+# O bloco REG completo (travas por frente, gates, governança) é passe próprio.
+
+meta:
+  versao: 1.0
+  passe: 1-FIEL
+  extraido_em: 2026-08-13
+  escopo: "regras citadas por peças FOR do passe 1"
+  contagem: 7
+
+pecas:
+
+- id: REG-SEV-001
+  tipo: REG
+  bloco: SEV
+  nome: "Escada de medição do Atendimento Total (AT)"
+  resumo: "No varejo físico o AT não é observável por padrão; a forma de medi-lo amadurece com a loja."
+  gatilho: "loja precisa calcular o IC"
+  acao: >
+    Nível 0 — sem registro: usar proxy (orçamentos no PDV + vendas, clientes únicos);
+    ponte provisória Cadastros Novos ÷ Vendas Totais, que é RAZÃO, não taxa de fluxo.
+    Nível 1 — em construção: Ficha de Atendimento obrigatória, com o PDV exigindo o
+    registro do atendimento antes de mostrar o produto.
+    Nível 2 — maduro: AT via orçamentos + vendas, cruzado com contador de fluxo na porta.
+  obrigatoriedade: PADRAO
+  quem_executa: "Consultor define o nível; PDV executa"
+  o_que_reprova: "IC apresentado como taxa quando a loja está no Nível 0"
+  procedencia:
+    - {fonte: F2, local: "§1 · Tabela 1 — o buraco do AT"}
+    - {fonte: F6, local: "Parte G · O buraco do AT"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  ver_tambem: [FOR-SEV-002, FOR-SEV-003]
+
+- id: REG-SEV-002
+  tipo: REG
+  bloco: SEV
+  nome: "Anti-gaming do denominador"
+  resumo: "AT contado pelo sistema, nunca por autorreporte."
+  gatilho: "origem do dado de atendimento é entrada manual do vendedor"
+  acao: "Preferir o AT contado pelo sistema (orçamento no PDV). Se depender da mão do vendedor, ele não registra o não-comprador e o IC infla."
+  obrigatoriedade: INEGOCIAVEL
+  quem_executa: "Arquitetura do PDV"
+  o_que_reprova: "IC calculado sobre AT autorreportado apresentado sem selo de confiança"
+  procedencia:
+    - {fonte: F2, local: "§1 · Anti-gaming"}
+    - {fonte: F6, local: "Parte G"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  ver_tambem: [FOR-SEV-003]
+
+- id: REG-SEV-003
+  tipo: REG
+  bloco: SEV
+  nome: "Comparabilidade do SEV entre lojas"
+  resumo: "Lojas com vetores de peso diferentes não têm SEV comparável."
+  gatilho: "duas lojas em estágios de maturidade distintos"
+  acao: "Bloquear comparação direta de SEV. Comparar a TENDÊNCIA dentro de cada loja, nunca o número cru entre lojas."
+  obrigatoriedade: INEGOCIAVEL
+  quem_executa: "Camada de apresentação"
+  o_que_reprova: "Ranking de SEV cruzando lojas de vetores distintos"
+  procedencia:
+    - {fonte: F2, local: "§ composição · Cuidado ao comparar lojas"}
+    - {fonte: F6, local: "Parte G"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  ver_tambem: [FOR-SEV-012, PAR-SEV-001]
+
+- id: REG-SEV-004
+  tipo: REG
+  bloco: SEV
+  nome: "Empacotamento do score (a trava-mãe)"
+  resumo: "Sempre score + caminho de desenvolvimento. Nunca ranking cru."
+  gatilho: "exibição de qualquer score individual"
+  acao: >
+    O score sai sempre acompanhado do caminho de desenvolvimento. O painel mostra
+    distribuição por bandas, nunca nomes. Nomes vivem só no coaching privado.
+    Escada de três modos: (a) só na consultoria → (b) anônimo por arquétipos →
+    (c) gestão nominal, e só se sobe por confiança conquistada.
+  obrigatoriedade: INEGOCIAVEL
+  quem_executa: "Sistema (controle de acesso), não convenção"
+  o_que_reprova: "Ranking nominal cru em qualquer tela"
+  procedencia:
+    - {fonte: F6, local: "Parte F · As 5 regras de governança"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  nota: "Compliance: LGPD (dado de colaborador) e trabalhista (assédio por ranking vexatório). Passar por RH/jurídico antes de a régua dirigir contratação ou demissão."
+  ver_tambem: [FOR-SEV-012, FOR-CMP-001]
+
+- id: REG-TMI-001
+  tipo: REG
+  bloco: TMI
+  nome: "Contingência de segmentação do TMI"
+  resumo: "Sem venda etiquetada por tipo, usar P75 geral — e declarar."
+  gatilho: "vendas sem etiqueta de segmento (multifocal, simples, solar, lente de contato)"
+  acao: "Usar provisoriamente um TMI único (P75 geral) e marcar a segmentação como meta da fase de higiene, com selo visível no painel."
+  obrigatoriedade: PADRAO
+  quem_executa: "Máquina + Consultor"
+  o_que_reprova: "TMI segmentado apresentado sobre dado não etiquetado, sem selo"
+  procedencia:
+    - {fonte: F4, local: "§4 · Cuidado com o dado"}
+    - {fonte: F6, local: "Parte G"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  ver_tambem: [FOR-TMI-001]
+
+- id: REG-TMI-002
+  tipo: REG
+  bloco: TMI
+  nome: "Trava do Hopium"
+  resumo: "Orçamento irreal se revisa, não se persegue."
+  gatilho: "Gap classificado como estrutural mas o orçamento não tem lastro no mercado"
+  acao: "Classificar como Hopium. Revisar o orçamento com o dono; NÃO transformar em régua de vendedor."
+  obrigatoriedade: INEGOCIAVEL
+  quem_executa: "Consultor + Dono"
+  o_que_reprova: "TMIp irreal virando denominador do IT"
+  procedencia:
+    - {fonte: F4, local: "§3 · O gap é o achado"}
+    - {fonte: F1, local: "§2.5"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  ver_tambem: [FOR-TMI-003, FOR-TMI-005]
+
+- id: REG-MET-001
+  tipo: REG
+  bloco: MET
+  nome: "Classificação de Risco de Atingimento (CRA)"
+  resumo: "Semáforo de meta por categoria."
+  gatilho: "avaliação diária do atingimento"
+  acao: >
+    🟢 Verde: PA%_c ≥ 100% E T_c ≥ 0,95.
+    🟡 Amarelo: PA%_c ≥ 85% E EDN_c ≤ 1,5 × Pace_c.
+    🔴 Vermelho: PA%_c < 85% OU EDN_c > 1,5 × Pace_c.
+  obrigatoriedade: PADRAO
+  quem_executa: "Máquina"
+  o_que_reprova: "—"
+  procedencia:
+    - {fonte: F1, local: "§5.10"}
+  status_canonico: CONFLITANTE
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-051, LAC-FOR-034, LAC-FOR-015]
+  nota_fonte: "Transcrita fielmente. Os três predicados não são mutuamente exclusivos, não têm precedência declarada, e T é indefinido na primeira semana — ver lacunas."
+  ver_tambem: [FOR-MET-003, FOR-MET-007, FOR-MET-010]

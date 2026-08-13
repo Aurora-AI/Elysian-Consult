@@ -1,0 +1,651 @@
+# # REGISTRO · BLOCO LAC — Lacunas do bloco Fórmulas
+# Extração PASSE 2 (DIAGNÓSTICO) — 13/08/2026
+# Contrato: ESQUEMA_PECA.md §5.6 e §10
+#
+# REGRA: nenhuma destas foi corrigida. O Passe 3 (decisão) é do autor.
+# Severidade:  CRITICA = produz número errado ou trava build
+#              ALTA    = comportamento indefinido em produção
+#              MEDIA   = degrada a leitura, não quebra
+#              BAIXA   = higiene documental
+
+meta:
+  versao: 1.0
+  passe: 2-DIAGNOSTICO
+  extraido_em: 2026-08-13
+  escopo: "bloco FOR · 5 arquivos primários de docs/FONTES/formulas/"
+  contagem: 51
+  por_severidade: {CRITICA: 9, ALTA: 18, MEDIA: 17, BAIXA: 7}
+
+pecas:
+
+# ─────────── CRÍTICAS ───────────
+
+- id: LAC-FOR-003
+  tipo: LAC
+  severidade: CRITICA
+  titulo: "PV usa o IR normalizado como probabilidade de conversão"
+  descricao: >
+    O forecast PV = AG × (IR÷100) × TMR trata IR como taxa de conversão. Mas a
+    Blindagem (F3 §2) redefiniu IR como índice NORMALIZADO contra alvo P75 por
+    temperatura. São duas variáveis com o mesmo nome.
+  evidencia:
+    - "F1 §3.1: PV = AG × (IR ÷ 100) × TMR · legenda: 'IR = Índice de Resgate (%)'"
+    - "F1 §1.3 e F3 §2: IR = mín(ConvReal ÷ P75(conv por temperatura) ; 1) × 100"
+    - "Aritmética: conversão real 30%, alvo P75 40% → IR = 75 → PV usa 0,75 quando o esperado é 0,30. Forecast 2,5× inflado."
+    - "Degrada com a qualidade: vendedor que bate o alvo tem IR = 100 → PV assume conversão de 100%."
+  impacto: "Todo forecast de vendedor, loja e rede sai superestimado. Piora quanto melhor o vendedor."
+  correcao_candidata: "PV deve consumir ConvReal (FOR-SEV-008), não IR (FOR-SEV-010)."
+  bloqueia: [FOR-FCT-001]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-001
+  tipo: LAC
+  severidade: CRITICA
+  titulo: "Vetor de pesos do estágio Construção diverge entre três documentos"
+  descricao: "Duas variantes vivas para o mesmo estágio. A regra de precedência não resolve (dois satélites contra um Master)."
+  evidencia:
+    - "F1 (Arsenal, autodeclarado fonte única) §1.2: 0,25 / 0,25 / 0,20 / 0,20 / 0,10"
+    - "F2 (ParteF Score_Formula) tabela 2: 0,25 / 0,25 / 0,20 / 0,20 / 0,10"
+    - "F6 (Playbook v9 Master, mais recente) tabela 5: 0,30 / 0,25 / 0,20 / 0,15 / 0,10"
+    - "Estágios Cego e Cruzeiro: as três fontes concordam."
+  impacto: "Muda todo SEV calculado. Bloqueia implementação."
+  correcao_candidata: null
+  bloqueia: [FOR-SEV-012, PAR-SEV-001]
+  quem_decide: Rodrigo
+  status: ABERTA
+  nota: "Inversão de nível na hierarquia de precedência — é correto que a regra não resolva."
+
+- id: LAC-FOR-002
+  tipo: LAC
+  severidade: CRITICA
+  titulo: "EMD documentado sem a trava de triagem que a implementação exige"
+  descricao: >
+    A fórmula Σdesconto ÷ receita não tem teto. Em dado real produziu 337,78%
+    (V-30/L9-Serra) porque o preço de tabela da rede não descreve a prática das lojas.
+    A SPEC_Fase_C existe inteira por causa disso. O Arsenal apresenta a fórmula nua.
+  evidencia:
+    - "F1 §6.7: EMD_vend = (Σ Desc_vend ÷ R_vend) × 100"
+    - "SPEC_Fase_C §1: 'discount_pct de 337,78% na fórmula do Algoritmo 3'"
+    - "Evidência ARP-013: NF R$309,11 · tabela R$838,85 · praticado L9 R$172–248"
+  impacto: "Quem implementar a partir do Arsenal reconstrói o bug e acusa vendedor por erro de cadastro."
+  correcao_candidata: "Anexar à peça a trava da Fase C: dois triggers por linha de venda, triagem antes de atribuir a vendedor."
+  bloqueia: [FOR-MRG-021]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-006
+  tipo: LAC
+  severidade: CRITICA
+  titulo: "TMI operacional mistura grão de vendedor com grão de loja"
+  descricao: >
+    TMIo = TMIhv + α(TMIp − TMIhv). O TMIhv é por vendedor (ponderado pelo mix dele);
+    o TMIp é da loja (MR ÷ NVp). Conforme α sobe, todos convergem para o mesmo destino
+    e a ponderação por mix — que é a tese inteira do bloco — se dissolve.
+  evidencia:
+    - "F4 §2: 'Erro 2 — TMI = número único para todos: confunde sorte com habilidade'"
+    - "F4 §2 Passo 3: TMIhv = Σ(Mi × TMIhs_i) — grão vendedor"
+    - "F4 §3: TMIp = MR ÷ NVp — grão loja"
+    - "Em α = 1: TMIo = TMIp para todo vendedor da loja. O Erro 2 volta."
+  impacto: "A régua fica injusta progressivamente ao longo dos trimestres, exatamente quando ninguém lembra mais o porquê."
+  correcao_candidata: "Preservar a razão de mix no destino: TMIp_vendedor = TMIp_loja × (TMIhv_v ÷ TMIhv_loja)."
+  bloqueia: [FOR-TMI-004, FOR-SEV-007]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-015
+  tipo: LAC
+  severidade: CRITICA
+  titulo: "Projeção linear ignora a curva intra-mês e produz falso vermelho todo início de mês"
+  descricao: >
+    PA_c = (V_c ÷ DU_e) × DU_t assume venda uniforme pelos dias úteis. O varejo brasileiro
+    concentra em quinzena e fim de mês. Nos primeiros 10 dias o PA% sai baixo e o EDN alto
+    para todo mundo — e a CRA pinta a rede de vermelho.
+  evidencia:
+    - "F1 §5.2 · extrapolação linear"
+    - "F1 §5.10 · CRA depende de PA% e EDN"
+    - "Fase 3 do plano de massa de dados tem índice sazonal MENSAL, nenhum intra-mês"
+  impacto: "Falso alarme previsível e recorrente. O gestor aprende a ignorar o painel — inclusive quando o vermelho é verdadeiro."
+  correcao_candidata: "Peso por dia útil derivado do histórico da loja: PA = V ÷ Σpeso(dias transcorridos) × Σpeso(dias totais)."
+  bloqueia: [FOR-MET-002, FOR-MET-003, FOR-MET-005, FOR-MRG-023]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-013
+  tipo: LAC
+  severidade: CRITICA
+  titulo: "AGV não tem teto por categoria — é gamificável"
+  descricao: >
+    AGV = Σ(AR_c × w_c) com AR_c ilimitado. Estourar uma categoria de meta pequena
+    levanta a nota inteira. O SEV tem teto em 100 por índice justamente para bloquear isso.
+  evidencia:
+    - "F1 §5.1: AR_c = (V_c ÷ M_c) × 100 · sem teto declarado"
+    - "F1 §1.1: 'IT = (TMR ÷ TMI) × 100 (teto em 100)' — o Bloco 1 protege, o Bloco 5 não"
+  impacto: "Nota de atingimento manipulável por concentração numa categoria de meta frouxa."
+  correcao_candidata: "Teto por categoria (ex. mín(AR_c ; 150)), coerente com a blindagem do SEV."
+  bloqueia: [FOR-MET-013, FOR-MET-014]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-014
+  tipo: LAC
+  severidade: CRITICA
+  titulo: "Pesos w_c do AGV são chutados — contradiz a doutrina da casa"
+  descricao: >
+    A fonte rotula a tabela como 'Peso Sugerido' com coluna 'Racional'. São seis valores
+    fixados por julgamento, não derivados do dado do cliente.
+  evidencia:
+    - "F1 §5.13: LMF 0,25 · LTR 0,20 · LGS 0,20 · OS 0,15 · SRV 0,10 · ACC 0,10"
+    - "F6 (nota final): 'Todo número ideal do sistema é derivado do dado do próprio cliente e caminha por um glide path — nunca chutado. É a espinha do método.'"
+  impacto: "Viola o princípio que diferencia o método. E não se autoatualiza."
+  correcao_candidata: "w_c = Part_cat (FOR-MRG-005) — a contribuição real da categoria para pagar o custo fixo. Deriva do dado e se atualiza sozinho."
+  bloqueia: [PAR-MET-001]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-032
+  tipo: LAC
+  severidade: CRITICA
+  titulo: "Divisão por zero nas fórmulas de dias úteis"
+  descricao: "EDN divide por (DU_t − DU_e), que é zero no último dia útil de todo mês. PA, Pace e MC_proj dividem por DU_e, que é zero no dia 1."
+  evidencia:
+    - "F1 §5.6: EDN_c = (M_c − V_c) ÷ (DU_t − DU_e)"
+    - "F1 §5.2, §5.5, §6.7: divisores DU_e"
+  impacto: "Crash ou infinito em duas datas previsíveis de todo mês."
+  correcao_candidata: "Guardas explícitas + comportamento declarado (ex. EDN no último dia = MR_c)."
+  bloqueia: [FOR-MET-002, FOR-MET-006, FOR-MET-007, FOR-MRG-023]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-019
+  tipo: LAC
+  severidade: CRITICA
+  titulo: "'Imposto sobre venda' em CV não está definido para o Simples Nacional"
+  descricao: >
+    MC_item subtrai CV, que inclui 'imposto sobre venda'. Sob o Simples, o DAS incide sobre
+    a receita bruta do mês pela faixa (RBT12), não por item — e não há crédito de ICMS/PIS/COFINS
+    na compra. A regra de alocação por item não existe em nenhum documento.
+  evidencia:
+    - "F1 §6.1: CV_item = 'imposto sobre venda, comissão, taxa de cartão/Pix, frete'"
+    - "Nenhum arquivo do acervo contém fórmula fiscal (INVENTARIO §4)"
+  impacto: "Toda MC, MC%, PE, ICCF e GMROI nascem com base fiscal indefinida."
+  correcao_candidata: "Escrever o Bloco Fiscal antes de gerar qualquer base. Declarar a alíquota efetiva do mês e o método de alocação."
+  bloqueia: [FOR-MRG-001, FOR-MRG-002, FOR-MRG-015, FOR-MRG-019]
+  quem_decide: Rodrigo
+  status: ABERTA
+  ver_tambem: [LAC-FOR-049]
+
+# ─────────── ALTAS ───────────
+
+- id: LAC-FOR-004
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Colisão de símbolo: MR = Meta de Receita e Meta Residual"
+  evidencia:
+    - "F1 §2.3: TMIp = MR ÷ NVp · 'MR = Meta de Receita'"
+    - "F1 §5.7: MR_c = M_c − V_c · 'Meta Residual'"
+    - "F1 §7 (glossário): lista apenas 'MR | Meta Residual'"
+  impacto: "Referência de campo errada em código, com erro silencioso."
+  correcao_candidata: "Renomear um dos dois. Sugestão: MRec (receita) e MRes (residual)."
+  bloqueia: [FOR-TMI-003, FOR-MET-008]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-005
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Colisão de símbolo: PV = Previsão de Venda e Preço de Venda"
+  evidencia:
+    - "F1 §3.1: PV = AG × (IR÷100) × TMR"
+    - "F1 §6.1: MC_item = PV_item − CE_item − CV_item"
+    - "F1 §7 (glossário): admite ambos — 'PV (forecast)' e 'PV (margem)'"
+  impacto: "O próprio glossário registra a ambiguidade sem resolvê-la."
+  correcao_candidata: "PVF (forecast) e PVU (preço unitário)."
+  bloqueia: [FOR-FCT-001, FOR-MRG-001]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-007
+  tipo: LAC
+  severidade: ALTA
+  titulo: "TMI operacional sem piso quando TMIp < TMIhv"
+  descricao: "Se a meta do dono for conservadora ou a projeção de nº de vendas for alta, o Gap fica negativo e a régua DESCE ao longo dos trimestres."
+  evidencia: ["F1 §2.4 e F4 §3: TMIo = TMIhv + α(TMIp − TMIhv), sem restrição de sinal"]
+  impacto: "A régua do vendedor pode retroceder abaixo do que a loja já consegue."
+  correcao_candidata: "Piso: TMIo = máx(TMIhv ; TMIhv + α(TMIp − TMIhv))."
+  bloqueia: [FOR-TMI-004]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-008
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Σ PV é apresentado como forecast da loja, mas só cobre o canal de resgate"
+  descricao: "PV = AG × conv × TMR modela apenas a fila. O passante/walk-in não aparece em nenhuma variável."
+  evidencia:
+    - "F2 (Camada 2): 'A soma de todos os PV é o forecast da loja'"
+    - "Nenhuma variável de fluxo de porta na fórmula"
+  impacto: "Subestima toda loja com fluxo de rua relevante. Combinado com LAC-FOR-003 (que superestima), os dois erros se cancelam parcialmente — o pior cenário, porque parece calibrado."
+  correcao_candidata: "Declarar PV como forecast do canal de resgate e somar um termo de passante, ou renomear."
+  bloqueia: [FOR-FCT-001]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-009
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Régua de Perfil Ideal não é computável como escrita"
+  descricao: "RPI = assinatura(Topo) − assinatura(Base + saíram). A própria fonte declara que 'a subtração é conceitual'."
+  evidencia: ["F1 §4.2", "F2: 'a subtração é conceitual: o que o topo tem que a base e os que saíram não têm'"]
+  impacto: "Registrada como FOR mas não produz número. Candidata a reclassificação como MEC."
+  correcao_candidata: "Ou definir a operação vetorial, ou reclassificar como mecanismo."
+  bloqueia: [FOR-CMP-002]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-010
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Divisão por zero não tratada em 23 fórmulas"
+  descricao: "Nenhuma fonte declara comportamento para denominador nulo. Afeta praticamente todo índice e razão do arsenal."
+  evidencia: ["Varredura das 57 peças: 23 têm denominador que pode ser zero sem tratamento declarado"]
+  impacto: "Crash ou NaN silencioso em produção."
+  correcao_candidata: "Política única no Bloco 0 de contratos: denominador zero → índice nulo + selo 'sem base', nunca 0 nem 100."
+  bloqueia: [multiplas]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-011
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Nenhuma fórmula declara mínimo de amostra"
+  descricao: >
+    P75 por segmento, TMIhv, Disp_gestor, MC por célula vendedor×categoria — todas
+    sensíveis a amostra pequena. Com 5 vendedores por loja e segmentação por 4 tipos,
+    células de 1–2 vendas são comuns.
+  evidencia:
+    - "F4 §2: P75 do segmento sem mínimo"
+    - "F1 §6.4: Disp = MC%max − MC%min · amplitude dominada por outlier"
+    - "O motor já tem benchmark_population e is_pseudo_entity — nenhum documentado nas fontes"
+  impacto: "Métricas instáveis apresentadas como fato."
+  correcao_candidata: "Mínimo declarado por fórmula + selo de confiança quando abaixo."
+  bloqueia: [FOR-SEV-005, FOR-TMI-001, FOR-TMI-002, FOR-MRG-008, FOR-MRG-012]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-012
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Elasticidade de Recuperação indefinida no primeiro trimestre"
+  descricao: "ER = EDN ÷ Pace_max, e Pace_max exige 'a maior velocidade sustentada por 1 semana nos últimos 3 meses'. Vendedor novo e loja nova não têm."
+  evidencia:
+    - "F1 §5.11"
+    - "Gabarito: 'Vendedor novo (ramp) — V-35 (L10), contratado ~40 dias · NÃO penalizar no SEV'"
+    - "Gabarito: 'Cold-start loja nova — L10, só ~3 meses de dados · metas NÃO deriváveis; assumir-e-rotular, não chutar'"
+  impacto: "Indefinido exatamente na janela em que a consultoria está implantando."
+  correcao_candidata: "Regra de cold start declarada, no padrão 'assumir-e-rotular' que o Gabarito já exige."
+  bloqueia: [FOR-MET-011]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-017
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Denominador do IAd divergente entre fontes (VT × VTC)"
+  evidencia:
+    - "F1 §1.1 e F3 §2: adesão = VCa ÷ VT ('Vendas Totais do vendedor')"
+    - "F6 Parte G: adesão = VCa ÷ VTC"
+    - "Nenhuma fonte define VTC no glossário"
+  impacto: "Índice diferente conforme a fonte. VTC nem sequer está definido."
+  correcao_candidata: null
+  bloqueia: [FOR-SEV-011]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-018
+  tipo: LAC
+  severidade: ALTA
+  titulo: "SEV com índice sem dado — renormalização parcial não definida"
+  descricao: "Se IR e IAd não têm dado (tabelas Fila e Campanhas inexistentes), 25% a 40% do vetor de pesos fica órfão. Nenhuma fonte diz o que fazer."
+  evidencia: ["F1 §1.2", "INVENTARIO §4: tabelas Atendimentos, Fila e Campanhas não existem em nenhum dado real"]
+  impacto: "Ou o SEV é subestimado, ou é renormalizado silenciosamente — as duas opções sem declaração."
+  correcao_candidata: "Renormalizar sobre os pesos disponíveis + selo 'SEV parcial' obrigatório no card."
+  bloqueia: [FOR-SEV-012]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-020
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Risco de dupla contagem: comissão em CV e folha em CF"
+  descricao: "MC_item subtrai comissão dentro de CV. O Ponto de Equilíbrio divide o Custo Fixo, que inclui 'folha'. Se a folha do dado incluir comissão, ela é contada duas vezes."
+  evidencia: ["F1 §6.1 (CV inclui comissão)", "F1 §6.5 (CF inclui folha)"]
+  impacto: "PE e ICCF errados nas duas pontas."
+  correcao_candidata: "Declarar que CF é folha fixa, excluindo a parcela variável."
+  bloqueia: [FOR-MRG-001, FOR-MRG-015, FOR-MRG-019]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-033
+  tipo: LAC
+  severidade: ALTA
+  titulo: "EDN e Meta Residual ficam negativos quando a meta é batida"
+  evidencia: ["F1 §5.6 e §5.7", "Tabela de leitura do EDN não cobre valor negativo"]
+  impacto: "Leitura indefinida justamente no caso de sucesso."
+  correcao_candidata: "Piso em zero + leitura própria ('meta batida')."
+  bloqueia: [FOR-MET-007, FOR-MET-008]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-034
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Tendência Semanal indefinida na primeira semana"
+  descricao: "T = Pace(semana atual) ÷ Pace(semana anterior). Não está declarado se 'semana anterior' é dentro do mês ou a semana calendário. Se for dentro do mês, T é indefinido nos primeiros dias — e a CRA depende de T."
+  evidencia: ["F1 §5.9", "F1 §5.10: Verde exige T ≥ 0,95"]
+  impacto: "CRA inclassificável no início de todo mês."
+  correcao_candidata: "Usar semana calendário anterior e declarar."
+  bloqueia: [FOR-MET-010]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-041
+  tipo: LAC
+  severidade: ALTA
+  titulo: "MC da loja soma vendedores, não itens — perde venda sem vendedor"
+  evidencia: ["F1 §6.5: MC_loja = Σ(v ∈ loja) MC_vend_v"]
+  impacto: "Venda sem vendedor atribuído (auto-close, e-commerce, ajuste) some do resultado da loja."
+  correcao_candidata: "MC_loja = Σ MC_item sobre itens da loja."
+  bloqueia: [FOR-MRG-013]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-042
+  tipo: LAC
+  severidade: ALTA
+  titulo: "MC não decompõe serviço × produto — e o Gabarito exige"
+  evidencia:
+    - "F1 §6.5 e §6.6: agregam tudo"
+    - "Gabarito: 'SVC · Serviço mascara produto (L7): serviços almofadam o total, mas a margem de PRODUTO segue ~-R$4k'"
+    - "Gabarito: 'Serviço não tem estoque → não entra em GMROI; não deve poluir ticket médio de produto'"
+  impacto: "O mecanismo central do Ato 2 do laudo (o paradoxo L7) não é detectável pela fórmula documentada."
+  correcao_candidata: "Nível de decomposição obrigatório por natureza (produto × serviço) em todos os níveis de MC."
+  bloqueia: [FOR-MRG-013, FOR-MRG-014, FOR-MRG-017]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-043
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Ponto de Equilíbrio indefinido quando a margem é nula ou negativa"
+  evidencia: ["F1 §6.5 e §6.6: PE = CF ÷ (MC% ÷ 100)"]
+  impacto: "Nas lojas que mais precisam do indicador (L7, L9 do Gabarito, com margem negativa) o PE explode ou inverte de sinal."
+  correcao_candidata: "Comportamento declarado: 'sem ponto de equilíbrio no mix atual' em vez de número."
+  bloqueia: [FOR-MRG-015, FOR-MRG-019]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-047
+  tipo: LAC
+  severidade: ALTA
+  titulo: "RDM compara o vendedor contra uma média que o contém"
+  descricao: "Com 5 vendedores por loja, cada um pesa ~20% da própria referência. O melhor vendedor puxa a média para cima e reduz o próprio RDM."
+  evidencia: ["F1 §6.7: RDM_vend = MC%_vend − MC%_loja"]
+  impacto: "Viés sistemático que comprime o ranking, pior em lojas pequenas."
+  correcao_candidata: "Leave-one-out ou mediana da loja."
+  bloqueia: [FOR-MRG-022]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-049
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Blocos Fiscal e Financeiro não existem em nenhum arquivo do acervo"
+  descricao: "O arsenal cobre Comercial, Metas e Margem. Não há fórmula de DAS/faixa/RBT12, fluxo de caixa, DRE ou resultado operacional em lugar nenhum dos 145 arquivos inventariados."
+  evidencia: ["INVENTARIO §4 · tabela de lacunas conhecidas"]
+  impacto: "Bloqueia um terço do escopo da base de homologação. Não se gera massa contra fórmula inexistente."
+  correcao_candidata: "Escrever os dois blocos antes da Fase 4."
+  bloqueia: [base_homologacao]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-050
+  tipo: LAC
+  severidade: ALTA
+  titulo: "Bandas do SEV com fronteira ambígua"
+  descricao: "Topo 90–100, Forte 75–90, Médio 60–75, Base 0–60. Não está declarado a que banda pertencem exatamente 90, 75 e 60."
+  evidencia: ["F1 §1.4", "F2 · tabela 3"]
+  impacto: "Classificação instável no limite; dois sistemas podem discordar."
+  correcao_candidata: "Intervalos semiabertos: [90,100] · [75,90) · [60,75) · [0,60)."
+  bloqueia: [FOR-SEV-012]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-051
+  tipo: LAC
+  severidade: ALTA
+  titulo: "CRA não é mutuamente exclusiva nem tem precedência declarada"
+  descricao: >
+    Três predicados com 'e'/'ou' misturados. PA%=120 com T=0,80 falha o Verde e cai em
+    Amarelo ('recuperável'), o que é leitura errada para quem está 20% acima da meta.
+    E o Vermelho não considera T em nenhuma condição.
+  evidencia: ["F1 §5.10"]
+  impacto: "Semáforo com resultado dependente da ordem de avaliação."
+  correcao_candidata: "Tabela de decisão com precedência explícita e cobertura exaustiva."
+  bloqueia: [FOR-MET-003, FOR-MET-007, FOR-MET-010]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+# ─────────── MÉDIAS ───────────
+
+- id: LAC-FOR-016
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "Banda-alvo do IAd sugerida mas não definida"
+  evidencia: ["F3 §2: 'se virar problema, troque por uma banda-alvo (penaliza acima e abaixo do alvo)'"]
+  bloqueia: [FOR-SEV-011]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-021
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "TMIhv não declara normalização de Σ Mi"
+  evidencia: ["F4 §2 Passo 3: TMIhv = Σ(Mi × TMIhs_i), 'Mi = participação (%)'"]
+  bloqueia: [FOR-TMI-002]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-022
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "α inicial da ponte do TMI não definido"
+  evidencia: ["F4 §3: 'α sobe a cada trimestre conforme a viabilidade' — sem valor de partida"]
+  bloqueia: [FOR-TMI-004]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-023
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "Classificação do Gap do TMI não tem critério numérico"
+  descricao: "Operacional × estrutural × Hopium são separados por julgamento do consultor, sem régua."
+  evidencia: ["F4 §3", "F1 §2.5"]
+  bloqueia: [FOR-TMI-005]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-024
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "TMR usa média, e o Gabarito exige robustez a outlier"
+  evidencia:
+    - "Gabarito: 'Outlier de digitação — L9: preço R$33.900 e qtd=99 · distorcem ticket médio → usar P75/robustez, não média'"
+    - "Nenhuma fonte declara tratamento de outlier no TMR"
+  bloqueia: [FOR-TMI-006, FOR-SEV-007]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-025
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "Expressão do TMR nunca foi escrita"
+  descricao: "TMR aparece só na legenda ('Ticket Médio Real do vendedor'). A fórmula foi reconstruída pelo extrator."
+  evidencia: ["F1 §1.1 · legenda", "F2 · glossário"]
+  bloqueia: [FOR-TMI-006]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-026
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "Maturação da Camada 2 declarada sem regra de confiança"
+  evidencia: ["F6 Parte F: 'amadurece em 60–90 dias, conforme o dado acumula'"]
+  bloqueia: [FOR-FCT-001]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-027
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "DR divide por zero exatamente no estoque parado"
+  descricao: "DR = EA ÷ VMD. SKU sem giro tem VMD = 0 — e é justamente o estoque morto que interessa."
+  evidencia: ["F1 §3.2"]
+  bloqueia: [FOR-FCT-002]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-028
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "VMD 'projetada' sem método de projeção"
+  evidencia: ["F2 Camada 2: 'VMD = Venda Média Diária projetada (baseada no hábito de mix da equipe)'"]
+  bloqueia: [FOR-FCT-002]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-029
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "NC não define comportamento com critério ausente"
+  evidencia: ["F1 §4.1: NC = (E + Pt + Va + Qa) ÷ 4"]
+  bloqueia: [FOR-CMP-001]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-031
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "Unidade de V_c e M_c ambígua (valor ou quantidade?)"
+  evidencia:
+    - "F1 §5.1: 'V_c = Volume realizado na categoria'"
+    - "Modelo de dados proposto: fato_meta tem meta_valor E meta_quantidade"
+  bloqueia: [FOR-MET-001, FOR-MET-002, FOR-MET-006, FOR-MET-007, FOR-MET-008]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-035
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "CMC sem propósito declarado e com mistura de sinal"
+  descricao: "Numerador com Gap com sinal, denominador com Σ|Gap|. Única fórmula do Bloco 5 sem campo de leitura."
+  evidencia: ["F1 §5.12"]
+  bloqueia: [FOR-MET-012]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-036
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "Renormalização dos pesos w_c quando falta categoria"
+  evidencia: ["F1 §5.13"]
+  bloqueia: [FOR-MET-013, PAR-MET-001]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-038
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "Part_cat sobre base de MC negativa não tem leitura"
+  evidencia: ["F1 §6.2"]
+  bloqueia: [FOR-MRG-005]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-039
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "Exclusão de pseudo-entidade existe no motor e não na documentação"
+  evidencia: ["is_pseudo_entity / _PSEUDO_ENTITY_IDS citados em SPEC_Fase_E §0.3", "Nenhuma fonte de fórmula menciona"]
+  bloqueia: [FOR-MRG-006, FOR-SEV-012]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-040
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "Atribuição de vendedor a gestor ao longo do tempo não declarada"
+  evidencia: ["F1 §6.4"]
+  bloqueia: [FOR-MRG-010]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-046
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "Alerta de margem sem regra de exceção para promoção sinalizada"
+  evidencia:
+    - "F1 §6.7 · Alerta_MC"
+    - "Gabarito: 'B (falso+) · Desconto promocional — SKU PROMO-001 (L8): R$112 sobre custo R$100 · margem pequena POSITIVA · Não marcar como prejuízo'"
+  bloqueia: [FOR-MRG-020]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-048
+  tipo: LAC
+  severidade: MEDIA
+  titulo: "Meta de MC não existe no modelo de dados"
+  evidencia: ["F1 §6.7: Gap_MC = MC_proj − MC_meta", "fato_meta proposto tem meta_valor e meta_quantidade apenas"]
+  bloqueia: [FOR-MRG-024]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+# ─────────── BAIXAS ───────────
+
+- id: LAC-FOR-030
+  tipo: LAC
+  severidade: BAIXA
+  titulo: "RPI sem histórico de desligamentos deixa o termo 'quem saiu' vazio"
+  evidencia: ["F1 §4.2"]
+  bloqueia: [FOR-CMP-002]
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-037
+  tipo: LAC
+  severidade: BAIXA
+  titulo: "CE_item divergente da NF de compra não tem tratamento na fórmula"
+  evidencia: ["Evidência ARP-013 (SPEC_Fase_C §1): custo_entrada da venda diverge do custo real de aquisição"]
+  bloqueia: [FOR-MRG-001]
+  quem_decide: Rodrigo
+  status: ABERTA
+  nota: "O motor já detecta (Fase C); a fórmula documentada não menciona."
+
+- id: LAC-FOR-044
+  tipo: LAC
+  severidade: BAIXA
+  titulo: "Bloco 6 titulado '5 Níveis' mas apresenta 6"
+  evidencia: ["F1 §6 título e índice", "F1 §6.1 a §6.6 · o §6.6 é rotulado 'Nível 6'"]
+  correcao_candidata: "Atualizar título para 6 níveis."
+  bloqueia: []
+  quem_decide: Rodrigo
+  status: ABERTA
+
+- id: LAC-FOR-045
+  tipo: LAC
+  severidade: BAIXA
+  titulo: "Overhead corporativo não cabe no modelo de custo fixo proposto"
+  evidencia: ["F1 §6.6: CF_op inclui overhead corporativo", "fato_custo_fixo proposto tem grão loja"]
+  bloqueia: [FOR-MRG-019]
+  quem_decide: Rodrigo
+  status: ABERTA
