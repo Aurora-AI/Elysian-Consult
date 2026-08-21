@@ -10,7 +10,7 @@ meta:
   passe: 1-FIEL
   extraido_em: 2026-08-13
   escopo: "regras citadas por peças FOR do passe 1"
-  contagem: 7
+  contagem: 14
 
 pecas:
 
@@ -130,6 +130,279 @@ pecas:
   confianca: ALTA
   natureza_conhecimento: EMPIRICO_AUTOR
   ver_tambem: [FOR-TMI-003, FOR-TMI-005]
+
+- id: REG-FIN-001
+  tipo: REG
+  bloco: FIN
+  nome: "Na camada de crédito, a remuneração segue o risco"
+  escopo: >
+    APENAS intermediação de crédito ao consumidor final (emissores, crediário garantido, BaaS).
+    NÃO se aplica à concentradora de compras — ver REG-CNC-001 e DEC-003.
+  resumo: "Quem não carrega o risco de default não participa da receita financeira. Vale para a Aurora e para a ótica."
+  principio: >
+    Aurora: não carrega risco → não recebe. A recomendação de parceiro é entregável do pacote
+    de consultoria.
+    Ótica: não carrega risco → não participa do MDR. Pode variar por fornecedor, mas não é
+    praxe de mercado nem o modelo Aurora.
+    Parceiro: assume 100% do default → fica com a receita financeira.
+    BASE DE REMUNERAÇÃO DO MERCADO (DEC-004): no crédito remunera-se por ORIGINAÇÃO, não por
+    transação — pela venda do produto financeiro (cartão aprovado, crediário aberto, seguro,
+    tarifa de anuidade), nunca pelo R$ transacionado. Por isso o "share de MDR" da Rota 1 do
+    C2 §2 era errado também FACTUALMENTE, não só eticamente: MDR é transacional.
+  gatilho: "recomendação de parceiro financeiro (emissor, crediário garantido, BaaS) a um cliente"
+  acao: >
+    A Aurora NÃO recebe compensação do parceiro — nem comissão, nem share de MDR, nem contrato
+    de indicador/seller. RAZÃO (DEC-006): decisão de EMPACOTAMENTO COMERCIAL (a recomendação
+    está no pacote da consultoria) somada à PRÁTICA DE MERCADO de não se remunerar sobre MDR.
+    NÃO é imperativo ético — cobrar por serviço prestado não tem problema nenhum; ver REG-CNC-001. A ótica NÃO recebe parte do MDR. O parceiro assume 100% do risco e
+    fica com a receita financeira. O retorno do dado da transação ao motor permanece condição
+    inegociável de seleção — a alavanca é o volume que a Aurora leva, não dinheiro.
+  obrigatoriedade: INEGOCIAVEL
+  quem_executa: "Consultor Aurora"
+  o_que_reprova: >
+    Qualquer remuneração da Aurora vinda do parceiro financeiro. Qualquer participação da
+    ótica no MDR. Qualquer modelo que coloque inadimplência no P&L da ótica.
+  base_de_remuneracao: ORIGINACAO
+  procedencia:
+    - {fonte: DEC-001, local: "decisão do autor, 13/08/2026 — ratificada como ABSOLUTA pela DEC-004"}
+    - {fonte: DEC-002, local: "decisão do autor, 13/08/2026"}
+    - {fonte: DEC-003, local: "correção de escopo, 13/08/2026"}
+    - {fonte: DEC-004, local: "base de remuneração + ratificação, 13/08/2026"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  ver_tambem: [FOR-FIN-007, FOR-FIN-008, FOR-FIN-009, REG-CNC-001]
+  lacunas: [LAC-FIN-079]
+  nota: >
+    Consequência estrutural: o C2 §2 dedicava três parágrafos a defender a neutralidade
+    (painel e não bandeira única, transparência radical, dever de arquiteto) — andaime que
+    existia para sustentar uma remuneração que agora não existe. A neutralidade deixa de ser
+    argumentada e passa a ser estrutural. Fecha com o posicionamento de "não cobrar pedágio
+    sobre a receita bruta". A doutrina tinha duas exceções mal justificadas (Aurora com
+    comissão sem risco, ótica com receita financeira própria); as duas caem pelo mesmo motivo.
+  pendencia: >
+    Sem o contrato de indicador/seller, a cláusula de retorno do dado (C2 §3) perde o
+    instrumento onde morava. Ver LAC-FIN-079.
+
+- id: REG-CNC-001
+  tipo: REG
+  bloco: CNC
+  nome: "Na concentradora, a remuneração segue o valor entregue"
+  escopo: >
+    APENAS a concentradora de compras (fornecedores óticos). NÃO se aplica à camada de
+    crédito — ver REG-FIN-001 e DEC-003.
+  resumo: "Remuneração cobrada do CLIENTE, como % sobre o valor do produto. Comissão de fábrica é possibilidade anotada, não regra."
+  principio: >
+    Aqui a Aurora É remunerada, e por ambos os lados — mesmo sem carregar risco. A base não é
+    o risco (que não existe no modelo drop-ship: zero estoque, zero capital de giro), e sim o
+    VALOR ENTREGUE: acesso a marca, preço melhor, e a inteligência de sell-in × sell-through
+    que separa a central inteligente da central commodity.
+  base_de_remuneracao: VOLUME
+  base_de_calculo: "% sobre o valor do produto"
+  posicao_na_transacao: >
+    A Aurora/concentradora é PARTE da transação — ela fatura para a ótica. Por isso o que ela
+    cobra é PREÇO DE SERVIÇO, não pedágio. Contraste (DEC-006): no crédito ela está FORA da
+    transação (só indica), e o royalty de franquia incide sobre faturamento alheio. A forma
+    percentual é parecida; a posição é oposta. Além disso, o cliente não tinha acesso ao
+    fornecedor — o ganho é CRIADO pela central, não capturado de um fluxo preexistente.
+  funcao_primaria: "canal de aquisição de clientes para a consultoria (DEC-005)"
+  gatilho: "ótica entra no clube de compras da concentradora"
+  acao: >
+    REGRA (DEC-005): a Aurora cobra uma % sobre o valor do produto, do CLIENTE (a ótica),
+    que em troca compra mais barato ou acessa marcas fora do alcance dele sozinho.
+    POSSIBILIDADE ANOTADA, NÃO ADOTADA: comissão do fornecedor pelo volume agregado.
+    O autor declarou não ver como cobrar das fábricas hoje, mas pediu que a hipótese ficasse
+    registrada. Não usar como premissa de modelo, projeção ou material comercial.
+    Linhas do documento de origem (F9 §3) que seguem sem decisão: marca própria ·
+    financiamento do pedido (via C2) · fee de adesão opcional.
+  obrigatoriedade: PADRAO
+  quem_executa: "Aurora + Marcos (a concentradora é ativo do Marcos; a inteligência é da Aurora)"
+  o_que_reprova: >
+    Aplicar a regra da camada de crédito (REG-FIN-001) aqui. Confundir os dois tipos de
+    parceiro é o erro que a DEC-003 corrige.
+  transparencia: >
+    A fonte recomenda REBATE TRANSPARENTE — a ótica vê preço de fábrica + fee — para preservar
+    a confiança. Ver LAC-CNC-080: a justificativa original era "igual à C2", e esse paralelo
+    caiu com a DEC-001.
+  procedencia:
+    - {fonte: DEC-003, local: "decisão do autor, 13/08/2026"}
+    - {fonte: DEC-005, local: "correção da bilateralidade + função de aquisição, 13/08/2026"}
+    - {fonte: DEC-006, local: "posição na transação, 13/08/2026"}
+    - {fonte: F9, local: "§3 · Como ganha dinheiro (Tabela 2)"}
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  ver_tambem: [REG-FIN-001, FOR-CNC-001, FOR-CNC-002, FOR-CNC-003, FOR-CNC-004]
+  lacunas: [LAC-CNC-080, LAC-CNC-082, LAC-CNC-083]
+
+# ═══════════════════════════════════════════════════════════════
+# BLOCO NUM — Política de números degenerados (DEC-008)
+# Cinco regras que fecham 19 lacunas. Cada uma deriva de doutrina
+# que já existia na casa; nenhuma foi inventada do zero.
+# ═══════════════════════════════════════════════════════════════
+
+- id: REG-NUM-001
+  tipo: REG
+  bloco: NUM
+  nome: "Sem base → resultado NULO com selo, nunca zero nem cem"
+  resumo: "Denominador nulo ou insumo ausente não produzem número. Produzem a ausência de número, declarada."
+  gatilho: "denominador = 0 · insumo obrigatório ausente · coluna inexistente na origem"
+  acao: >
+    O resultado é NULO, com motivo declarado (SEM_BASE) e selo visível no card.
+    NUNCA 0 — que o leitor lê como desempenho ruim.
+    NUNCA 100 — que o leitor lê como desempenho perfeito.
+    NUNCA a média do grupo — que inventa um dado que não existe.
+    O nulo não entra em agregação, não entra em ranking, não entra em média de equipe
+    ou de loja: ele é EXCLUÍDO do conjunto, não tratado como zero.
+  obrigatoriedade: INEGOCIAVEL
+  quem_executa: "Motor de cálculo + camada de apresentação"
+  o_que_reprova: >
+    Qualquer índice publicado como 0 ou 100 quando a causa foi ausência de base.
+    Qualquer agregação que trate nulo como zero.
+  derivado_de: >
+    SPEC_Fase_E §0.1 — "nenhum detector infere o que não está no dado. Se o cliente não
+    informa, o motor NUNCA assume; reporta a lacuna e segue sem o achado."
+  exemplos:
+    - "IC com AT = 0 → nulo, não 0"
+    - "DR com VMD = 0 (SKU sem giro) → 'sem previsão de ruptura: o item não gira' — e isso É o achado de estoque morto"
+    - "Part_cat sobre ΣMC ≤ 0 → nulo; participação sobre base negativa não tem leitura"
+  procedencia: [{fonte: DEC-008, local: "decisão do autor, 13/08/2026"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  fecha: [LAC-FOR-010, LAC-FOR-027, LAC-FOR-032, LAC-FOR-038, LAC-FOR-070]
+
+- id: REG-NUM-002
+  tipo: REG
+  bloco: NUM
+  nome: "Amostra insuficiente → calcula, marca, e fica fora de comparação"
+  resumo: "Há base, mas fraca. O número existe; a confiança nele, não. Medido no ACUMULADO, nunca na janela."
+  gatilho: "célula de cálculo abaixo do mínimo declarado"
+  acao: >
+    Calcular normalmente, atribuir CONFIANÇA e aplicar a trava: resultado de baixa confiança
+    NÃO entra em ranking, NÃO entra em banda e NÃO dispara alerta — aparece no painel com selo.
+    O mínimo é medido sobre o ACUMULADO do vendedor/célula, nunca sobre a janela de cálculo.
+  descoberta_que_gerou_a_regra: >
+    No dado real (Consultoria.xlsx), V-30 fez 2 vendas no último mês e V-35 — o vendedor
+    novo que o Gabarito manda NÃO penalizar — fez 3. Pela janela mensal o novato parece MAIS
+    ativo. Só o acumulado discrimina: V-30 tem 101 vendas e 785 dias de casa; V-35 tem 6 e 39.
+    Mínimo sobre a janela não separa maturidade de sazonalidade.
+  minimos:
+    - {escopo: "vendedor em SEV/ranking/banda", regra: "≥ 30 vendas acumuladas E ≥ 90 dias de casa", status: CANDIDATO}
+    - {escopo: "P75 por segmento (TMI, attach, conversão)", regra: "≥ 20 observações na célula", status: CANDIDATO}
+    - {escopo: "dispersão de margem da equipe", regra: "≥ 3 vendedores elegíveis, senão usar amplitude interquartil", status: CANDIDATO}
+    - {escopo: "concentração de VIP", regra: "≥ 3 vendedores na loja; com 1 ou 2 a concentração é estrutural, não risco", status: CANDIDATO}
+  faixas_de_confianca:
+    - {faixa: "≥ 2× o mínimo", confianca: ALTA, uso: "livre"}
+    - {faixa: "entre 1× e 2×", confianca: MEDIA, uso: "publica com selo; entra em tendência, não em ranking"}
+    - {faixa: "< 1× o mínimo", confianca: BAIXA, uso: "publica com selo; fora de ranking, banda e alerta"}
+  validado_contra:
+    - "V-35 (6 vendas, 39 dias) → excluído ✓ — Gabarito: 'vendedor novo (ramp), NÃO penalizar no SEV'"
+    - "V-30 (101 vendas, 785 dias) → incluído ✓"
+    - "V-23 (189 vendas, 780 dias) → incluído ✓"
+  obrigatoriedade: INEGOCIAVEL
+  quem_executa: "Motor de cálculo"
+  o_que_reprova: "Vendedor abaixo do mínimo aparecendo em ranking ou banda. Mínimo aferido sobre a janela em vez do acumulado."
+  derivado_de: "benchmark_population e is_pseudo_entity, já existentes no motor (SPEC_Fase_E §0.3 e §0.4)"
+  onde_calibrar: >
+    O CRITÉRIO (acumulado, nunca janela) foi validado no par V-35 × V-30 da Consultoria.xlsx —
+    comparação relativa, que a fixture funcional suporta bem.
+    Os VALORES (30 vendas, 90 dias) NÃO podem ser calibrados ali: a Consultoria.xlsx tem 7,4
+    linhas/loja/mês e R$ 3.497 de receita por loja/mês — é fixture FUNCIONAL, construída para
+    carregar as 37 anomalias do Gabarito, não para representar densidade operacional.
+    Os valores só se validam sobre a base VOLUMÉTRICA (≈500 linhas/loja/mês) ou sobre o dado
+    real do Cliente #1. Até lá, permanecem CANDIDATO. Ver LAC-NUM-089.
+  procedencia: [{fonte: DEC-008, local: "decisão do autor, 13/08/2026"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: DERIVADO_DE_DADO
+  fecha: [LAC-FOR-011, LAC-FOR-075]
+
+- id: REG-NUM-003
+  tipo: REG
+  bloco: NUM
+  nome: "Cold start → assumir-e-rotular, nunca chutar"
+  resumo: "Quando a fórmula exige um passado que ainda não existe, usa-se fallback DECLARADO — e o rótulo é parte do resultado."
+  gatilho: "histórico exigido pela fórmula ainda não acumulou (vendedor novo, loja nova, clube novo, primeiro trimestre)"
+  acao: >
+    Descer a escada de fallback até encontrar base, e ROTULAR o nível usado:
+    (1) a própria célula → (2) o nível imediatamente acima (vendedor→loja→rede) →
+    (3) benchmark declarado → (4) indisponível (REG-NUM-001).
+    O rótulo é obrigatório e acompanha o número em toda exibição, junto com quanto falta
+    para sair do fallback ("faltam 51 dias" / "faltam 24 vendas").
+    Nunca omitir o rótulo. Nunca inventar o número sem ele.
+  obrigatoriedade: INEGOCIAVEL
+  quem_executa: "Motor de cálculo"
+  o_que_reprova: "Número em fallback apresentado sem o rótulo do nível usado."
+  derivado_de: >
+    Gabarito, caso L10-Industrial: "Cold-start loja nova — só ~3 meses de dados → metas NÃO
+    deriváveis; assumir-e-rotular, não chutar." A frase é da régua de veracidade da casa.
+  casos:
+    - {formula: FOR-MET-011, falta: "Pace_max exige 3 meses", fallback: "Pace_max da loja, rotulado"}
+    - {formula: FOR-MET-010, falta: "semana anterior na 1ª semana do mês", fallback: "semana calendário anterior — e declarar que é essa"}
+    - {formula: FOR-TMI-004, falta: "α do primeiro trimestre", fallback: "α = 0 (a régua começa no histórico puro) e sobe a partir do 2º trimestre"}
+    - {formula: FOR-FIN-002, falta: "permanência média do assinante", fallback: "indisponível até 6 meses de clube — não estimar LTV"}
+    - {formula: FOR-CNC-001, falta: "preço antigo do SKU", fallback: "indisponível — sem base de comparação, não há economia a declarar"}
+    - {formula: FOR-CMP-002, falta: "histórico de desligamentos", fallback: "RPI só com Banda Topo; declarar que o contraste está incompleto"}
+  procedencia: [{fonte: DEC-008, local: "decisão do autor, 13/08/2026"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  fecha: [LAC-FOR-012, LAC-FOR-022, LAC-FOR-030, LAC-FOR-034, LAC-FOR-068]
+
+- id: REG-NUM-004
+  tipo: REG
+  bloco: NUM
+  nome: "Valor fora do domínio → vira leitura, não número"
+  resumo: "Quando o resultado sai do domínio que faz sentido, o painel responde o que significa — não quanto mede."
+  gatilho: "resultado matematicamente válido mas fora do domínio interpretável"
+  acao: >
+    Substituir o número por uma LEITURA qualitativa declarada. O número bruto vai para o anexo,
+    nunca para o card. Aplicação direta da Lei da Linguagem do laudo: todo bloco responde
+    'quanto custa' ou 'quanto rende', nunca 'quanto mede'.
+  tabela:
+    - {formula: FOR-MET-007, condicao: "EDN < 0 (meta já batida)", leitura: "'meta batida' — piso em 0, sem esforço residual"}
+    - {formula: FOR-MET-008, condicao: "MRes_c < 0", leitura: "'meta superada em R$ X' — o excedente é o achado, não a falta"}
+    - {formula: FOR-MRG-015, condicao: "MC% ≤ 0", leitura: "'sem ponto de equilíbrio no mix atual' — PE não existe, e é isso que precisa ser dito"}
+    - {formula: FOR-MRG-019, condicao: "MC%_op ≤ 0", leitura: "idem, no consolidado"}
+    - {formula: FOR-TMI-004, condicao: "TMIp < TMIhv (Gap negativo)", leitura: "piso em TMIhv — a régua nunca desce abaixo do que a loja já consegue"}
+  obrigatoriedade: INEGOCIAVEL
+  quem_executa: "Camada de apresentação"
+  o_que_reprova: "PE negativo ou infinito exibido como número. EDN negativo exibido sem leitura."
+  derivado_de: "EXRS_Spec_Laudo_Executivo_v4 §3.1 — Lei da Linguagem"
+  procedencia: [{fonte: DEC-008, local: "decisão do autor, 13/08/2026"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  fecha: [LAC-FOR-007, LAC-FOR-033, LAC-FOR-043]
+
+- id: REG-NUM-005
+  tipo: REG
+  bloco: NUM
+  nome: "Composição parcial → renormaliza sobre o disponível e declara"
+  resumo: "Índice composto com parcela faltando renormaliza, marca 'parcial' e lista o que faltou. Com pouco demais, não publica."
+  gatilho: "índice composto (SEV, AGV, NC) com uma ou mais parcelas sem dado"
+  acao: >
+    Renormalizar os pesos sobre as parcelas DISPONÍVEIS (Σp dos presentes = 1) e publicar com
+    selo 'parcial' + a lista do que faltou.
+    NUNCA preencher a parcela ausente com 0 — que pune quem não tem o dado.
+    NUNCA preencher com a média — que inventa desempenho.
+    PISO DE PUBLICAÇÃO: se menos de 60% do peso original estiver disponível, o composto NÃO é
+    publicado — cai em REG-NUM-001 (nulo com selo). Meio índice não é um índice.
+  obrigatoriedade: INEGOCIAVEL
+  quem_executa: "Motor de cálculo"
+  o_que_reprova: "SEV publicado com parcela zerada por ausência de dado. Composto publicado abaixo do piso de 60%."
+  situacao_atual: >
+    Sem as tabelas Fila e Campanhas, o SEV perde IR e IAd. No vetor Construção isso é
+    0,20 + 0,10 = 30% do peso (variante A) ou 0,15 + 0,10 = 25% (variante B) — em ambos os
+    casos acima do piso, então o SEV é publicável como PARCIAL sobre 70–75% do vetor.
+    No estágio Cruzeiro o IR pesa 0,30 e a perda vai a 40%: abaixo do piso, SEV não publicável.
+  procedencia: [{fonte: DEC-008, local: "decisão do autor, 13/08/2026"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  fecha: [LAC-FOR-018, LAC-FOR-021, LAC-FOR-029, LAC-FOR-036]
+
 
 - id: REG-MET-001
   tipo: REG

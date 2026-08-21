@@ -1,0 +1,237 @@
+# # REGISTRO · BLOCO ART — Artefatos
+# Extração PASSE 1 (FIEL) — 13/08/2026
+# Contrato: ESQUEMA_PECA.md §5.4-bis · criado por DEC-009
+#
+# O ART é o contrato entre a teoria e a tela. Sem ele o dashboard é desenhado
+# à mão e diverge do registro — que é exatamente o que o P2 existe para evitar.
+#
+# DOIS PRINCÍPIOS (DEC-009):
+#   Superfície mínima, profundidade total — a complexidade é latente, não ausente.
+#   O drill-down é diagnóstico, não navegação — erro mínimo explica problema complexo.
+
+meta:
+  versao: 1.0
+  passe: 1-FIEL
+  extraido_em: 2026-08-13
+  criado_por: DEC-009
+  escopo: "artefatos descritos nas fontes do acervo. Card de balcão e War Room ainda não têm fonte."
+  contagem: 6
+  fontes:
+    - {id: F6, arquivo: "docs/FONTES/metodo/Oticas_Playbook_v9_Master.docx", papel: "Cockpit (Parte E), fila diária (Parte B), painel por bandas (Parte F)"}
+    - {id: F12, arquivo: "AuroraControler/laudo_executivo/EXRS_Spec_Laudo_Executivo_v4.md", papel: "Laudo — a LEI de apresentação"}
+    - {id: F13, arquivo: "AuroraControler/SPEC_Fase_C_Fila_Auditoria_Manual.md", papel: "fila de auditoria"}
+    - {id: F14, arquivo: "AuroraControler/SPEC_Fase_D2_Anexo_Vivo_e_Zero_Contradicao.md", papel: "anexo vivo — o piso do drill"}
+
+pecas:
+
+- id: ART-LAU-001
+  tipo: ART
+  nome: "Executive Audit Report — o Laudo"
+  resumo: "Prova ao dono que o relatório que ele olha hoje mente. Uma vez, no D5–D7."
+  consumidor: dono
+  gatilho: "diagnóstico concluído — o choque do Dia 5"
+  cadencia: uma_vez_por_rodada
+  superficie:
+    teto_elementos: 1
+    numero_ancora: "R$ total em risco, consolidado"
+    elementos: ["um único número em R$, tipografia gigante, zero tabela, zero lista"]
+    o_que_NAO_aparece:
+      - "SKU, churn, attach, GMROI, margem de contribuição, LTV, dataset, outlier — vocabulário PROIBIDO (F12 §3.4)"
+      - "qualquer métrica que responda 'quanto mede' em vez de 'quanto custa'"
+      - "item pendente na fila de auditoria (F13) — pendente nunca vira fato"
+      - "4º capítulo no Ato 3 — são exatamente 3, o resto vira sub-item ou anexo"
+  profundidade:
+    eixo_vertical: [rede, loja, categoria, sku, venda, item, linha_de_origem]
+    eixo_horizontal:
+      - {grao: loja, dimensoes: [natureza_item, categoria, periodo]}
+      - {grao: cliente, dimensoes: [segmento_rfm, recuperabilidade]}
+    completude: TOTAL
+    piso_declarado: "ART-ANX-001 — o anexo É a soma; divergência de 1 centavo quebra o build"
+  estrutura:
+    - {ato: 1, nome: "O SOCO", conteudo: "1 tela, 10 segundos, um número"}
+    - {ato: 2, nome: "O PARADOXO", conteudo: "o achado que prova que o relatório atual engana"}
+    - {ato: 3, nome: "OS TRÊS SANGRAMENTOS", conteudo: "Lucro Fantasma · Clientes Evaporando · Caixa Preso"}
+    - {ato: 4, nome: "A ABSOLVIÇÃO", conteudo: "o que NÃO é problema — sem venda nesta seção"}
+    - {ato: 5, nome: "A SAÍDA", conteudo: "plano ordenado por R$ computado, nunca por dramaticidade"}
+  lei_de_linguagem: LAUDO
+  modo_minimo: a
+  consome:
+    superficie_e_direto: [FOR-BAS-004, FOR-BAS-005, FOR-BAS-008, FOR-EST-006, FOR-MRG-001, FOR-MRG-013, FOR-MRG-020]
+    profundidade: [FOR-BAS-001, FOR-BAS-002, FOR-BAS-003, FOR-BAS-006, FOR-BAS-007, FOR-BAS-009, FOR-EST-001, FOR-EST-002, FOR-EST-003, FOR-EST-004, FOR-EST-005, FOR-EST-007, FOR-MRG-002, FOR-MRG-003, FOR-MRG-004, FOR-MRG-005, FOR-MRG-014, FOR-MRG-021, FOR-AUD-001, FOR-AUD-002, FOR-AUD-003, FOR-AUD-004, FOR-AUD-005, FOR-TMI-006]
+  regras_aplicaveis: [REG-NUM-001, REG-NUM-004]
+  procedencia: [{fonte: F12, local: "§0 a §4 — a LEI"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  nota: "É o artefato mais especificado do acervo — tem lei narrativa, lei de linguagem, lei visual e validador de zero contradição. Serve de padrão de rigor para os demais."
+
+- id: ART-ANX-001
+  tipo: ART
+  nome: "Anexo Vivo — a procedência"
+  resumo: "O corpo afirma; o anexo É a soma. É o piso de todo drill-down do sistema."
+  consumidor: dono
+  gatilho: "clique em qualquer número do laudo"
+  cadencia: sob_demanda
+  superficie:
+    teto_elementos: 0
+    numero_ancora: null
+    elementos: ["nada — o anexo não tem superfície, ele É profundidade"]
+    o_que_NAO_aparece: ["nada é omitido; é o único artefato sem omissão declarada"]
+  profundidade:
+    eixo_vertical: [agregado, componente, linha_de_origem]
+    eixo_horizontal: []
+    completude: TOTAL
+    piso_declarado: "source_rows com teto em provenance_sample_cap (F14 Pilar 2)"
+  travas:
+    - "formatador BURRO: lê SOMENTE o audit_report congelado. Zero recálculo, zero LLM, zero acesso à planilha."
+    - "divergência de 1 centavo entre card e Σ(anexo) = build quebrado, nada é gerado"
+    - "número que precisa existir no anexo e não está no relatório congelado → exportar do MOTOR, nunca calcular na apresentação"
+  lei_de_linguagem: TECNICA
+  modo_minimo: a
+  consome:
+    superficie_e_direto: [ART-LAU-001]
+    profundidade: []   # o anexo É a profundidade dos outros
+  regras_aplicaveis: []
+  procedencia: [{fonte: F14, local: "§0 e §3"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  nota: "Este artefato É o contrato de drill-down da casa. Todo eixo vertical de todo ART termina aqui. Sem ele, 'profundidade total' seria promessa."
+
+- id: ART-COC-001
+  tipo: ART
+  nome: "Cockpit do dono"
+  resumo: "O painel que o dono abre. Indicador-mãe é um só: o ciclo de recompra caindo."
+  consumidor: dono
+  gatilho: "acompanhamento da operação"
+  cadencia: mensal
+  superficie:
+    teto_elementos: 7
+    numero_ancora: FOR-BAS-003
+    elementos: [FOR-BAS-003, FOR-BAS-010, FOR-BAS-009, FOR-BAS-007, FOR-EST-003, FOR-BAS-011, FOR-FIN-004]
+    o_que_NAO_aparece:
+      - "métrica de vaidade — a fonte proíbe explicitamente"
+      - "nome de vendedor (REG-SEV-004)"
+      - "índice sem base: aparece NULO com selo, nunca 0 nem 100 (REG-NUM-001)"
+  profundidade:
+    eixo_vertical: [rede, loja, equipe, vendedor, venda, item, linha_de_origem]
+    eixo_horizontal:
+      - {grao: loja, dimensoes: [categoria, natureza_item, periodo, forma_pagamento]}
+      - {grao: cliente, dimensoes: [segmento_rfm, recuperabilidade, temperatura_fila]}
+      - {grao: sku, dimensoes: [categoria, curva_abc, giro]}
+    completude: TOTAL
+  lei_de_linguagem: LAUDO
+  modo_minimo: a
+  consome:
+    superficie_e_direto: [FOR-BAS-003, FOR-BAS-007, FOR-BAS-009, FOR-BAS-010, FOR-BAS-011, FOR-EST-003, FOR-FIN-004]
+    profundidade: [FOR-BAS-001, FOR-BAS-002, FOR-BAS-004, FOR-BAS-005, FOR-BAS-006, FOR-BAS-008, FOR-BAS-012, FOR-EST-001, FOR-EST-002, FOR-EST-004, FOR-EST-005, FOR-EST-006, FOR-EST-007, FOR-MRG-001, FOR-MRG-003, FOR-MRG-004, FOR-MRG-005, FOR-MRG-013, FOR-MRG-014, FOR-TMI-006]
+  regras_aplicaveis: [REG-NUM-001, REG-NUM-005, REG-SEV-004]
+  procedencia: [{fonte: F6, local: "Parte E · Cockpit — tabela de 7 KPIs com fórmula e meta"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-FOR-063]
+  nota: "3 dos 7 KPIs (conversão de pendentes, MRR do Clube, taxa de cadastro por AT) dependem de tabelas que não existem em nenhum dado real — ver LAC-FOR-063."
+
+- id: ART-PER-001
+  tipo: ART
+  nome: "Painel de performance por bandas"
+  resumo: "Distribuição, nunca nomes. O KPI da tela é mover a curva para a direita, não cortar a cauda."
+  consumidor: gestor
+  gatilho: "ciclo de desenvolvimento da equipe"
+  cadencia: mensal
+  superficie:
+    teto_elementos: 4
+    numero_ancora: "gap em R$ entre a média e o topo"
+    elementos: ["distribuição por banda (Topo/Forte/Médio/Base)", "assinatura de comportamento de cada banda", "gap em R$", "tendência intra-loja"]
+    o_que_NAO_aparece:
+      - "🔴 NOMES — vivem só no coaching privado (REG-SEV-004)"
+      - "🔴 ranking cru — o score sai SEMPRE com caminho de desenvolvimento"
+      - "🔴 comparação de SEV entre lojas de vetores de peso distintos (REG-SEV-003)"
+      - "SEV abaixo do piso de 60% de peso disponível (REG-NUM-005)"
+      - "vendedor abaixo do mínimo de amostra em ranking ou banda (REG-NUM-002)"
+  profundidade:
+    eixo_vertical: [rede, loja, equipe, banda, vendedor, venda, item, linha_de_origem]
+    eixo_horizontal:
+      - {grao: vendedor, dimensoes: [indice, categoria, segmento, temperatura_fila, periodo]}
+      - {grao: banda, dimensoes: [assinatura_comportamento, gap_em_reais]}
+    completude: PARCIAL
+    onde_corta: "o nível VENDEDOR nominal só abre no modo (c), com aceite de RH/jurídico registrado"
+    por_que: "REG-SEV-004 — o painel é radar de desenvolvimento, nunca vigilância. LGPD e trabalhista."
+  lei_de_linguagem: TECNICA
+  modo_minimo: a
+  consome:
+    superficie_e_direto: [FOR-SEV-012, FOR-SEV-003, FOR-SEV-006, FOR-SEV-007, FOR-SEV-010, FOR-SEV-011, FOR-CMP-001]
+    profundidade: [FOR-SEV-001, FOR-SEV-002, FOR-SEV-004, FOR-SEV-005, FOR-SEV-008, FOR-SEV-009, PAR-SEV-001, FOR-TMI-001, FOR-TMI-002, FOR-TMI-003, FOR-TMI-004, FOR-TMI-005, FOR-TMI-006, FOR-MRG-006, FOR-MRG-007, FOR-MRG-008, FOR-MRG-009, FOR-MRG-010, FOR-MRG-011, FOR-MRG-012, FOR-MRG-021, FOR-MRG-022, FOR-CMP-002]
+  regras_aplicaveis: [REG-SEV-002, REG-SEV-003, REG-SEV-004, REG-NUM-002, REG-NUM-005]
+  procedencia: [{fonte: F6, local: "Parte F · governança, regra 3 — painel por bandas"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  nota: "Único ART com completude PARCIAL declarada — e a justificativa é legal, não técnica. É o caso que prova que a regra de declarar o corte funciona."
+
+- id: ART-FIL-001
+  tipo: ART
+  nome: "Fila de resgate diária"
+  resumo: "A ponte entre a inteligência da máquina e a venda de verdade. Ordenada por recuperabilidade, não por cifrão."
+  consumidor: vendedor
+  gatilho: "abertura da loja"
+  cadencia: diaria
+  superficie:
+    teto_elementos: 1
+    numero_ancora: "a lista de contatos do dia"
+    elementos: ["cliente · o que oferecer · por que agora"]
+    o_que_NAO_aparece:
+      - "score do próprio vendedor (isso é ART-PER-001, e no coaching privado)"
+      - "métrica de loja ou de rede — o vendedor não precisa"
+      - "o cálculo por trás da ordenação"
+  profundidade:
+    eixo_vertical: [fila, cliente, historico_de_compra, venda, item, linha_de_origem]
+    eixo_horizontal:
+      - {grao: cliente, dimensoes: [temperatura_fila, segmento_rfm, categoria_faltante, ciclo]}
+    completude: TOTAL
+  ordenacao: "por recuperabilidade (FOR-BAS-006), não por valor — cliente de R$1.640 sumido há 2,8 ciclos vale menos hoje que um de R$894 sumido há 1,7"
+  lei_de_linguagem: LAUDO
+  modo_minimo: a
+  consome:
+    superficie_e_direto: [FOR-BAS-004, FOR-BAS-006, FOR-BAS-007, FOR-BAS-008]
+    profundidade: [FOR-BAS-002, FOR-BAS-003, FOR-BAS-012, FOR-TMI-006]
+  regras_aplicaveis: [REG-NUM-001]
+  procedencia: [{fonte: F6, local: "Parte B · motor de dois relógios · D8–D10"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  nota: "É o artefato de superfície mais estreita do sistema — e o de maior frequência. Prova o princípio: quem usa todo dia precisa de menos, não de mais."
+
+- id: ART-FIL-002
+  tipo: ART
+  nome: "Fila de auditoria manual"
+  resumo: "O resíduo não classificável — nunca o atacado. Veredito em ~30 segundos por item."
+  consumidor: consultor
+  gatilho: "rodada de auditoria concluída"
+  cadencia: por_rodada
+  superficie:
+    teto_elementos: 1
+    numero_ancora: "quantos itens aguardam veredito"
+    elementos: ["item + todas as evidências já cruzadas, para decisão em ~30s"]
+    o_que_NAO_aparece:
+      - "o atacado — só o resíduo que o motor não conseguiu classificar sozinho"
+      - "acusação a vendedor antes do veredito"
+  profundidade:
+    eixo_vertical: [fila, item, transacao, sku, nota_fiscal, linha_de_origem]
+    eixo_horizontal:
+      - {grao: item, dimensoes: [custo_nf, preco_tabela, preco_praticado, flag_promocao, estoque_morto]}
+    completude: TOTAL
+  principio_dimensionador: "fila com 300 itens é backlog morto; com 5 itens especificamente inexplicáveis é governança"
+  trava: "item pendente NUNCA vira fato em nenhum outro artefato — não entra em total_operational_loss nem gera acusação"
+  lei_de_linguagem: TECNICA
+  modo_minimo: a
+  consome:
+    superficie_e_direto: [FOR-MRG-021, FOR-AUD-003, FOR-MRG-020]
+    profundidade: [FOR-MRG-001, FOR-MRG-002, FOR-EST-005, FOR-AUD-001, FOR-AUD-002, FOR-AUD-004, FOR-AUD-005]
+  regras_aplicaveis: []
+  procedencia: [{fonte: F13, local: "§1 e §3"}]
+  status_canonico: CANONICO
+  confianca: ALTA
+  natureza_conhecimento: EMPIRICO_AUTOR
+  lacunas: [LAC-NUM-091]

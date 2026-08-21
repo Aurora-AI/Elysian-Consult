@@ -30,6 +30,8 @@ POR_TIPO = {
     "AXI": ["enunciado", "o_que_falsificaria"],
     "MEC": ["funcao", "fase", "executor"],
     "EVI": ["fato", "fonte_dado", "o_que_prova"],
+    "ART": ["consumidor", "gatilho", "cadencia", "superficie", "profundidade",
+            "lei_de_linguagem", "modo_minimo"],
 }
 NATUREZAS = {"CRUA", "NORMALIZADA", "DERIVADA", "PARAMETRO", "SUBJETIVA"}
 STATUS = {"CANONICO", "CANDIDATO", "SUPERADO", "CONFLITANTE", "NAO_UTILIZADO", "IMPORTADO"}
