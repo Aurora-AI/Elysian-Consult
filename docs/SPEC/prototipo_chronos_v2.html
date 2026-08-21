@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CHRONOS · Protótipo v2 — Sistema de Gestão 360º Elysian</title>
+<style>
+:root{
+  --bg:#F4F2ED;
+  --panel:#F8F7F3;
+  --line:#D9D4C9;
+  --line-strong:#C1B9A8;
+  --ink:#111110;
+  --ink2:#4A4A46;
+  --ink3:#757570;
+  --red:#A63C30;
+  --green:#406B4D;
+  --amber:#947228;
+  --blue:#3A5B7A;
+  --mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;
+  --serif:Garamond, 'EB Garamond', 'Times New Roman', serif;
+  --sans:-apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:14.5px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{display:flex;min-height:100vh}
+
+/* NAV */
+nav{width:240px;flex:0 0 240px;background:var(--panel);border-right:1px solid var(--line-strong);padding:22px 0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{padding:0 20px 20px;border-bottom:1px solid var(--line-strong);margin-bottom:14px}
+.brand h1{font-family:var(--serif);font-size:20px;letter-spacing:.05em;font-weight:600}
+.brand p{font-size:10.5px;color:var(--ink3);letter-spacing:.1em;margin-top:5px;text-transform:uppercase;font-family:var(--mono)}
+nav a{display:block;padding:9px 20px;color:var(--ink2);text-decoration:none;font-size:13.5px;border-left:2px solid transparent;cursor:pointer}
+nav a:hover{color:var(--ink);background:#EBE7DF}
+nav a.on{color:var(--ink);border-left-color:var(--red);background:#EAE5DA;font-weight:500}
+nav a small{display:block;font-size:10px;color:var(--ink3);margin-top:1px;font-family:var(--mono)}
+.navsec{padding:20px 20px 6px;font:10px var(--mono);letter-spacing:.16em;color:var(--ink3);text-transform:uppercase}
+
+/* MAIN */
+main{flex:1;padding:34px 44px 80px;max-width:1360px}
+.head{border-bottom:1px solid var(--line-strong);padding-bottom:16px;margin-bottom:30px;display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.head h2{font-family:var(--serif);font-size:32px;font-weight:400;letter-spacing:-.01em}
+.head p{color:var(--ink2);font-size:14px;margin-top:8px;max-width:640px}
+.stamp{font:11px/1.5 var(--mono);color:var(--ink3);text-align:right;white-space:nowrap}
+.stamp b{color:var(--ink);font-weight:600}
+
+.screen{display:none} .screen.on{display:block}
+
+/* CARDS - IDE Modular Style */
+.grid{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:20px}
+.g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)} .g5{grid-template-columns:repeat(5,1fr)}
+.card{background:var(--panel);padding:20px}
+.card .lbl{font:10.5px var(--mono);letter-spacing:.11em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.card .val{font:400 32px/1.1 var(--serif);letter-spacing:-.02em}
+.card .sub{font-size:12px;color:var(--ink2);margin-top:10px;line-height:1.45}
+.card.star{background:#FFFDF7;}
+.val.red{color:var(--red)} .val.green{color:var(--green)} .val.amber{color:var(--amber)}
+
+/* SOCO */
+.soco{background:#FFFDF7;border:1px solid var(--line-strong);padding:42px 40px;margin-bottom:24px;border-left:4px solid var(--red)}
+.soco .kick{font:10.5px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink3)}
+.soco .big{font:400 68px/1 var(--serif);color:var(--red);margin:14px 0 16px;letter-spacing:-.03em}
+.soco .say{font-size:18px;max-width:780px;color:var(--ink);font-family:var(--serif)}
+.soco .fine{font-size:12.5px;color:var(--ink3);margin-top:16px;max-width:760px;font-family:var(--mono)}
+
+/* TABLE */
+.table-wrapper{border:1px solid var(--line);background:var(--panel);margin-bottom:20px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font:10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);padding:10px 12px;border-bottom:1px solid var(--line-strong);font-weight:600;background:#EFECE5}
+td{padding:10px 12px;border-bottom:1px solid var(--line);color:var(--ink2)}
+td.n{font-family:var(--mono);text-align:right;color:var(--ink)}
+tr:last-child td{border-bottom:0}
+tr:hover td{background:#F4F2ED}
+.src{font:10.5px var(--mono);color:var(--blue);cursor:pointer;text-decoration:underline dotted}
+
+/* BADGES */
+.b{display:inline-block;font:9.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;border:1px solid;vertical-align:middle}
+.b.red{color:var(--red);border-color:#D8A8A2;background:#FDECE9}
+.b.grn{color:var(--green);border-color:#A8C8B2;background:#EBF3ED}
+.b.amb{color:var(--amber);border-color:#DBC59A;background:#FDF6E3}
+.b.gry{color:var(--ink3);border-color:var(--line);background:#EAE5DA}
+.b.blu{color:var(--blue);border-color:#A8C2D8;background:#EAF1F8}
+
+/* RFM */
+.rfm{display:grid;grid-template-columns:auto repeat(5,1fr);gap:1px;font-size:11px;background:var(--line);border:1px solid var(--line)}
+.rfm .ax{background:var(--panel);color:var(--ink3);font:10px var(--mono);display:flex;align-items:center;justify-content:center;padding:6px}
+.rfm .c{background:var(--panel);aspect-ratio:1.6;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;}
+.rfm .c b{font:600 15px var(--mono);color:var(--ink)} .rfm .c s{font-size:9.5px;color:rgba(0,0,0,0.5);text-decoration:none}
+
+/* BARS */
+.bar{height:6px;background:var(--line);overflow:hidden;border:1px solid var(--line-strong)}
+.bar i{display:block;height:100%}
+.bandrow{display:grid;grid-template-columns:90px 1fr 62px;gap:14px;align-items:center;margin-bottom:12px;font-size:12.5px}
+
+/* WATERFALL */
+.wf{display:flex;align-items:flex-end;gap:16px;height:220px;padding:16px 4px 0}
+.wf .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+.wf .bx{width:100%;border:1px solid var(--line-strong);border-bottom:0}
+.wf .cap{font:10.5px var(--mono);color:var(--ink3);margin-top:10px;text-align:center;line-height:1.3}
+.wf .num{font:600 12px var(--mono);margin-bottom:6px}
+
+/* TREEMAP */
+.tm{display:flex;flex-wrap:wrap;gap:1px;background:var(--line);border:1px solid var(--line)}
+.tm div{background:var(--panel);padding:10px;display:flex;flex-direction:column;justify-content:space-between;color:var(--ink2);font-size:11px}
+.tm div b{font:400 15px var(--serif);color:var(--red)}
+
+/* SLIDER */
+.rule{position:relative;height:60px;margin:30px 0 10px}
+.rule .track{position:absolute;top:26px;left:0;right:0;height:1px;background:var(--line-strong)}
+.rule .fill{position:absolute;top:25px;height:3px;background:var(--amber)}
+.rule .pin{position:absolute;top:18px;width:1px;height:17px;background:var(--line-strong)}
+.rule .tag{position:absolute;top:-4px;font:10px var(--mono);white-space:nowrap;transform:translateX(-50%);font-weight:600}
+.rule .tagb{position:absolute;top:44px;font:10px var(--mono);white-space:nowrap;transform:translateX(-50%);color:var(--ink3)}
+input[type=range]{width:100%;accent-color:var(--amber)}
+
+.note{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--blue);padding:14px 18px;font-size:13px;color:var(--ink2);margin:18px 0}
+.note b{color:var(--ink)}
+.warn{border-left-color:var(--red);background:#FFFDF7}
+.h3{font-family:var(--serif);font-size:22px;color:var(--ink);margin:40px 0 16px;padding-bottom:10px;border-bottom:1px solid var(--line-strong)}
+.mode{display:inline-flex;border:1px solid var(--line-strong);background:var(--panel)}
+.mode button{background:transparent;border:0;color:var(--ink3);padding:8px 16px;font:11.5px var(--mono);cursor:pointer;border-right:1px solid var(--line-strong);text-transform:uppercase}
+.mode button:last-child{border-right:0}
+.mode button.on{background:#EAE5DA;color:var(--ink);font-weight:600}
+.mode button:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:900px){.wrap{flex-direction:column}nav{width:100%;height:auto;position:static;flex:none}main{padding:24px}.g3,.g4,.g5{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <div class="brand"><h1>CHRONOS</h1><p>Elysian · Gestão 360º</p></div>
+  <div class="navsec">Dono</div>
+  <a class="on" data-s="s0">Cockpit<small>o número da semana</small></a>
+  <a data-s="s1">Base de Clientes<small>o Mapa da Mina</small></a>
+  <a data-s="s2">Estoque &amp; Margem<small>a salvação do caixa</small></a>
+  <div class="navsec">Gestão</div>
+  <a data-s="s3">Performance<small>SEV · radar, não vigilância</small></a>
+  <a data-s="s4">Engenharia do Ticket<small>TMI · as três réguas</small></a>
+  <a data-s="s5">Forecast &amp; Ruptura<small>camada probabilística</small></a>
+  <div class="navsec">Consultor</div>
+  <a data-s="s6">Fila de Auditoria<small>o resíduo, nunca o atacado</small></a>
+  <a data-s="s7">Anexo Vivo<small>procedência</small></a>
+</nav>
+
+<main>
+
+<!-- ══════ TELA 0 ══════ -->
+<section class="screen on" id="s0">
+  <div class="head">
+    <div><h2>Cockpit</h2><p>O painel do dono. Todo bloco responde <em>quanto custa</em> ou <em>quanto rende</em> — nunca <em>quanto mede</em>.</p></div>
+    <div class="stamp">rede: <b>Cliente #1 · 10 lojas</b><br>rodada <b>v4</b> · atualizado <b>27/07/2026 06:00</b><br>vendas <b>≤5 min</b> · índices <b>D-1</b></div>
+  </div>
+
+  <div class="soco">
+    <div class="kick">Receita em risco · medida, não projetada</div>
+    <div class="big">R$ 103.825</div>
+    <div class="say">Sua rede fatura <b>R$ 1,43 milhão</b> com 55,9% de margem — e mesmo assim está deixando isso na mesa todo mês, sem que nada apareça no relatório que você olha hoje.</div>
+    <div class="fine">Composição: R$ 68.785 medidos em clientes que sumiram + R$ 35.040 medidos em produto parado. Cenários projetados ficam sempre à parte e não somam aqui.</div>
+  </div>
+
+  <div class="grid g4" style="margin-bottom:14px">
+    <div class="card star">
+      <div class="lbl">★ Ciclo de recompra <span class="b gry">north-star</span></div>
+      <div class="val amber">3,2 <span style="font-size:15px;color:var(--ink3);font-family:var(--sans)">meses</span></div>
+      <div class="sub">Mediana real da sua base — não os 12 meses de manual. Meta: comprimir. <span class="src">507 clientes →</span></div>
+    </div>
+    <div class="card"><div class="lbl">Clientes que sumiram</div><div class="val red">146</div><div class="sub">R$ 68.785 · 28,8% da base<br><span class="src">ver fila de resgate →</span></div></div>
+    <div class="card"><div class="lbl">Segunda venda (lente)</div><div class="val">43,8%</div><div class="sub">4 em cada 10 clientes de armação levam a lente aqui. Os outros 6 compram em outro lugar.</div></div>
+    <div class="card"><div class="lbl">Retorno do produto parado</div><div class="val red">R$ 35.040</div><div class="sub">16 produtos sem sair há mais de 6 meses. Liberáveis em 60 dias.</div></div>
+  </div>
+
+  <div class="grid g3">
+    <div class="card"><div class="lbl">Cadastro por atendimento <span class="b amb">razão, não taxa</span></div><div class="val">94,9%</div><div class="sub">Telefone preenchido. Mas o denominador ainda é <em>venda</em>, não <em>atendimento</em> — quem entra e não compra não é contado. <span class="b gry">AT nível 0</span></div></div>
+    <div class="card"><div class="lbl">Retorno sobre estoque</div><div class="val green">1,84</div><div class="sub">Acima de 1 o estoque se paga. Duas lojas estão abaixo.</div></div>
+    <div class="card"><div class="lbl">Recorrência do Clube</div><div class="val" style="color:var(--ink3)">—</div><div class="sub"><span class="b gry">[LACUNA]</span> Clube não implantado. O sistema não estima o que não existe.</div></div>
+  </div>
+
+  <div class="note warn"><b>Alerta aberto ·</b> 546 linhas de venda com preço abaixo do custo de entrada. Antes de tratar como desconto de vendedor, a triagem precisa separar erro de catálogo de prática real — <span class="src">6 itens aguardam veredito na Fila de Auditoria →</span></div>
+</section>
+
+<!-- ══════ TELA 1 ══════ -->
+<section class="screen" id="s1">
+  <div class="head"><div><h2>Base de Clientes · o Mapa da Mina</h2><p>RFM em quintis, churn derivado do ciclo próprio da loja (nunca benchmark) e a receita latente por categoria.</p></div>
+  <div class="stamp">grão <b>cliente</b> · cadência <b>mensal</b><br>churn: <b>semanal</b> · atualizado <b>27/07 06:00</b></div></div>
+
+  <div class="h3">Matriz RFM · 507 clientes</div>
+  <div class="grid" style="grid-template-columns:1.35fr 1fr">
+    <div class="card">
+      <div class="rfm" id="rfm"></div>
+      <div style="display:flex;justify-content:space-between;font:10px var(--mono);color:var(--ink3);margin-top:12px"><span>← Recência (5 = comprou recente)</span><span>Frequência+Valor ↑</span></div>
+    </div>
+    <div class="card">
+      <div class="lbl">Segmentos</div>
+      <div class="table-wrapper" style="margin-bottom:0">
+      <table>
+        <tr><td><span class="b grn">Campeões</span></td><td class="n">61</td><td class="n">R$ 312k</td></tr>
+        <tr><td><span class="b blu">Fiéis</span></td><td class="n">118</td><td class="n">R$ 447k</td></tr>
+        <tr><td><span class="b amb">Em risco</span></td><td class="n">94</td><td class="n">R$ 268k</td></tr>
+        <tr><td><span class="b amb">Hibernando</span></td><td class="n">88</td><td class="n">R$ 191k</td></tr>
+        <tr><td><span class="b red">Perdidos</span></td><td class="n">146</td><td class="n">R$ 216k</td></tr>
+      </table>
+      </div>
+      <div class="sub" style="margin-top:14px">Um cliente é considerado sumido quando o silêncio passa de <b>1,5 × o ciclo da própria loja</b> (146 dias), não pelos 12 meses genéricos do mercado.</div>
+    </div>
+  </div>
+
+  <div class="h3">Fila de resgate · ordenada por recuperabilidade</div>
+  <div class="table-wrapper">
+    <table>
+      <thead><tr><th>Cliente</th><th>Loja</th><th>Última compra</th><th style="text-align:right">Silêncio ÷ ciclo</th><th style="text-align:right">Ticket histórico</th><th>Recuperabilidade</th><th>Fonte</th></tr></thead>
+      <tbody>
+        <tr><td>C-017</td><td>L1 · Centro</td><td>18/02/2026</td><td class="n">1,62×</td><td class="n">R$ 1.204</td><td><span class="b grn">alta</span></td><td><span class="src">L1129,L2201</span></td></tr>
+        <tr><td>C-018</td><td>L1 · Centro</td><td>04/02/2026</td><td class="n">1,77×</td><td class="n">R$ 894</td><td><span class="b grn">alta</span></td><td><span class="src">L0884</span></td></tr>
+        <tr><td>C-019</td><td>L2 · Shopping</td><td>21/01/2026</td><td class="n">1,92×</td><td class="n">R$ 1.640</td><td><span class="b amb">média</span></td><td><span class="src">L1904,L2755</span></td></tr>
+        <tr><td>C-020</td><td>L3 · Bairro</td><td>09/12/2025</td><td class="n">2,35×</td><td class="n">R$ 512</td><td><span class="b amb">média</span></td><td><span class="src">L0421</span></td></tr>
+        <tr><td>C-021</td><td>L2 · Shopping</td><td>27/10/2025</td><td class="n">2,84×</td><td class="n">R$ 738</td><td><span class="b red">baixa</span></td><td><span class="src">L2011</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Ordenar por <b>recuperabilidade</b>, não por valor. Um cliente de R$ 1.640 sumido há 2,8 ciclos vale menos na fila de hoje que um de R$ 894 sumido há 1,7 — a régua é o `silence_to_cycle_ratio`, não o cifrão.</div>
+
+  <div class="h3">Receita Latente · segunda venda por categoria</div>
+  <div class="grid g3">
+    <div class="card"><div class="lbl">Armação premium → Lente</div><div class="val">43,8%</div><div class="sub">314 clientes compraram armação premium · 176 não levaram a lente aqui<br><b style="color:var(--red)">R$ 82.940 à mesa</b></div><div class="bar" style="margin-top:14px"><i style="width:43.8%;background:var(--amber)"></i></div></div>
+    <div class="card"><div class="lbl">Grau → Solar</div><div class="val">61,5%</div><div class="sub">O 2º par é o mais avançado da rede. Alvo P75 do segmento: 74%<br><b style="color:var(--amber)">R$ 31.200 à mesa</b></div><div class="bar" style="margin-top:14px"><i style="width:61.5%;background:var(--green)"></i></div></div>
+    <div class="card"><div class="lbl">Grau → Lente de contato</div><div class="val">26,0%</div><div class="sub">Menor attach da rede e maior recorrência natural do mix<br><b style="color:var(--red)">R$ 54.610 à mesa</b></div><div class="bar" style="margin-top:14px"><i style="width:26%;background:var(--red)"></i></div></div>
+  </div>
+  <div class="note"><b>Triangulação obrigatória:</b> comparar o P75 com o "kit clínico" do catálogo. Se o kit ideal for muito maior que o P75, nem os melhores da loja vendem o kit completo — isso não é erro da régua, é oportunidade de receita.</div>
+</section>
+
+<!-- ══════ TELA 2 ══════ -->
+<section class="screen" id="s2">
+  <div class="head"><div><h2>Estoque &amp; Margem</h2><p>Onde o caixa está preso e onde a margem está mentindo.</p></div>
+  <div class="stamp">grão <b>SKU × loja</b> · cadência <b>mensal</b><br>MC&lt;0: <b>diária</b></div></div>
+
+  <div class="h3">O paradoxo · L7 Oeste</div>
+  <div class="grid g1">
+  <div class="card">
+    <div class="wf" id="wf"></div>
+    <div class="sub" style="margin-top:20px;border-top:1px solid var(--line);padding-top:16px">A loja fecha o mês "no verde". Mas a venda de <b>produto</b> está negativa e é o <b>serviço</b> que cobre o buraco — o relatório que você olha hoje soma os dois e esconde o mecanismo. Margem de L7: <b style="color:var(--red)">27,3%</b> contra 55,9% da rede.</div>
+  </div>
+  </div>
+
+  <div class="h3">Capital preso · 16 produtos sem saída há +6 meses</div>
+  <div class="grid" style="grid-template-columns:1.3fr 1fr">
+    <div class="card"><div class="tm" id="tm" style="height:230px"></div></div>
+    <div class="card">
+      <div class="lbl">Retorno sobre estoque (GMROI) por loja</div>
+      <div id="gmroi" style="margin-top:12px"></div>
+      <div class="sub" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--line)">Abaixo de 1,00 o estoque destrói valor: você imobiliza mais capital do que a margem devolve.</div>
+    </div>
+  </div>
+
+  <div class="h3">Alertas de margem <span class="b red" style="margin-left:8px">546 linhas</span></div>
+  <div class="table-wrapper">
+    <table>
+      <thead><tr><th>Produto</th><th>Loja</th><th style="text-align:right">Custo NF</th><th style="text-align:right">Tabela</th><th style="text-align:right">Praticado (P50)</th><th>Assinatura</th><th>Destino</th></tr></thead>
+      <tbody>
+        <tr><td>ARP-013</td><td>L9 · Serra</td><td class="n">309,11</td><td class="n">838,85</td><td class="n" style="color:var(--red)">210,00</td><td><span class="b amb">catálogo desalinhado</span></td><td><span class="src">fila de auditoria</span></td></tr>
+        <tr><td>ARP-013</td><td>L2 · Shopping</td><td class="n">309,11</td><td class="n">838,85</td><td class="n">1.687,00</td><td><span class="b amb">custo divergente da NF</span></td><td><span class="src">fila de auditoria</span></td></tr>
+        <tr><td>LEN-044</td><td>L7 · Oeste</td><td class="n">188,40</td><td class="n">240,00</td><td class="n" style="color:var(--red)">171,50</td><td><span class="b red">MC negativa real</span></td><td><span class="b red">ação imediata</span></td></tr>
+        <tr><td>SOL-021</td><td>L6 · Leste</td><td class="n">119,51</td><td class="n">389,00</td><td class="n" style="color:var(--red)">98,00</td><td><span class="b amb">promoção não sinalizada</span></td><td><span class="src">fila de auditoria</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note warn"><b>Regra inegociável.</b> Nenhum destes números pode ser apresentado como "vendedor que corrói margem". O preço de tabela único da rede (R$ 838,85) não descreve a prática de nenhuma loja — isso é assinatura de erro cadastral, não de conduta. A acusação só sai depois do veredito.</div>
+</section>
+
+<!-- ══════ TELA 3 ══════ -->
+<section class="screen" id="s3">
+  <div class="head"><div><h2>Performance da Equipe · SEV</h2><p>Radar de desenvolvimento, nunca vigilância. O painel mostra a distribuição — os nomes vivem no coaching privado.</p></div>
+  <div class="stamp">grão <b>vendedor</b> · cadência <b>mensal</b><br>vetor de pesos: <b>Construção</b></div></div>
+
+  <div style="display:flex;gap:16px;align-items:center;margin-bottom:20px;flex-wrap:wrap">
+    <span style="font:10px var(--mono);color:var(--ink3);letter-spacing:.1em;text-transform:uppercase">Modo de exibição</span>
+    <div class="mode"><button class="on">(a) consultoria</button><button>(b) arquétipos</button><button disabled title="Exige aceite de RH/jurídico registrado">(c) nominal 🔒</button></div>
+    <span class="b gry" style="background:#FFFDF7">modo (c) bloqueado · aceite de RH/jurídico não registrado</span>
+  </div>
+
+  <div class="grid" style="grid-template-columns:1.15fr 1fr">
+    <div class="card">
+      <div class="lbl">Distribuição por banda · 34 vendedores</div>
+      <div style="margin-top:20px" id="bands"></div>
+      <div class="sub" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line)">
+        <b style="color:var(--ink)">Gap em R$ entre a média e o topo: R$ 214.600/ano.</b><br>
+        O KPI desta tela é <em>mover a curva para a direita</em>, não cortar a cauda.
+      </div>
+    </div>
+    <div class="card" style="padding:0">
+      <div class="lbl" style="padding:20px 20px 0">Assinatura de comportamento por banda</div>
+      <div class="table-wrapper" style="border:0;border-top:1px solid var(--line);margin:12px 0 0">
+      <table>
+        <tr><td><span class="b grn">Topo</span> 90–100</td><td style="font-size:12.5px">Captura quase todo atendimento, anexa 1 em cada 3 graus, executa a fila. É o template.</td></tr>
+        <tr><td><span class="b blu">Forte</span> 75–90</td><td style="font-size:12.5px">Bom em quase tudo, com um índice fraco identificável.</td></tr>
+        <tr><td><span class="b amb">Médio</span> 60–75</td><td style="font-size:12.5px"><b style="color:var(--ink)">Tira pedido:</b> converte, mas não captura nem anexa. Onde está a maior receita latente.</td></tr>
+        <tr><td><span class="b red">Base</span> 0–60</td><td style="font-size:12.5px">Vaza em vários índices. Coaching direcionado requerido.</td></tr>
+      </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="h3">Os cinco índices · normalizados contra alvo derivado</div>
+  <div class="grid g5">
+    <div class="card"><div class="lbl">IC · Captura</div><div class="val" style="font-size:32px">72<span style="font-size:14px;color:var(--ink3);font-family:var(--sans)">/100</span></div><div class="sub" style="font-size:11px">alvo = 100% (a exceção)<br><span class="b amb">AT nível 0</span></div><div class="bar" style="margin-top:12px"><i style="width:72%;background:var(--amber)"></i></div></div>
+    <div class="card"><div class="lbl">IA · Anexação</div><div class="val" style="font-size:32px">64<span style="font-size:14px;color:var(--ink3);font-family:var(--sans)">/100</span></div><div class="sub" style="font-size:11px">alvo = P75 por segmento<br>real 28% · alvo 44%</div><div class="bar" style="margin-top:12px"><i style="width:64%;background:var(--amber)"></i></div></div>
+    <div class="card"><div class="lbl">IT · Ticket</div><div class="val" style="font-size:32px">83<span style="font-size:14px;color:var(--ink3);font-family:var(--sans)">/100</span></div><div class="sub" style="font-size:11px">alvo = TMIo (ver Tela 4)<br>TMR 471 · TMIo 567</div><div class="bar" style="margin-top:12px"><i style="width:83%;background:var(--green)"></i></div></div>
+    <div class="card"><div class="lbl">IR · Resgate</div><div class="val" style="font-size:32px;color:var(--ink3)">—</div><div class="sub" style="font-size:11px"><span class="b gry">[LACUNA]</span> tabela Fila não existe. Sem RT não há denominador.</div></div>
+    <div class="card"><div class="lbl">IAd · Adesão</div><div class="val" style="font-size:32px;color:var(--ink3)">—</div><div class="sub" style="font-size:11px"><span class="b gry">[LACUNA]</span> tabela Campanhas não existe.</div></div>
+  </div>
+
+  <div class="note warn"><b>SEV parcial.</b> IR e IAd somam 25% do vetor Construção e não têm dado. O SEV exibido está normalizado sobre os 75% disponíveis e marcado <span class="b amb">parcial</span> em todo card — o sistema nunca preenche o vazio com estimativa. Destravar exige as tabelas <b>Fila</b> e <b>Campanhas</b> no PDV.</div>
+
+  <div class="note"><b>Comparação entre lojas bloqueada.</b> L4 e L8 operam no vetor <em>Cego</em> (0,45/0,15/0,10/0,20/0,10); as demais no vetor <em>Construção</em>. SEV com vetores distintos não é comparável de frente — o sistema oferece tendência intra-loja no lugar do ranking.</div>
+</section>
+
+<!-- ══════ TELA 4 ══════ -->
+<section class="screen" id="s4">
+  <div class="head"><div><h2>Engenharia do Ticket · TMI</h2><p>O IT só vale o quanto o TMI vale. As três réguas simultâneas, com o α como decisão visível do consultor.</p></div>
+  <div class="stamp">recalibração <b>trimestral</b><br>segmentação: <b>[LACUNA] P75 geral</b></div></div>
+
+  <div class="grid g1">
+  <div class="card">
+    <div class="lbl">As três réguas · L1 Centro</div>
+    <div class="rule" id="rule"></div>
+    <div style="display:flex;align-items:center;gap:16px;margin-top:20px">
+      <span style="font:11.5px var(--mono);color:var(--ink3);white-space:nowrap">α = <b id="av" style="color:var(--amber)">0,35</b></span>
+      <input type="range" id="alpha" min="0" max="100" value="35">
+      <span style="font:11.5px var(--mono);color:var(--ink3);white-space:nowrap">TMIo = <b id="tmio" style="color:var(--amber)">R$ 616</b></span>
+    </div>
+    <div class="sub" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line)">A régua começa no que a loja <b>consegue</b> (P75 histórico) e caminha para o que o negócio <b>precisa</b> (planejamento), na velocidade que o mix permite. Nunca o número-fantasia no dia 1; nunca congelada no histórico.</div>
+  </div>
+  </div>
+
+  <div class="grid g3">
+    <div class="card"><div class="lbl">TMIhv · o que a loja consegue</div><div class="val">R$ 567</div><div class="sub">P75 dos tickets, ponderado pelo mix real de cada vendedor. 25% das vendas já batem — é possível. 75% ficam abaixo — é aspiracional.</div></div>
+    <div class="card"><div class="lbl">TMIp · o que o negócio precisa</div><div class="val">R$ 707</div><div class="sub">Meta de receita ÷ nº de vendas projetado. Top-down: sozinho vira número-fantasia.</div></div>
+    <div class="card"><div class="lbl">Gap</div><div class="val amber">R$ 140</div><div class="sub"><b style="color:var(--green)">R$ 96 operacional</b> — fechável por mix e coaching (2º par, antirreflexo, armação de valor).<br><b style="color:var(--amber)">R$ 44 estrutural</b> — decisão do dono: preço ou público.<br><span class="b grn" style="margin-top:4px">zero Hopium</span></div></div>
+  </div>
+
+  <div class="h3">P75 vs. kit clínico por segmento</div>
+  <div class="table-wrapper">
+    <table>
+      <thead><tr><th>Segmento</th><th style="text-align:right">P75 (TMIhs)</th><th style="text-align:right">Kit clínico engenheirado</th><th style="text-align:right">Gap</th><th>Leitura</th></tr></thead>
+      <tbody>
+        <tr><td>Grau simples</td><td class="n">412</td><td class="n">498</td><td class="n">+86</td><td><span class="b grn">saudável</span></td></tr>
+        <tr><td>Multifocal</td><td class="n">924</td><td class="n">1.640</td><td class="n" style="color:var(--red)">+716</td><td><span class="b red">nem os melhores vendem o kit completo — receita à mesa</span></td></tr>
+        <tr><td>Solar com grau</td><td class="n">588</td><td class="n">690</td><td class="n">+102</td><td><span class="b grn">saudável</span></td></tr>
+        <tr><td>Lente de contato</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td><span class="b gry">[LACUNA] venda não etiquetada por tipo</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note"><b>Contingência declarada.</b> A venda não vem etiquetada por tipo no dado atual. Enquanto isso, o sistema usa P75 geral e marca a segmentação como pendência da fase de higiene — com selo visível, nunca em silêncio.</div>
+</section>
+
+<!-- ══════ TELA 5 ══════ -->
+<section class="screen" id="s5">
+  <div class="head"><div><h2>Forecast &amp; Ruptura</h2><p>Camada probabilística. Previsibilidade por baixo — a soma dos vendedores —, não por achismo do gerente.</p></div>
+  <div class="stamp">cadência <b>semanal</b> · confiança <b>em maturação</b><br>60–90 dias de dado necessários</div></div>
+
+  <div class="grid g4">
+    <div class="card"><div class="lbl">Forecast da semana</div><div class="val">R$ 41.200</div><div class="sub">Σ PV de 34 vendedores <span class="b amb">confiança baixa</span></div></div>
+    <div class="card"><div class="lbl">Acurácia histórica</div><div class="val" style="color:var(--ink3)">—</div><div class="sub"><span class="b gry">[LACUNA]</span> 3 de 12 semanas necessárias. Não usar em meta.</div></div>
+    <div class="card"><div class="lbl">SKUs da Curva A em risco</div><div class="val red">7</div><div class="sub">DR abaixo do lead time do fornecedor</div></div>
+    <div class="card"><div class="lbl">Risco de concentração</div><div class="val red">47%</div><div class="sub">V-04 detém 47% da receita VIP de L1 — acima do limiar de 40%</div></div>
+  </div>
+
+  <div class="h3">Dias até a ruptura · Curva A</div>
+  <div class="table-wrapper">
+    <table>
+      <thead><tr><th>Produto</th><th>Loja</th><th style="text-align:right">Estoque</th><th style="text-align:right">Venda média/dia</th><th style="text-align:right">DR</th><th style="text-align:right">Lead time</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>ARM-001</td><td>L1 · Centro</td><td class="n">9</td><td class="n">0,84</td><td class="n" style="color:var(--red)">11</td><td class="n">21</td><td><span class="b red">ruptura antes da reposição</span></td></tr>
+        <tr><td>SOL-021</td><td>L2 · Shopping</td><td class="n">14</td><td class="n">0,71</td><td class="n" style="color:var(--amber)">20</td><td class="n">21</td><td><span class="b amb">no limite</span></td></tr>
+        <tr><td>LEN-044</td><td>L1 · Centro</td><td class="n">31</td><td class="n">0,52</td><td class="n">60</td><td class="n">21</td><td><span class="b grn">folga</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="h3">Risco de evasão de talento</div>
+  <div class="note">Série temporal de receita por vendedor com desvio σ. <b>2 vendedores</b> em queda sustentada por 3 meses acima de 1,5σ — sinal de desengajamento antes do pedido de demissão. O sistema aponta a física da operação (incentivo, capacidade, escalonamento), não acusa a pessoa. <span class="b gry">exige tabela Escalas para o diagnóstico completo</span></div>
+</section>
+
+<!-- ══════ TELA 6 ══════ -->
+<section class="screen" id="s6">
+  <div class="head"><div><h2>Fila de Auditoria</h2><p>O resíduo não classificável — nunca o atacado. Uma fila com 300 itens é backlog morto; uma com 6 itens inexplicáveis é governança.</p></div>
+  <div class="stamp">perfil <b>consultor</b> · contínua<br>meta: <b>~30s por item</b></div></div>
+
+  <div class="grid g4">
+    <div class="card"><div class="lbl">Transações disparadas</div><div class="val">546</div><div class="sub">pelos dois triggers por linha</div></div>
+    <div class="card"><div class="lbl">Classificadas pelo motor</div><div class="val green">540</div><div class="sub">98,9% resolvidas sem humano</div></div>
+    <div class="card star"><div class="lbl">Aguardando veredito</div><div class="val amber">6</div><div class="sub">o resíduo</div></div>
+    <div class="card"><div class="lbl">Impacto pendente</div><div class="val">R$ 18.400</div><div class="sub"><b style="color:var(--red)">não somado</b> em nenhum card de negócio</div></div>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead><tr><th>Item</th><th>Evidências anexadas</th><th style="text-align:right">Impacto</th><th>Veredito</th></tr></thead>
+      <tbody>
+        <tr><td>ARP-013 · L9 · V-30<br><span style="font-size:11px;color:var(--ink3);font-family:var(--sans)">praticado a 25% da tabela</span></td>
+            <td style="font-size:12.5px">NF CP-00499: R$ 309,11 · Estoque: R$ 838,85 (uniforme na rede) · promoção: não sinalizada · estoque morto: não</td>
+            <td class="n">R$ 6.200</td><td><span class="b amb">pendente</span></td></tr>
+        <tr><td>LEN-044 · L7 · V-12<br><span style="font-size:11px;color:var(--ink3);font-family:var(--sans)">MC negativa recorrente</span></td>
+            <td style="font-size:12.5px">custo linha R$ 188,40 = custo NF · praticado R$ 171,50 em 14 vendas · sem flag de promoção</td>
+            <td class="n">R$ 4.900</td><td><span class="b amb">pendente</span></td></tr>
+        <tr><td>SOL-021 · L6 · vários<br><span style="font-size:11px;color:var(--ink3);font-family:var(--sans)">padrão sistêmico de loja</span></td>
+            <td style="font-size:12.5px">toda a loja pratica ~1/3 da tabela · assinatura de catálogo desalinhado, não de vendedor</td>
+            <td class="n">R$ 7.300</td><td><span class="b amb">pendente</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note warn"><b>Trava do sistema.</b> Item pendente nunca vira fato. Os R$ 18.400 acima não aparecem no Cockpit, não entram em <code>total_operational_loss</code> e não geram acusação a nenhum vendedor até o veredito ser registrado.</div>
+</section>
+
+<!-- ══════ TELA 7 ══════ -->
+<section class="screen" id="s7">
+  <div class="head"><div><h2>Anexo Vivo · procedência</h2><p>O corpo afirma; o anexo <b>é</b> a soma. Divergência de um centavo entre card e Σ(anexo) quebra o build.</p></div>
+  <div class="stamp">derivado de <b>audit_report_v4.json</b><br>congelado <b>27/07/2026 06:00</b></div></div>
+
+  <div class="note"><b>Validador Zero Contradição — status:</b> <span class="b grn">aprovado</span> · 24 cards conferidos · 24 somas batendo ao centavo · 0 promessas de anexo vazias.</div>
+
+  <div class="h3">Card "Retorno do produto parado · R$ 35.040" → a tabela que soma exatamente isso</div>
+  <div class="table-wrapper">
+    <table>
+      <thead><tr><th>Produto</th><th>Descrição</th><th>Loja</th><th style="text-align:right">Qtd</th><th style="text-align:right">Custo un.</th><th style="text-align:right">Capital preso</th><th>Linha de origem</th></tr></thead>
+      <tbody id="anexo"></tbody>
+      <tfoot><tr><td colspan="5" style="text-align:right;color:var(--ink);font-weight:600;border-top:1px solid var(--line-strong)">Σ conferida</td><td class="n" style="border-top:1px solid var(--line-strong);color:var(--green);font-weight:600">R$ 35.040,00</td><td style="border-top:1px solid var(--line-strong)"></td></tr></tfoot>
+    </table>
+  </div>
+  <div class="note">Qualquer diretor pode refazer esta soma à mão. É isso que separa um laudo de uma apresentação.</div>
+</section>
+
+</main>
+</div>
+
+<script>
+// nav
+document.querySelectorAll('nav a').forEach(a=>a.onclick=()=>{
+  document.querySelectorAll('nav a').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('on'));
+  a.classList.add('on'); document.getElementById(a.dataset.s).classList.add('on');
+  window.scrollTo(0,0);
+});
+
+// RFM
+const rfmData=[[4,7,11,9,6],[6,9,14,12,8],[9,13,21,18,11],[12,17,26,22,14],[8,14,24,29,42]];
+const rfm=document.getElementById('rfm');
+let h='<div class="ax"></div>'+[1,2,3,4,5].map(i=>`<div class="ax">R${i}</div>`).join('');
+rfmData.forEach((row,ri)=>{
+  h+=`<div class="ax">FV${5-ri}</div>`;
+  row.forEach(v=>{const t=Math.min(v/42,1);
+    const c=`rgba(${Math.round(210-t*40)},${Math.round(205-t*80)},${Math.round(190-t*80)},${.1+t*.9})`;
+    h+=`<div class="c" style="background:${c}"><b>${v}</b><s>clientes</s></div>`;});
+});
+rfm.innerHTML=h;
+
+// waterfall L7
+const wfData=[{l:'Receita produto',v:62,c:'var(--blue)'},{l:'Custo produto',v:-71,c:'var(--red)'},{l:'Receita serviço',v:38,c:'var(--green)'},{l:'Custo serviço',v:-6,c:'var(--amber)'},{l:'Total "verde"',v:23,c:'#5A6A55'}];
+document.getElementById('wf').innerHTML=wfData.map(d=>{
+  const hgt=Math.abs(d.v)*2;
+  return `<div class="col"><div class="num" style="color:${d.v<0?'var(--red)':'var(--ink2)'}">${d.v>0?'+':''}${d.v}k</div><div class="bx" style="height:${hgt}px;background:${d.c}"></div><div class="cap">${d.l}</div></div>`;
+}).join('');
+
+// treemap
+const tmData=[['ARP-013',9840],['SOL-021',6120],['ARM-044',4980],['LEN-108',3760],['ARM-012',3210],['SOL-077',2440],['ARP-091',1890],['LEN-033',1420],['ARM-155',1380]];
+document.getElementById('tm').innerHTML=tmData.map(([s,v])=>{
+  const w=Math.max(20,Math.sqrt(v/9840)*46);
+  return `<div style="width:${w}%;height:${Math.max(52,w*1.5)}px"><span style="font-family:var(--mono);color:var(--ink3);font-size:10px">${s}</span><b>R$ ${v.toLocaleString('pt-BR')}</b></div>`;
+}).join('');
+
+// gmroi
+const gm=[['L8 · Praia',2.41],['L5 · Norte',2.18],['L4 · Zona Sul',2.04],['L2 · Shopping',1.72],['L1 · Centro',1.66],['L3 · Bairro',1.61],['L9 · Serra',1.12],['L6 · Leste',0.94],['L7 · Oeste',0.61]];
+document.getElementById('gmroi').innerHTML=gm.map(([n,v])=>
+ `<div class="bandrow"><span style="color:var(--ink2);font-size:12px">${n}</span><div class="bar"><i style="width:${v/2.5*100}%;background:${v<1?'var(--red)':v<1.3?'var(--amber)':'var(--green)'}"></i></div><span style="font:11px var(--mono);color:${v<1?'var(--red)':'var(--ink)'}">${v.toFixed(2)}</span></div>`).join('');
+
+// bands
+const bd=[['Topo','90–100',3,'var(--green)'],['Forte','75–90',7,'var(--blue)'],['Médio','60–75',15,'var(--amber)'],['Base','0–60',9,'var(--red)']];
+document.getElementById('bands').innerHTML=bd.map(([n,f,v,c])=>
+ `<div class="bandrow"><span>${n}<br><small style="color:var(--ink3);font:10px var(--mono)">${f}</small></span><div class="bar" style="height:24px"><i style="width:${v/15*100}%;background:${c}"></i></div><span style="font:11px var(--mono);color:var(--ink3)">${v} pes.</span></div>`).join('');
+
+// TMI rule
+const hv=567,tp=707,lo=480,hi=760;
+function pos(v){return (v-lo)/(hi-lo)*100}
+function drawRule(a){
+  const to=hv+a*(tp-hv);
+  document.getElementById('rule').innerHTML=`
+  <div class="track"></div>
+  <div class="fill" style="left:${pos(hv)}%;width:${pos(to)-pos(hv)}%"></div>
+  <div class="pin" style="left:${pos(hv)}%;background:var(--blue)"></div><div class="tag" style="left:${pos(hv)}%;color:var(--blue)">TMIhv 567</div><div class="tagb" style="left:${pos(hv)}%">o que a loja consegue</div>
+  <div class="pin" style="left:${pos(to)}%;background:var(--amber);width:3px;height:25px;top:14px"></div><div class="tag" style="left:${pos(to)}%;color:var(--amber)">TMIo ${Math.round(to)}</div><div class="tagb" style="left:${pos(to)}%">a régua do IT</div>
+  <div class="pin" style="left:${pos(tp)}%;background:var(--ink3)"></div><div class="tag" style="left:${pos(tp)}%;color:var(--ink3)">TMIp 707</div><div class="tagb" style="left:${pos(tp)}%">o que o negócio precisa</div>`;
+  document.getElementById('av').textContent=a.toFixed(2).replace('.',',');
+  document.getElementById('tmio').textContent='R$ '+Math.round(to);
+}
+drawRule(.35);
+document.getElementById('alpha').oninput=e=>drawRule(e.target.value/100);
+
+// anexo
+const an=[['ARP-013','Óculos Solar Polarizado A','L9 · Serra',12,309.11,3709.32,'E0221'],['SOL-021','Solar Aviador Clássico','L6 · Leste',24,119.51,2868.24,'E0344'],['ARM-044','Armação Acetato Premium','L1 · Centro',18,204.80,3686.40,'E0102'],['LEN-108','Lente Multifocal Digital','L2 · Shopping',9,388.90,3500.10,'E0781'],['ARM-012','Armação Metal Titânio','L3 · Bairro',15,241.60,3624.00,'E0455']];
+document.getElementById('anexo').innerHTML=an.map(r=>
+ `<tr><td>${r[0]}</td><td style="font-size:12.5px;font-family:var(--sans)">${r[1]}</td><td style="font-family:var(--sans)">${r[2]}</td><td class="n">${r[3]}</td><td class="n">${r[4].toFixed(2)}</td><td class="n">${r[5].toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td><span class="src">${r[6]}</span></td></tr>`
+).join('')+`<tr><td colspan="7" style="color:var(--ink3);font-size:11.5px;text-align:center">+ 11 produtos · R$ 17.651,94</td></tr>`;
+</script>
+</body>
+</html>

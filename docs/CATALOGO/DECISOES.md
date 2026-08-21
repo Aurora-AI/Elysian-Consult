@@ -592,7 +592,25 @@ mal, ou vende mal só multifocal?"* — que é a pergunta que muda a intervenç�
 ### O piso da cadeia já existia
 
 A `SPEC_Fase_D2` (Pilar 2) já exige `source_rows` em todo achado material, com teto em
-`provenance_sample_cap`. O fundo do drill é doutrina desde julho. O que faltava era declarar
-**o caminho** da superfície até ele — e é isso que o bloco `ART` passa a carregar.
+---
+
+## DEC-010 · Clarificação do Protótipo CHRONOS v2 vs Artefatos Canônicos (DEC-009)
+
+**Data:** 2026-08-20 · **Decisor:** Rodrigo · **Subordina:** `prototipo_chronos_v2.html` e `apps/chronos-backoffice/src/app/chronos` · **Reafirma:** `DEC-009`
+
+### O que fica estabelecido:
+
+1. **Protótipo Visual ≠ Sistema Homologado:**
+   O `prototipo_chronos_v2.html` e a implementação frontend correspondente em `apps/chronos-backoffice/src/app/chronos` são formalmente classificados como **Protótipo Visual de Ergonomia e Alvo de Design (Mock)**. Eles testam e provam a estética (v2 Editorial Warm Paper), mas **não constituem entrega contábil homologada**.
+
+2. **Vigência Irrestrita da DEC-009:**
+   A verdade do sistema, os números de produção e a entrega executiva continuam 100% governados pelo princípio de **Superfície Mínima, Profundidade Total** através dos **6 Artefatos Canônicos** (`ART-LAU-001`, `ART-ANX-001`, `ART-COC-001`, `ART-FIL-001`, `ART-FIL-002`, `ART-PER-001`) definidos em `artefatos.yaml`.
+
+3. **Nova Trava de CI para Camada de Apresentação:**
+   Nenhum artefato, relatório ou dashboard pode receber selo de homologação ou conformidade (`AURORA_TRUSTWARE` / `QA_REVIEW_VERIFIED`) se o dataset consumido não contiver `generated_at` e rastreabilidade `source_rows` emitidos diretamente pela execução física do motor Python (`commercial_auditor.py`). Constantes e mocks digitados à mão em TypeScript/JSON são sumariamente rejeitados como prova de funcionamento.
+
+4. **Proibição de Procedência Fictícia:**
+   É terminantemente proibido exibir menções a arquivos congelados (ex: `audit_report_v4.json`) em qualquer interface sem que a string literal corresponda a um arquivo físico existente e verificado no disco (`Test-Path`).
 
 ---
+
